@@ -1,0 +1,5 @@
+let nums = [1,2,4];
+
+for n in range(2, 8) {
+    print(n);
+}

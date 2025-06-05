@@ -1,0 +1,9 @@
+fn greet(name) {
+    return "Hello, " . name . "!";
+}
+
+print(greet("World"));
+
+let obj = { name: "World" };
+let value = obj.name;
+print(value);

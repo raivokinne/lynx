@@ -1,0 +1,6 @@
+let obj = {a: 1, b: 2, c: 3};
+
+obj.a = 4;
+obj.c = 5;
+
+print(obj);
