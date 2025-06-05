@@ -201,16 +201,6 @@ car->mileage = 15000
 ```
 
 ### For Loops
-Lynx provides several types of for loops to handle different iteration patterns.
-
-#### Basic For Loop
-```lynx
-# Traditional C-style for loop
-for (let i = 0; i < 5; i = i + 1) {
-    print("Count: " . i)
-}
-# Output: Count: 0, Count: 1, Count: 2, Count: 3, Count: 4
-```
 
 #### For-In Loop (Arrays)
 ```lynx
