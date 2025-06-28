@@ -2,7 +2,7 @@ package evaluator
 
 import (
 	"fmt"
-	"lynx/object"
+	"lynx/src/object"
 )
 
 var builtins = map[string]*object.Builtin{

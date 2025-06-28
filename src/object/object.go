@@ -3,7 +3,7 @@ package object
 import (
 	"fmt"
 	"hash/fnv"
-	"lynx/ast"
+	"lynx/src/ast"
 	"strings"
 )
 

@@ -2,8 +2,8 @@ package evaluator
 
 import (
 	"fmt"
-	"lynx/ast"
-	"lynx/object"
+	"lynx/src/ast"
+	"lynx/src/object"
 	"strconv"
 )
 
@@ -49,12 +49,12 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 			return val
 		}
 		return &object.Return{Value: val}
-	case *ast.LetStatement:
+	case *ast.VarStatement:
 		val := Eval(node.Value, env)
 		if isError(val) {
 			return val
 		}
-		env.Set(node.Name.Value, val)
+		env.Set(node.Name.Value, val, node.IsConst)
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
 	case *ast.FunctionLiteral:
@@ -106,7 +106,12 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 		if isError(val) {
 			return val
 		}
-		env.Assign(node.Name.Value, val)
+
+		obj := env.Assign(node.Name.Value, val)
+
+		if isError(obj) {
+			return obj
+		}
 	case *ast.PropertyAccess:
 		obj := Eval(node.Object, env)
 		if isError(obj) {
@@ -345,7 +350,7 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Env {
 	env := fn.Env.NewEnclosedEnv()
 	for paramIdx, param := range fn.Parameters {
-		env.Set(param.Value, args[paramIdx])
+		env.Set(param.Value, args[paramIdx], false)
 	}
 	return env
 }
@@ -561,10 +566,10 @@ func evalForRangeArray(node *ast.ForRange, array *object.Array, env *object.Env)
 	var result object.Object = NULL
 
 	for i, element := range array.Elements {
-		env.Set(node.Variable.Value, element)
+		env.Set(node.Variable.Value, element, false)
 
 		if node.Index != nil {
-			env.Set(node.Index.Value, &object.Integer{Value: int64(i)})
+			env.Set(node.Index.Value, &object.Integer{Value: int64(i)}, false)
 		}
 
 		if node.Body != nil {
@@ -589,10 +594,10 @@ func evalForRangeHash(node *ast.ForRange, hash *object.Hash, env *object.Env) ob
 	var result object.Object = NULL
 
 	for _, pair := range hash.Pairs {
-		env.Set(node.Variable.Value, pair.Value)
+		env.Set(node.Variable.Value, pair.Value, false)
 
 		if node.Index != nil {
-			env.Set(node.Index.Value, pair.Key)
+			env.Set(node.Index.Value, pair.Key, false)
 		}
 
 		if node.Body != nil {
@@ -617,10 +622,10 @@ func evalForRangeString(node *ast.ForRange, str *object.String, env *object.Env)
 	var result object.Object = NULL
 
 	for i, char := range str.Value {
-		env.Set(node.Variable.Value, &object.String{Value: string(char)})
+		env.Set(node.Variable.Value, &object.String{Value: string(char)}, false)
 
 		if node.Index != nil {
-			env.Set(node.Index.Value, &object.Integer{Value: int64(i)})
+			env.Set(node.Index.Value, &object.Integer{Value: int64(i)}, false)
 		}
 
 		if node.Body != nil {

@@ -1,9 +1,12 @@
 let i = 0;
 
-while i <= 3 {
+while true {
     print(i);
     i = i + 1;
-}
 
-print("Broke out of loop");
+    if i >= 10 {
+        print("Broke out of loop");
+        break;
+    }
+}
 

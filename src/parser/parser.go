@@ -2,11 +2,10 @@ package parser
 
 import (
 	"fmt"
-	"lynx/ast"
-	"lynx/lexer"
-	"lynx/token"
+	"lynx/src/ast"
+	"lynx/src/lexer"
+	"lynx/src/token"
 	"strconv"
-	"strings"
 )
 
 const (
@@ -44,25 +43,10 @@ type ParseError struct {
 	Line    int
 	Column  int
 	Token   token.Token
-	Context string
-	Hint    string
 }
 
 func (pe ParseError) String() string {
-	var parts []string
-	if pe.Line > 0 && pe.Column > 0 {
-		parts = append(parts, fmt.Sprintf("Error at line %d, column %d:", pe.Line, pe.Column))
-	} else {
-		parts = append(parts, "Parse Error:")
-	}
-	parts = append(parts, pe.Message)
-	if pe.Context != "" {
-		parts = append(parts, fmt.Sprintf("Context: %s", pe.Context))
-	}
-	if pe.Hint != "" {
-		parts = append(parts, fmt.Sprintf("Hint: %s", pe.Hint))
-	}
-	return strings.Join(parts, "\n  ")
+	return fmt.Sprintf("Parser error at line %d, column %d: %s: %s", pe.Line, pe.Column, pe.Type, pe.Message)
 }
 
 type (
@@ -98,6 +82,7 @@ func New(l *lexer.Lexer) *Parser {
 	// Read two tokens, so curToken and peekToken are both set
 	p.nextToken()
 	p.nextToken()
+
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
@@ -111,6 +96,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.STR, p.parseStringLiteral)
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
+
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
@@ -140,45 +126,19 @@ func (p *Parser) ErrorStrings() []string {
 	return strs
 }
 
-func (p *Parser) addError(errorType, message, context, hint string) {
+func (p *Parser) addError(errorType, message string) {
 	p.errors = append(p.errors, ParseError{
 		Type:    errorType,
 		Message: message,
 		Line:    p.curToken.Line,
 		Column:  p.curToken.Column,
 		Token:   p.curToken,
-		Context: context,
-		Hint:    hint,
 	})
 }
 
 func (p *Parser) peekError(expected token.TokenType) {
-	var hint string
-	var context string
-	if p.currentStatement != "" {
-		context = fmt.Sprintf("while parsing %s", p.currentStatement)
-	}
-	switch expected {
-	case token.SEMICOLON:
-		hint = "Try adding a semicolon ';' at the end of the statement"
-	case token.RPAREN:
-		hint = "Make sure all opening parentheses '(' have matching closing parentheses ')'"
-	case token.RBRACE:
-		hint = "Make sure all opening braces '{' have matching closing braces '}'"
-	case token.RBRACKET:
-		hint = "Make sure all opening brackets '[' have matching closing brackets ']'"
-	case token.IDENT:
-		hint = "Expected an identifier (variable name)"
-	case token.ASSIGN:
-		hint = "Use '=' for assignment"
-	default:
-		hint = fmt.Sprintf("Expected '%s' token", expected)
-	}
-	message := fmt.Sprintf("Expected '%s', got '%s'", expected, p.peekToken.Type)
-	if p.peekToken.Literal != "" && p.peekToken.Literal != string(p.peekToken.Type) {
-		message += fmt.Sprintf(" ('%s')", p.peekToken.Literal)
-	}
-	p.addError("SyntaxError", message, context, hint)
+	message := fmt.Sprintf("Expected '%s', got '%s'", expected, p.peekToken.Literal)
+	p.addError("SyntaxError", message)
 }
 
 func (p *Parser) nextToken() {
@@ -195,7 +155,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 			program.Statements = append(program.Statements, stmt)
 		}
 		if len(p.errors) > 10 {
-			p.addError("ParserError", "Too many parse errors, stopping", "", "Check syntax carefully")
+			p.addError("ParserError", "Too many parse errors, stopping")
 			break
 		}
 		p.nextToken()
@@ -214,8 +174,6 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 		p.addError(
 			"ValueError",
 			fmt.Sprintf("Cannot parse '%s' as integer", p.curToken.Literal),
-			"parsing integer literal",
-			"Make sure the number is within valid range and properly formatted",
 		)
 		return nil
 	}
@@ -225,33 +183,24 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
-	case token.LET:
-		p.currentStatement = "let statement"
-		return p.parseLetStatement()
+	case token.LET, token.CONST:
+		return p.parseVarStatement()
 	case token.RETURN:
-		p.currentStatement = "return statement"
 		return p.parseReturnStatement()
 	case token.IDENT:
 		if p.peekTokenIs(token.ASSIGN) {
-			p.currentStatement = "assignment statement"
 			return p.parseAssignmentStatement()
 		}
-		p.currentStatement = "expression statement"
 		return p.parseExpressionStatement()
 	case token.FOR:
-		p.currentStatement = "for loop"
 		return p.parseForStatement()
 	case token.WHILE:
-		p.currentStatement = "while loop"
 		return p.parseWhileStatement()
 	case token.CONTINUE:
-		p.currentStatement = "continue statement"
 		return p.parseContinueStatement()
 	case token.BREAK:
-		p.currentStatement = "break statement"
 		return p.parseBreakStatement()
 	default:
-		p.currentStatement = "expression statement"
 		return p.parseExpressionStatement()
 	}
 }
@@ -261,8 +210,6 @@ func (p *Parser) parseContinueStatement() ast.Statement {
 		p.addError(
 			"ScopeError",
 			"'continue' statement outside of loop",
-			"continue statement",
-			"'continue' can only be used inside for or while loops",
 		)
 	}
 	stmt := &ast.Continue{Token: p.curToken}
@@ -277,8 +224,6 @@ func (p *Parser) parseBreakStatement() ast.Statement {
 		p.addError(
 			"ScopeError",
 			"'break' statement outside of loop",
-			"break statement",
-			"'break' can only be used inside for or while loops",
 		)
 	}
 	stmt := &ast.Break{Token: p.curToken}
@@ -295,6 +240,10 @@ func (p *Parser) parseForStatement() ast.Statement {
 		Token: p.curToken,
 	}
 	if !p.expectPeek(token.IDENT) {
+		p.addError(
+			"SyntaxError",
+			"Missing identifier in for loop",
+		)
 		return nil
 	}
 	variable := &ast.Identifier{
@@ -305,6 +254,10 @@ func (p *Parser) parseForStatement() ast.Statement {
 	if p.peekToken.Type == token.COMMA {
 		p.nextToken()
 		if !p.expectPeek(token.IDENT) {
+			p.addError(
+				"SyntaxError",
+				"Missing identifier in for loop",
+			)
 			return nil
 		}
 		index := &ast.Identifier{
@@ -317,14 +270,16 @@ func (p *Parser) parseForStatement() ast.Statement {
 		p.addError(
 			"SyntaxError",
 			"Missing 'in' keyword in for loop",
-			"for loop syntax",
-			"For loops should follow the pattern: for variable in collection { ... }",
 		)
 		return nil
 	}
 	p.nextToken()
 	stmt.Collection = p.parseExpression(LOWEST)
 	if !p.expectPeek(token.LBRACE) {
+		p.addError(
+			"SyntaxError",
+			"Missing block statement in for loop",
+		)
 		return nil
 	}
 	stmt.Body = p.parseBlockStatement()
@@ -340,6 +295,10 @@ func (p *Parser) parseWhileStatement() ast.Statement {
 	p.nextToken()
 	stmt.Condition = p.parseExpression(LOWEST)
 	if !p.expectPeek(token.LBRACE) {
+		p.addError(
+			"SyntaxError",
+			"Missing block statement in while loop",
+		)
 		return nil
 	}
 	stmt.Body = p.parseBlockStatement()
@@ -350,6 +309,10 @@ func (p *Parser) parseAssignmentStatement() *ast.Assignment {
 	stmt := &ast.Assignment{Token: p.curToken}
 	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 	if !p.expectPeek(token.ASSIGN) {
+		p.addError(
+			"SyntaxError",
+			"Missing assignment operator",
+		)
 		return nil
 	}
 	p.nextToken()
@@ -360,17 +323,29 @@ func (p *Parser) parseAssignmentStatement() *ast.Assignment {
 	return stmt
 }
 
-func (p *Parser) parseLetStatement() *ast.LetStatement {
-	stmt := &ast.LetStatement{Token: p.curToken}
-	if !p.expectPeek(token.IDENT) {
-		return nil
+func (p *Parser) parseVarStatement() *ast.VarStatement {
+	stmt := &ast.VarStatement{Token: p.curToken}
+
+	if p.curToken.Type == token.CONST {
+		stmt.IsConst = true
+		p.nextToken()
+	} else {
+		p.nextToken()
 	}
+
 	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
 	if !p.expectPeek(token.ASSIGN) {
+		p.addError(
+			"SyntaxError",
+			"Missing assignment operator",
+		)
 		return nil
 	}
+
 	p.nextToken()
 	stmt.Value = p.parseExpression(LOWEST)
+
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
@@ -382,8 +357,6 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 		p.addError(
 			"ScopeError",
 			"'return' statement outside of function",
-			"return statement",
-			"'return' can only be used inside function bodies",
 		)
 	}
 	stmt := &ast.ReturnStatement{Token: p.curToken}
@@ -398,7 +371,6 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
 	stmt.Expression = p.parseExpression(LOWEST)
-	// Consume optional semicolon
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
@@ -406,32 +378,11 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
-	var hint string
-	var context string
-	if p.currentStatement != "" {
-		context = fmt.Sprintf("while parsing %s", p.currentStatement)
-	}
-	switch t {
-	case token.RPAREN:
-		hint = "Unexpected closing parenthesis - check for missing opening parenthesis or extra closing parenthesis"
-	case token.RBRACE:
-		hint = "Unexpected closing brace - check for missing opening brace or extra closing brace"
-	case token.RBRACKET:
-		hint = "Unexpected closing bracket - check for missing opening bracket or extra closing bracket"
-	case token.COMMA:
-		hint = "Unexpected comma - check if you're missing a value before the comma"
-	case token.SEMICOLON:
-		hint = "Unexpected semicolon - check if you're missing an expression before the semicolon"
-	case token.EOF:
-		hint = "Unexpected end of file - check for missing closing braces, parentheses, or brackets"
-	default:
-		hint = fmt.Sprintf("Token '%s' cannot start an expression", t)
-	}
-	message := fmt.Sprintf("Unexpected token '%s'", t)
+	message := fmt.Sprintf("Unexpected token %s", t)
 	if p.curToken.Literal != "" && p.curToken.Literal != string(t) {
-		message += fmt.Sprintf(" ('%s')", p.curToken.Literal)
+		message += fmt.Sprintf("%s", p.curToken.Literal)
 	}
-	p.addError("SyntaxError", message, context, hint)
+	p.addError("SyntaxError", message)
 }
 
 func (p *Parser) parseExpression(precedence int) ast.Expression {
@@ -482,6 +433,10 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 	p.nextToken()
 	exp := p.parseExpression(LOWEST)
 	if !p.expectPeek(token.RPAREN) {
+		p.addError(
+			"SyntaxError",
+			"Missing closing parenthesis",
+		)
 		return nil
 	}
 	return exp
@@ -489,21 +444,23 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 
 func (p *Parser) parseIfExpression() ast.Expression {
 	expression := &ast.IfExpression{Token: p.curToken}
-	if !p.expectPeek(token.LPAREN) {
-		return nil
-	}
 	p.nextToken()
 	expression.Condition = p.parseExpression(LOWEST)
-	if !p.expectPeek(token.RPAREN) {
-		return nil
-	}
 	if !p.expectPeek(token.LBRACE) {
+		p.addError(
+			"SyntaxError",
+			"Missing opening brace",
+		)
 		return nil
 	}
 	expression.Consequence = p.parseBlockStatement()
 	if p.peekTokenIs(token.ELSE) {
 		p.nextToken()
 		if !p.expectPeek(token.LBRACE) {
+			p.addError(
+				"SyntaxError",
+				"Missing opening brace",
+			)
 			return nil
 		}
 		expression.Alternative = p.parseBlockStatement()
@@ -530,10 +487,18 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 	defer func() { p.functionDepth-- }()
 	lit := &ast.FunctionLiteral{Token: p.curToken}
 	if !p.expectPeek(token.LPAREN) {
+		p.addError(
+			"SyntaxError",
+			"Missing opening parenthesis",
+		)
 		return nil
 	}
 	lit.Parameters = p.parseFunctionParameters()
 	if !p.expectPeek(token.LBRACE) {
+		p.addError(
+			"SyntaxError",
+			"Missing opening brace",
+		)
 		return nil
 	}
 	lit.Body = p.parseBlockStatement()
@@ -556,6 +521,10 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 		identifiers = append(identifiers, ident)
 	}
 	if !p.expectPeek(token.RPAREN) {
+		p.addError(
+			"SyntaxError",
+			"Missing closing parenthesis",
+		)
 		return nil
 	}
 	return identifiers
@@ -592,6 +561,10 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 		}
 	}
 	if !p.expectPeek(token.RPAREN) {
+		p.addError(
+			"SyntaxError",
+			"Missing closing parenthesis",
+		)
 		return nil
 	}
 	return args
@@ -632,6 +605,10 @@ func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
 		}
 	}
 	if !p.expectPeek(end) {
+		p.addError(
+			"SyntaxError",
+			"Missing closing bracket",
+		)
 		return nil
 	}
 	return list
@@ -642,6 +619,10 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	p.nextToken()
 	exp.Index = p.parseExpression(LOWEST)
 	if !p.expectPeek(token.RBRACKET) {
+		p.addError(
+			"SyntaxError",
+			"Missing closing bracket",
+		)
 		return nil
 	}
 	return exp
@@ -657,8 +638,6 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 			p.addError(
 				"SyntaxError",
 				"Missing colon ':' in hash literal",
-				"hash literal key-value pair",
-				"Hash literals should follow the pattern: {key: value, key2: value2}",
 			)
 			return nil
 		}
@@ -666,10 +645,18 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 		value := p.parseExpression(LOWEST)
 		hash.Pairs[key] = value
 		if !p.peekTokenIs(token.RBRACE) && !p.expectPeek(token.COMMA) {
+			p.addError(
+				"SyntaxError",
+				"Missing comma ',' in hash literal",
+			)
 			return nil
 		}
 	}
 	if !p.expectPeek(token.RBRACE) {
+		p.addError(
+			"SyntaxError",
+			"Missing closing brace",
+		)
 		return nil
 	}
 	return hash
@@ -680,8 +667,6 @@ func (p *Parser) parseMethodCall(object ast.Expression) ast.Expression {
 		p.addError(
 			"SyntaxError",
 			"Expected method or property name after '.'",
-			"method call or property access",
-			"Use dot notation like: object.method() or object.property",
 		)
 		return nil
 	}

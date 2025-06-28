@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strings"
 
-	"lynx/token"
+	"lynx/src/token"
 )
 
 type Node interface {
@@ -60,25 +60,26 @@ func (p *Program) TokenLiteral() string {
 	}
 }
 
-type LetStatement struct {
-	Token token.Token
-	Name  *Identifier
-	Value Expression
+type VarStatement struct {
+	Token   token.Token
+	Name    *Identifier
+	Value   Expression
+	IsConst bool
 }
 
-func (ls *LetStatement) statementNode() {}
-func (ls *LetStatement) TokenLiteral() string {
-	return ls.Token.Literal
+func (vr *VarStatement) statementNode() {}
+func (vr *VarStatement) TokenLiteral() string {
+	return vr.Token.Literal
 }
 
-func (ls *LetStatement) String() string {
+func (vr *VarStatement) String() string {
 	var out bytes.Buffer
 
-	out.WriteString(ls.TokenLiteral() + " ")
-	out.WriteString(ls.Name.Value)
+	out.WriteString(vr.TokenLiteral() + " ")
+	out.WriteString(vr.Name.Value)
 	out.WriteString(" = ")
-	if ls.Value != nil {
-		out.WriteString(ls.Value.String())
+	if vr.Value != nil {
+		out.WriteString(vr.Value.String())
 	}
 	out.WriteString(";")
 	return out.String()

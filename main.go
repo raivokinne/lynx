@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"lynx/evaluator"
-	"lynx/lexer"
-	"lynx/object"
-	"lynx/parser"
-	"lynx/repl"
+	"lynx/src/evaluator"
+	"lynx/src/lexer"
+	"lynx/src/object"
+	"lynx/src/parser"
+	"lynx/src/repl"
 	"os"
 	"os/user"
 )

@@ -2,7 +2,7 @@ package lexer
 
 import (
 	"fmt"
-	"lynx/token"
+	"lynx/src/token"
 	"unicode"
 	"unicode/utf8"
 )

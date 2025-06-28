@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"io"
 
-	"lynx/evaluator"
-	"lynx/lexer"
-	"lynx/object"
-	"lynx/parser"
+	"lynx/src/evaluator"
+	"lynx/src/lexer"
+	"lynx/src/object"
+	"lynx/src/parser"
 )
 
 const PROMPT = ">> "
