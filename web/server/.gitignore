@@ -3,5 +3,3 @@ node_modules/
 temp/
 .env
 db.sqlite
-package-lock.json
-package.json

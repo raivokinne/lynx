@@ -35,7 +35,7 @@ export default function Home() {
 				setError(result.error || 'Compilation failed');
 				setOutput('');
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Error:', error);
 			setError(`Connection error: ${error.message}. Make sure your backend server is running.`);
 			setOutput('');
