@@ -44,27 +44,27 @@ export default function Login() {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-4">
 			<div className="max-w-md w-full">
-				<div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+				<div className="bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/10">
 					<div className="text-center mb-8">
-						<div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4">
-							<LogIn className="w-8 h-8 text-white" />
+						<div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl mb-4">
+							<LogIn className="w-8 h-8 text-black" />
 						</div>
-						<h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
-						<p className="text-gray-600">Please sign in to your account</p>
+						<h1 className="text-3xl font-bold text-white mb-2">Welcome back</h1>
+						<p className="text-gray-300">Please sign in to your account</p>
 					</div>
 
 					<form onSubmit={handleSubmit} className="space-y-6">
 						{error && (
-							<div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+							<div className="flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 text-sm backdrop-blur-sm">
 								<AlertCircle className="w-4 h-4 flex-shrink-0" />
 								{error}
 							</div>
 						)}
 
 						<div className="space-y-1">
-							<label htmlFor="username" className="block text-sm font-medium text-gray-700">
+							<label htmlFor="username" className="block text-sm font-medium text-gray-200">
 								Username
 							</label>
 							<input
@@ -74,13 +74,13 @@ export default function Login() {
 								required
 								value={formData.username}
 								onChange={handleInputChange}
-								className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+								className="w-full px-4 py-3 border border-white/20 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/40 transition-all duration-200 bg-white/5 focus:bg-white/10 text-white placeholder:text-gray-400"
 								placeholder="Enter your username"
 							/>
 						</div>
 
 						<div className="space-y-1">
-							<label htmlFor="password" className="block text-sm font-medium text-gray-700">
+							<label htmlFor="password" className="block text-sm font-medium text-gray-200">
 								Password
 							</label>
 							<div className="relative">
@@ -91,13 +91,13 @@ export default function Login() {
 									required
 									value={formData.password}
 									onChange={handleInputChange}
-									className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+									className="w-full px-4 py-3 pr-12 border border-white/20 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/40 transition-all duration-200 bg-white/5 focus:bg-white/10 text-white placeholder:text-gray-400"
 									placeholder="Enter your password"
 								/>
 								<button
 									type="button"
 									onClick={() => setShowPassword(!showPassword)}
-									className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+									className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors"
 								>
 									{showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
 								</button>
@@ -107,11 +107,11 @@ export default function Login() {
 						<button
 							type="submit"
 							disabled={isLoading}
-							className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+							className="w-full bg-white hover:bg-gray-100 disabled:bg-gray-400 text-black font-medium py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 						>
 							{isLoading ? (
 								<>
-									<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+									<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
 									Signing in...
 								</>
 							) : (
@@ -124,11 +124,11 @@ export default function Login() {
 					</form>
 
 					<div className="mt-8 text-center">
-						<p className="text-gray-600">
+						<p className="text-gray-300">
 							Don't have an account?{' '}
 							<Link
 								to="/register"
-								className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+								className="text-white hover:text-gray-200 font-medium transition-colors underline decoration-white/30 hover:decoration-white/60"
 							>
 								Sign up
 							</Link>

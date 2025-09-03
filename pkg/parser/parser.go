@@ -200,67 +200,18 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseContinueStatement()
 	case token.BREAK:
 		return p.parseBreakStatement()
-	case token.CLASS:
-		return p.parseClassStatement()
+	case token.AT:
+		return p.parseAtExpression()
 	default:
 		return p.parseExpressionStatement()
 	}
 }
 
-func (p *Parser) parseClassStatement() ast.Statement {
-	class := &ast.Class{Token: p.curToken}
+func (p *Parser) parseAtExpression() ast.Statement {
+	stmt := &ast.ModuleLoad{Token: p.curToken}
 	p.nextToken()
-	class.Name = p.parseIdentifier()
-	if !p.expectPeek(token.LBRACE) {
-		p.addError(
-			"SyntaxError",
-			"Missing opening brace",
-		)
-		return nil
-	}
-	class.Methods = p.parseMethodDeclarations()
-	if !p.expectPeek(token.RBRACE) {
-		p.addError(
-			"SyntaxError",
-			"Missing closing brace",
-		)
-		return nil
-	}
-	return class
-}
-
-func (p *Parser) parseMethodDeclarations() []*ast.Method {
-	methods := []*ast.Method{}
-	for p.peekTokenIs(token.FUNCTION) {
-		method := p.parseMethodDeclaration()
-		if method != nil {
-			methods = append(methods, method)
-		}
-		p.nextToken()
-	}
-	return methods
-}
-
-func (p *Parser) parseMethodDeclaration() *ast.Method {
-	method := &ast.Method{Token: p.curToken}
-	method.Name = p.parseIdentifier()
-	if !p.expectPeek(token.LPAREN) {
-		p.addError(
-			"SyntaxError",
-			"Missing opening parenthesis",
-		)
-		return nil
-	}
-	method.Parameters = p.parseFunctionParameters()
-	if !p.expectPeek(token.LBRACE) {
-		p.addError(
-			"SyntaxError",
-			"Missing opening brace",
-		)
-		return nil
-	}
-	method.Body = p.parseBlockStatement()
-	return method
+	stmt.Name = p.parseIdentifier()
+	return stmt
 }
 
 func (p *Parser) parseContinueStatement() ast.Statement {

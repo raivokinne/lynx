@@ -142,6 +142,8 @@ func (l *Lexer) NextToken() token.Token {
 		} else {
 			tok = l.newToken(token.BANG, l.ch)
 		}
+	case '@':
+		tok = l.newToken(token.AT, l.ch)
 	case '*':
 		tok = l.newToken(token.ASTERISK, l.ch)
 	case '/':

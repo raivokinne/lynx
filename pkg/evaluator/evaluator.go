@@ -3,8 +3,12 @@ package evaluator
 import (
 	"fmt"
 	"lynx/pkg/ast"
+	"lynx/pkg/lexer"
 	"lynx/pkg/object"
+	"lynx/pkg/parser"
+	"os"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -12,6 +16,8 @@ var (
 	TRUE  = &object.Boolean{Value: true}
 	FALSE = &object.Boolean{Value: false}
 )
+
+var moduleCache = make(map[string]object.Object)
 
 func Eval(node ast.Node, env *object.Env) object.Object {
 	switch node := node.(type) {
@@ -127,6 +133,8 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 		return &object.Continue{}
 	case *ast.Break:
 		return &object.Break{}
+	case *ast.ModuleLoad:
+		return evalModuleLoad(node, env)
 	default:
 		return newError("unknown node type: %T", node)
 	}
@@ -143,8 +151,9 @@ func nativeBoolToBooleanObject(input bool) *object.Boolean {
 
 func evalProgram(stmts []ast.Statement, env *object.Env) object.Object {
 	var result object.Object
-	for _, stmt := range stmts {
-		result = Eval(stmt, env)
+
+	for i, statement := range stmts {
+		result = Eval(statement, env)
 
 		switch result := result.(type) {
 		case *object.Return:
@@ -152,8 +161,15 @@ func evalProgram(stmts []ast.Statement, env *object.Env) object.Object {
 		case *object.Error:
 			return result
 		}
+
+		if i == len(stmts)-1 {
+			if _, ok := statement.(*ast.ExpressionStatement); ok {
+				return result
+			}
+		}
 	}
-	return result
+
+	return NULL
 }
 
 func evalPrefixExpression(operator string, right object.Object) object.Object {
@@ -446,9 +462,25 @@ func applyMethod(obj object.Object, method string, args []object.Object) object.
 		return evalArrayMethod(obj, method, args)
 	case *object.Hash:
 		return evalHashMethod(obj, method, args)
+	case *object.Module:
+		return evalModuleMethod(obj, method, args)
 	default:
 		return newError("method calls not supported on: %s", obj.Type())
 	}
+}
+
+func evalModuleMethod(obj *object.Module, method string, args []object.Object) object.Object {
+	val, ok := obj.Env.Get(method)
+	if !ok {
+		return newError("module has no method: %s", method)
+	}
+
+	fn, ok := val.(*object.Function)
+	if !ok {
+		return newError("%s is not callable", method)
+	}
+
+	return applyFunction(fn, args)
 }
 
 func evalHashMethod(obj *object.Hash, method string, args []object.Object) object.Object {
@@ -479,6 +511,50 @@ func evalStringMethod(obj *object.String, method string, args []object.Object) o
 		return &object.String{Value: obj.Value + args[0].(*object.String).Value}
 	case "len":
 		return &object.Integer{Value: int64(len(obj.Value))}
+	case "upper":
+		return &object.String{Value: strings.ToUpper(obj.Value)}
+	case "lower":
+		return &object.String{Value: strings.ToLower(obj.Value)}
+	case "split":
+		if len(args) != 1 {
+			return newError("wrong number of arguments. got=%d, want=1", len(args))
+		}
+		if args[0].Type() != object.STRING_OBJ {
+			return newError("argument to string.split must be STRING, got %T", args[0])
+		}
+		delimiter := args[0].(*object.String).Value
+		parts := strings.Split(obj.Value, delimiter)
+		elements := make([]object.Object, len(parts))
+		for i, part := range parts {
+			elements[i] = &object.String{Value: part}
+		}
+		return &object.Array{Elements: elements}
+	case "contains":
+		if len(args) != 1 {
+			return newError("wrong number of arguments. got=%d, want=1", len(args))
+		}
+		if args[0].Type() != object.STRING_OBJ {
+			return newError("argument to string.contains must be STRING, got %T", args[0])
+		}
+		substr := args[0].(*object.String).Value
+		return nativeBoolToBooleanObject(strings.Contains(obj.Value, substr))
+	case "substr":
+		if len(args) != 2 {
+			return newError("wrong number of arguments. got=%d, want=2", len(args))
+		}
+		start, ok := args[0].(*object.Integer)
+		if !ok {
+			return newError("first argument must be INTEGER, got %T", args[0])
+		}
+		length, ok := args[1].(*object.Integer)
+		if !ok {
+			return newError("second argument must be INTEGER, got %T", args[1])
+		}
+		if start.Value < 0 || start.Value >= int64(len(obj.Value)) {
+			return newError("start index out of bounds")
+		}
+		end := min(start.Value+length.Value, int64(len(obj.Value)))
+		return &object.String{Value: obj.Value[start.Value:end]}
 	default:
 		return newError("unknown method: %s", method)
 	}
@@ -495,14 +571,47 @@ func evalArrayMethod(obj *object.Array, method string, args []object.Object) obj
 		newElements[len(obj.Elements)] = args[0]
 		return &object.Array{Elements: newElements}
 	case "pop":
-		if len(args) > 1 {
+		if len(args) != 0 {
 			return newError("wrong number of arguments. got=%d, want=0", len(args))
 		}
+		if len(obj.Elements) == 0 {
+			return newError("cannot pop from empty array")
+		}
 		newElements := make([]object.Object, len(obj.Elements)-1)
-		copy(newElements, obj.Elements)
+		copy(newElements, obj.Elements[:len(obj.Elements)-1])
 		return &object.Array{Elements: newElements}
 	case "len":
 		return &object.Integer{Value: int64(len(obj.Elements))}
+	case "first":
+		if len(obj.Elements) == 0 {
+			return NULL
+		}
+		return obj.Elements[0]
+	case "last":
+		if len(obj.Elements) == 0 {
+			return NULL
+		}
+		return obj.Elements[len(obj.Elements)-1]
+	case "rest":
+		if len(obj.Elements) == 0 {
+			return &object.Array{Elements: []object.Object{}}
+		}
+		newElements := make([]object.Object, len(obj.Elements)-1)
+		copy(newElements, obj.Elements[1:])
+		return &object.Array{Elements: newElements}
+	case "join":
+		if len(args) != 1 {
+			return newError("wrong number of arguments. got=%d, want=1", len(args))
+		}
+		if args[0].Type() != object.STRING_OBJ {
+			return newError("argument to array.join must be STRING, got %T", args[0])
+		}
+		delimiter := args[0].(*object.String).Value
+		var parts []string
+		for _, elem := range obj.Elements {
+			parts = append(parts, elem.Inspect())
+		}
+		return &object.String{Value: strings.Join(parts, delimiter)}
 	default:
 		return newError("unknown method: %s", method)
 	}
@@ -673,4 +782,56 @@ func evalWhile(node *ast.While, env *object.Env) object.Object {
 	}
 
 	return result
+}
+
+func evalModuleLoad(node *ast.ModuleLoad, env *object.Env) object.Object {
+	name := node.Name.String()
+
+	if mod, ok := moduleCache[name]; ok {
+		env.Set(name, mod, true)
+		return mod
+	}
+
+	modEnv := env.NewEnclosedEnv()
+	err := loadModule(name, modEnv)
+	if err != nil {
+		return newError("%s", err.Error())
+	}
+
+	modObj := &object.Module{Name: name, Env: modEnv}
+
+	env.Set(name, modObj, true)
+	moduleCache[name] = modObj
+
+	return modObj
+}
+
+func loadModule(name string, env *object.Env) error {
+	source, err := loadModuleSource(name)
+	if err != nil {
+		return err
+	}
+
+	lexer := lexer.New(string(source))
+	parser := parser.New(lexer)
+	program := parser.ParseProgram()
+
+	if len(parser.Errors()) != 0 {
+		return fmt.Errorf("parse errors in %s: %v", name, parser.Errors())
+	}
+
+	Eval(program, env)
+	return nil
+}
+
+func loadModuleSource(name string) ([]byte, error) {
+	cwd, _ := os.Getwd()
+	path := fmt.Sprintf("%s/%s.lynx", cwd, name)
+
+	source, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return source, nil
 }

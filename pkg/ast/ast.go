@@ -500,3 +500,14 @@ func (m *Method) String() string {
 	out.WriteString(m.Body.String())
 	return out.String()
 }
+
+type ModuleLoad struct {
+	Token token.Token
+	Name  Expression
+}
+
+func (ml *ModuleLoad) statementNode()       {}
+func (ml *ModuleLoad) TokenLiteral() string { return ml.Token.Literal }
+func (ml *ModuleLoad) String() string {
+	return "@" + ml.Name.String()
+}

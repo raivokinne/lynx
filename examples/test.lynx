@@ -1,36 +1,3 @@
-let add = fn(x) {
-    fn(y) {
-        return y + x;
-    }
-};
+@math
 
-print(add(1)(2));
-
-let arr = [1,2,4];
-
-for n,i in arr {
-    print(n);
-}
-
-let obj = {
-    "name": "John",
-};
-
-print(obj.name);
-
-let x = 0;
-
-while x < 10 {
-    x = x + 1;
-
-    print(x);
-}
-
-if false {
-    print("True");
-} else {
-    print("False");
-}
-
-let name = prompt("Enter your name: ");
-print("Your name: " + name);
+print(math.add(1, 2));

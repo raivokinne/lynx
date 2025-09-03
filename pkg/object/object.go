@@ -27,6 +27,7 @@ const (
 	ERROR_OBJ    = "ERROR"
 	BREAK_OBJ    = "BREAK"
 	CONTINUE_OBJ = "CONTINUE"
+	MODULE_OBJ   = "MODULE"
 )
 
 type Integer struct {
@@ -106,7 +107,15 @@ type Hash struct {
 }
 
 func (h *Hash) Type() ObjectType { return HASH_OBJ }
-func (h *Hash) Inspect() string  { return "HASH" }
+func (h *Hash) Inspect() string {
+	var out string
+	pairs := []string{}
+	for _, pair := range h.Pairs {
+		pairs = append(pairs, fmt.Sprintf("%s: %s", pair.Key.Inspect(), pair.Value.Inspect()))
+	}
+	out += fmt.Sprintf("{%s}", strings.Join(pairs, ", "))
+	return out
+}
 
 type HashPair struct {
 	Key   Object
@@ -166,3 +175,11 @@ type Break struct{}
 
 func (b *Break) Type() ObjectType { return "BREAK" }
 func (b *Break) Inspect() string  { return "break" }
+
+type Module struct {
+	Name string
+	Env  *Env
+}
+
+func (m *Module) Type() ObjectType { return "MODULE" }
+func (m *Module) Inspect() string  { return fmt.Sprintf("<module %s>", m.Name) }

@@ -46,11 +46,20 @@ func executeFile(filename string) {
 		os.Exit(1)
 	}
 
+	// fmt.Println(program.String())
+
 	env := object.New()
 	result := evaluator.Eval(program, env)
 
-	if result.Type() == object.ERROR_OBJ {
-		fmt.Printf("Error: %s\n", result.(*object.Error).Message)
+	switch result := result.(type) {
+	case *object.Error:
+		fmt.Printf("Error: %s\n", result.Message)
 		os.Exit(1)
+	case *object.Return:
+		fmt.Printf("%s\n", result.Value.Inspect())
+	default:
+		if result != evaluator.NULL && result.Type() != object.NULL_OBJ {
+			fmt.Printf("%s\n", result.Inspect())
+		}
 	}
 }

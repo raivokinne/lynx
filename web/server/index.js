@@ -225,12 +225,12 @@ app.post('/api/code/save', authenticate, async (req, res) => {
 	}
 });
 
-app.use((error, _req, res) => {
+app.use((error, req, res, next) => {
 	console.error('Unhandled error:', error);
 	res.status(500).json({ success: false, error: 'Internal server error' });
 });
 
-app.use((_req, res) => {
+app.use((req, res, next) => {
 	res.status(404).json({ success: false, error: 'Endpoint not found' });
 });
 
@@ -239,7 +239,7 @@ initDb().then(() => {
 		console.log(`🚀 Compiler server running on port ${PORT}`);
 		console.log(`📁 Temp directory: ${CONFIG.TEMP_DIR}`);
 		console.log(`⚡ Compiler path: ${CONFIG.COMPILER_PATH}`);
-		console.log(`⏱️  Execution timeout: ${CONFIG.EXECUTION_TIMEOUT}ms`);
+		console.log(`⏱️  Execution timeout: ${CONFIG.EXECUTION_TIMEOUT}ms`);
 
 		cleanupTempFiles();
 		setInterval(cleanupTempFiles, 30 * 60 * 1000);
