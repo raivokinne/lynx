@@ -30,7 +30,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 	useEffect(() => {
 		const token = localStorage.getItem('token');
 		if (token) {
-			// Decode token to get user info (basic implementation)
 			try {
 				const payload = JSON.parse(atob(token.split('.')[1]));
 				if (payload.exp * 1000 > Date.now()) {

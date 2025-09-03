@@ -62,14 +62,14 @@ export default function Home() {
 
 	return (
 		<div className="min-h-screen bg-gray-50">
-			<header className="bg-white shadow-sm border-b border-gray-200">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<header className="bg-white border-b border-gray-200">
+				<div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="flex justify-between items-center h-16">
 						<div className="flex items-center gap-3">
 							<div className="bg-blue-600 p-2 rounded-lg">
 								<Terminal className="w-6 h-6 text-white" />
 							</div>
-							<h1 className="text-xl font-semibold text-gray-900">Lynx Code Compiler</h1>
+							<h1 className="text-xl font-semibold text-gray-900">Lynx Koda Kompilators</h1>
 						</div>
 
 						<div className="flex items-center gap-4">
@@ -82,7 +82,7 @@ export default function Home() {
 								className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
 							>
 								<LogOut className="w-4 h-4" />
-								Sign out
+								Izrakstīties
 							</button>
 						</div>
 					</div>
@@ -90,8 +90,8 @@ export default function Home() {
 			</header>
 
 			{/* Main Content */}
-			<div className="max-w-7xl mx-auto p-6">
-				<div className="bg-white border border-gray-200 shadow-lg rounded-xl overflow-hidden">
+			<div className="w-full mx-auto p-6">
+				<div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
 					{/* Toolbar */}
 					<div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
 						<div className="flex items-center gap-3">
@@ -101,12 +101,12 @@ export default function Home() {
 								className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
 							>
 								<Play size={16} />
-								{isRunning ? 'Running...' : 'Compile & Run'}
+								{isRunning ? 'Izpildās…' : 'Kompilēt un Palaist'}
 							</button>
 							{isRunning && (
 								<div className="flex items-center gap-2 text-blue-600">
 									<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-									<span className="text-sm">Executing...</span>
+									<span className="text-sm">Tiek izpildīts…</span>
 								</div>
 							)}
 						</div>
@@ -119,7 +119,7 @@ export default function Home() {
 								title="Download Code"
 							>
 								<Download size={16} />
-								<span className="hidden sm:inline">Download</span>
+								<span className="hidden sm:inline">Lejupielādēt</span>
 							</button>
 							<button
 								onClick={clearCode}
@@ -128,7 +128,7 @@ export default function Home() {
 								title="Clear All"
 							>
 								<Trash2 size={16} />
-								<span className="hidden sm:inline">Clear</span>
+								<span className="hidden sm:inline">Izdzēst</span>
 							</button>
 						</div>
 					</div>
@@ -139,7 +139,7 @@ export default function Home() {
 							<div className="flex items-start">
 								<AlertCircle className="text-red-500 mr-3 mt-0.5 flex-shrink-0" size={16} />
 								<div>
-									<h4 className="text-red-800 font-medium text-sm">Compilation Error</h4>
+									<h4 className="text-red-800 font-medium text-sm">Kompilācijas kļūda</h4>
 									<p className="text-red-700 text-sm mt-1 font-mono whitespace-pre-wrap">{error}</p>
 								</div>
 							</div>
@@ -147,14 +147,14 @@ export default function Home() {
 					)}
 
 					{/* Code Editor and Output */}
-					<div className="grid grid-cols-1 lg:grid-cols-2 h-[600px]">
+					<div className="grid grid-cols-1 lg:grid-cols-2 h-[800px]">
 						{/* Code Editor */}
 						<div className="border-r border-gray-200">
 							<div className="bg-gray-100 px-4 py-3 border-b border-gray-200">
 								<h3 className="font-semibold text-gray-800 flex items-center gap-2">
 									<div className="w-3 h-3 bg-green-500 rounded-full"></div>
-									Code Editor
-									<span className="text-xs text-gray-500 ml-auto">Lynx Language</span>
+									Koda redaktors
+									<span className="text-xs text-gray-500 ml-auto">Lynx Valoda</span>
 								</h3>
 							</div>
 							<textarea
@@ -170,12 +170,12 @@ export default function Home() {
 							<div className="bg-gray-800 px-4 py-3 border-b border-gray-700">
 								<h3 className="font-semibold text-gray-200 flex items-center gap-2">
 									<div className={`w-3 h-3 rounded-full ${output && !error ? 'bg-green-500' : error ? 'bg-red-500' : 'bg-gray-500'}`}></div>
-									Output
+									Izvade
 									{output && !error && (
-										<span className="text-xs text-green-400 ml-auto">Success</span>
+										<span className="text-xs text-green-400 ml-auto">Izdevās</span>
 									)}
 									{error && (
-										<span className="text-xs text-red-400 ml-auto">Error</span>
+										<span className="text-xs text-red-400 ml-auto">Kļūda</span>
 									)}
 								</h3>
 							</div>

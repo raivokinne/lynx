@@ -57,7 +57,6 @@ if (!existsSync(CONFIG.TEMP_DIR)) {
 	mkdirSync(CONFIG.TEMP_DIR, { recursive: true });
 }
 
-// ------------------ Helpers ------------------
 function cleanupTempFiles() {
 	try {
 		const files = readdirSync(CONFIG.TEMP_DIR);
@@ -127,7 +126,6 @@ function authenticate(req, res, next) {
 	});
 }
 
-// ------------------ Auth Routes ------------------
 app.post('/api/register', async (req, res) => {
 	try {
 		const { username, password } = req.body;
@@ -174,7 +172,6 @@ app.post('/api/login', async (req, res) => {
 	}
 });
 
-// ------------------ Compiler Route ------------------
 app.post('/api/compile', async (req, res) => {
 	let tempFilePath = null;
 	try {
@@ -210,7 +207,6 @@ app.post('/api/compile', async (req, res) => {
 	}
 });
 
-// ------------------ Save & Fetch Code ------------------
 app.post('/api/code/save', authenticate, async (req, res) => {
 	try {
 		const { title, code } = req.body;
@@ -255,7 +251,6 @@ app.get('/api/code/:id', authenticate, async (req, res) => {
 	}
 });
 
-// ------------------ Error Handling ------------------
 app.use((error, _req, res) => {
 	console.error('Unhandled error:', error);
 	res.status(500).json({ success: false, error: 'Internal server error' });
@@ -265,7 +260,6 @@ app.use((_req, res) => {
 	res.status(404).json({ success: false, error: 'Endpoint not found' });
 });
 
-// ------------------ Startup ------------------
 initDb().then(() => {
 	app.listen(PORT, () => {
 		console.log(`🚀 Compiler server running on port ${PORT}`);
