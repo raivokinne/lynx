@@ -225,32 +225,6 @@ app.post('/api/code/save', authenticate, async (req, res) => {
 	}
 });
 
-app.get('/api/code/list', authenticate, async (req, res) => {
-	try {
-		const codes = await db.all('SELECT id, title, created_at FROM codes WHERE user_id = ? ORDER BY created_at DESC', [req.user.id]);
-		res.json({ success: true, codes });
-	} catch (error) {
-		console.error('List code error:', error.message);
-		res.status(500).json({ success: false, error: 'Failed to fetch codes' });
-	}
-});
-
-app.get('/api/code/:id', authenticate, async (req, res) => {
-	try {
-		const { id } = req.params;
-		const code = await db.get('SELECT id, title, code, created_at FROM codes WHERE id = ? AND user_id = ?', [id, req.user.id]);
-
-		if (!code) {
-			return res.status(404).json({ success: false, error: 'Code not found' });
-		}
-
-		res.json({ success: true, code });
-	} catch (error) {
-		console.error('Get code error:', error.message);
-		res.status(500).json({ success: false, error: 'Failed to fetch code' });
-	}
-});
-
 app.use((error, _req, res) => {
 	console.error('Unhandled error:', error);
 	res.status(500).json({ success: false, error: 'Internal server error' });
