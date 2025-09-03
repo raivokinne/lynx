@@ -502,12 +502,24 @@ func (m *Method) String() string {
 }
 
 type ModuleLoad struct {
-	Token token.Token
-	Name  Expression
+	Token   token.Token
+	Name    Expression
+	Members []*Identifier
 }
 
 func (ml *ModuleLoad) statementNode()       {}
 func (ml *ModuleLoad) TokenLiteral() string { return ml.Token.Literal }
 func (ml *ModuleLoad) String() string {
-	return "@" + ml.Name.String()
+	var out bytes.Buffer
+	out.WriteString("@")
+	out.WriteString(ml.Name.String())
+	out.WriteString("(")
+	for i, member := range ml.Members {
+		if i > 0 {
+			out.WriteString(", ")
+		}
+		out.WriteString(member.String())
+	}
+	out.WriteString(")")
+	return out.String()
 }

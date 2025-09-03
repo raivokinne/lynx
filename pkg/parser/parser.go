@@ -211,7 +211,38 @@ func (p *Parser) parseAtExpression() ast.Statement {
 	stmt := &ast.ModuleLoad{Token: p.curToken}
 	p.nextToken()
 	stmt.Name = p.parseIdentifier()
+	if p.peekTokenIs(token.LPAREN) {
+		p.nextToken()
+		stmt.Members = p.parseIdentifierList()
+		if !p.expectPeek(token.RPAREN) {
+			p.addError(
+				"SyntaxError",
+				"Missing closing parenthesis",
+			)
+			return nil
+		}
+	}
 	return stmt
+}
+
+func (p *Parser) parseIdentifierList() []*ast.Identifier {
+	identifiers := []*ast.Identifier{}
+
+	if p.peekTokenIs(token.RPAREN) {
+		p.nextToken()
+		return identifiers
+	}
+
+	p.nextToken()
+	identifiers = append(identifiers, &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal})
+
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		identifiers = append(identifiers, &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal})
+	}
+
+	return identifiers
 }
 
 func (p *Parser) parseContinueStatement() ast.Statement {

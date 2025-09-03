@@ -2,3 +2,14 @@ let add = fn(x, y) {
     return x + y;
 };
 
+let sub = fn(x, y) {
+    return x - y;
+};
+
+let mul = fn(x, y) {
+    return x * y;
+};
+
+let div = fn(x, y) {
+    return x / y;
+};

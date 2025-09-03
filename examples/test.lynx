@@ -1,3 +1,4 @@
-@math
+@math(add, sub)
 
-print(math.add(1, 2));
+print(add(1, 2));
+

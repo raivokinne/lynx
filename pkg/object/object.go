@@ -177,8 +177,9 @@ func (b *Break) Type() ObjectType { return "BREAK" }
 func (b *Break) Inspect() string  { return "break" }
 
 type Module struct {
-	Name string
-	Env  *Env
+	Name    string
+	Members map[string]Object
+	Env     *Env
 }
 
 func (m *Module) Type() ObjectType { return "MODULE" }

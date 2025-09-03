@@ -625,9 +625,22 @@ func evalPropertyAccess(obj object.Object, property string) object.Object {
 		return evalArrayPropertyAccess(obj, property)
 	case *object.Hash:
 		return evalHashPropertyAccess(obj, property)
+	case *object.Module:
+		return evalModulePropertyAccess(obj, property)
 	default:
 		return newError("property access not supported on: %s", obj.Type())
 	}
+}
+
+func evalModulePropertyAccess(obj *object.Module, property string) object.Object {
+	if obj.Members == nil {
+		return newError("module has no members")
+	}
+	member, ok := obj.Members[property]
+	if !ok {
+		return newError("module does not have member: %s", property)
+	}
+	return member
 }
 
 func evalArrayPropertyAccess(obj *object.Array, property string) object.Object {
@@ -786,22 +799,41 @@ func evalWhile(node *ast.While, env *object.Env) object.Object {
 
 func evalModuleLoad(node *ast.ModuleLoad, env *object.Env) object.Object {
 	name := node.Name.String()
+	modEnv := env.NewEnclosedEnv()
 
 	if mod, ok := moduleCache[name]; ok {
-		env.Set(name, mod, true)
+		if node.Members == nil {
+			env.Set(name, mod, true)
+		} else {
+			for _, member := range node.Members {
+				val, ok := modEnv.Get(member.Value)
+				if !ok {
+					return newError("module %s does not have member: %s", name, member.Value)
+				}
+				env.Set(member.Value, val, true)
+			}
+		}
 		return mod
 	}
 
-	modEnv := env.NewEnclosedEnv()
-	err := loadModule(name, modEnv)
-	if err != nil {
+	if err := loadModule(name, modEnv); err != nil {
 		return newError("%s", err.Error())
 	}
 
 	modObj := &object.Module{Name: name, Env: modEnv}
-
-	env.Set(name, modObj, true)
 	moduleCache[name] = modObj
+
+	if node.Members == nil {
+		env.Set(name, modObj, true)
+	} else {
+		for _, member := range node.Members {
+			val, ok := modObj.Env.Get(member.Value)
+			if !ok {
+				return newError("module %s does not have member: %s", name, member.Value)
+			}
+			env.Set(member.Value, val, true)
+		}
+	}
 
 	return modObj
 }
