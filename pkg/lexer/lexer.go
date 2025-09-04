@@ -148,6 +148,8 @@ func (l *Lexer) NextToken() token.Token {
 		tok = l.newToken(token.AT, l.ch)
 	case '*':
 		tok = l.newToken(token.ASTERISK, l.ch)
+	case '^':
+		tok = l.newToken(token.POWER, l.ch)
 	case '/':
 		if l.peekChar() == '/' {
 			l.skipLineComment()

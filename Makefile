@@ -18,6 +18,11 @@ install:
 test:
 	go test -v ./...
 
+build-all:
+	GOOS=linux GOARCH=amd64 go build -o build/lynx-linux ./cmd/lynx
+	GOOS=darwin GOARCH=amd64 go build -o build/lynx-macos ./cmd/lynx
+	GOOS=windows GOARCH=amd64 go build -o build/lynx.exe ./cmd/lynx
+
 clean:
 	rm -rf $(BUILD_DIR)
 

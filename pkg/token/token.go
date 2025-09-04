@@ -27,6 +27,7 @@ const (
 	ASTERISK = "*"
 	SLASH    = "/"
 	MODULOS  = "%"
+	POWER    = "^"
 
 	LT  = "<"
 	GT  = ">"

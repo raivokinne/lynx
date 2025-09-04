@@ -36,6 +36,7 @@ var precedences = map[token.TokenType]int{
 	token.LTE:      LESSEQ,
 	token.GTE:      GREATEREQ,
 	token.MODULOS:  PRODUCT,
+	token.POWER:    PRODUCT,
 }
 
 type ParseError struct {
@@ -101,6 +102,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.MODULOS, p.parseInfixExpression)
+	p.registerInfix(token.POWER, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
 	p.registerInfix(token.SLASH, p.parseInfixExpression)
 	p.registerInfix(token.ASTERISK, p.parseInfixExpression)

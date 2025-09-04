@@ -6,6 +6,7 @@ import (
 	"lynx/pkg/lexer"
 	"lynx/pkg/object"
 	"lynx/pkg/parser"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -296,6 +297,8 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 		return &object.Integer{Value: leftVal * rightVal}
 	case "%":
 		return &object.Integer{Value: leftVal % rightVal}
+	case "^":
+		return &object.Integer{Value: int64(math.Pow(float64(leftVal), float64(rightVal)))}
 	case "/":
 		if rightVal == 0 {
 			return newError("division by zero")
