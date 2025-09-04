@@ -1,0 +1,8 @@
+let adder = fn(x) {
+    fn(y) {
+        return x + y;
+    }
+};
+
+print(adder(2)(5));  // 7
+

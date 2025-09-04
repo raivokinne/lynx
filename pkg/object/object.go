@@ -179,7 +179,6 @@ func (b *Break) Inspect() string  { return "break" }
 type Module struct {
 	Name    string
 	Members map[string]Object
-	Child   Object
 	Env     *Env
 }
 

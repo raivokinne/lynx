@@ -54,8 +54,6 @@ func executeFile(filename string, dir string) {
 		os.Exit(1)
 	}
 
-	// fmt.Printf("Program: %s\n", program.String())
-
 	env := object.New(dir)
 	result := evaluator.Eval(program, env)
 

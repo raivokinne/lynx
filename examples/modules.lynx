@@ -1,0 +1,5 @@
+@math(add, pow)
+
+print(math.add(2, 3));   // 5
+print(math.pow(2, 8));   // 256
+

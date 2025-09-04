@@ -10,5 +10,5 @@ let times = fn(x) {
     return x * x;
 };
 
-print(map([1,2,3], times)); // [1, 4, 9]
+print(map([1,2,3], times));
 

@@ -1,0 +1,5 @@
+let user = { "name": "John", "age": 30 };
+print(user.name);
+user.age = 31;
+print(user.age);
+

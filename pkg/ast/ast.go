@@ -87,7 +87,7 @@ func (vr *VarStatement) String() string {
 
 type Assignment struct {
 	Token token.Token
-	Name  *Identifier
+	Name  Expression
 	Value Expression
 }
 
@@ -100,7 +100,7 @@ func (ls *Assignment) String() string {
 	var out bytes.Buffer
 
 	out.WriteString(ls.TokenLiteral() + " ")
-	out.WriteString(ls.Name.Value)
+	out.WriteString(ls.Name.String())
 	out.WriteString(" = ")
 	if ls.Value != nil {
 		out.WriteString(ls.Value.String())
@@ -464,7 +464,6 @@ type ModuleLoad struct {
 	Token   token.Token
 	Name    Expression
 	Members []*Identifier
-	Child   Expression
 }
 
 func (ml *ModuleLoad) statementNode()       {}
@@ -480,7 +479,6 @@ func (ml *ModuleLoad) String() string {
 		}
 		out.WriteString(member.String())
 	}
-	out.WriteString(ml.Child.String())
 	out.WriteString(")")
 	return out.String()
 }

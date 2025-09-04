@@ -1,0 +1,7 @@
+let add = fn(x, y) {
+    return x + y;
+};
+
+let pow = fn(x, y) {
+    return x ** y;
+};

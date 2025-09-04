@@ -21,6 +21,28 @@ var builtins = map[string]*object.Builtin{
 			}
 		},
 	},
+	"range": {
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 2 {
+				return newError("wrong number of arguments. got=%d, want=2", len(args))
+			}
+			switch arg := args[0].(type) {
+			case *object.Integer:
+				switch arg2 := args[1].(type) {
+				case *object.Integer:
+					var arr []object.Object
+					for i := int64(0); i < arg2.Value; i++ {
+						arr = append(arr, &object.Integer{Value: i})
+					}
+					return &object.Array{Elements: arr}
+				default:
+					return newError("second argument to `range` not supported, got %T", arg2)
+				}
+			default:
+				return newError("first argument to `range` not supported, got %T", arg)
+			}
+		},
+	},
 	"prompt": {
 		Fn: func(args ...object.Object) object.Object {
 			if len(args) != 1 {

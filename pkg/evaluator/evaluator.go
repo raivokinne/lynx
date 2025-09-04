@@ -61,6 +61,7 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 			return val
 		}
 		env.Set(node.Name.Value, val, node.IsConst)
+		return val
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
 	case *ast.FunctionLiteral:
@@ -73,9 +74,6 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 			return function
 		}
 		args := evalExpressions(node.Arguments, env)
-		if len(args) == 1 && isError(args[0]) {
-			return args[0]
-		}
 		return applyFunction(function, args)
 	case *ast.StringLiteral:
 		return &object.String{Value: node.Value}
@@ -113,11 +111,37 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 			return val
 		}
 
-		obj := env.Assign(node.Name.Value, val)
+		switch target := node.Name.(type) {
+		case *ast.Identifier:
+			obj := env.Assign(target.Value, val)
+			if isError(obj) {
+				return obj
+			}
+			return val
 
-		if isError(obj) {
-			return obj
+		case *ast.IndexExpression:
+			left := Eval(target.Left, env)
+			if isError(left) {
+				return left
+			}
+			index := Eval(target.Index, env)
+			if isError(index) {
+				return index
+			}
+
+			return evalIndexAssignment(left, index, val)
+
+		case *ast.PropertyAccess:
+			object := Eval(target.Object, env)
+			if isError(object) {
+				return object
+			}
+			return evalPropertyAssignment(object, target.Property.Value, val)
+
+		default:
+			return newError("invalid assignment target: %T", node.Name)
 		}
+
 	case *ast.PropertyAccess:
 		obj := Eval(node.Object, env)
 		if isError(obj) {
@@ -138,8 +162,46 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 	default:
 		return newError("unknown node type: %T", node)
 	}
+}
 
-	return nil
+func evalIndexAssignment(left, index, value object.Object) object.Object {
+	switch arr := left.(type) {
+	case *object.Array:
+		idx, ok := index.(*object.Integer)
+		if !ok {
+			return newError("index must be an integer: %s", index.Type())
+		}
+		max := int64(len(arr.Elements) - 1)
+		if idx.Value < 0 || idx.Value > max {
+			return newError("index out of range: %d", idx.Value)
+		}
+		arr.Elements[idx.Value] = value
+		return value
+	case *object.Hash:
+		key, ok := index.(object.Hashable)
+		if !ok {
+			return newError("unusable as hash key: %s", index.Type())
+		}
+		pair, ok := arr.Pairs[key.HashKey()]
+		if !ok {
+			return newError("key not found: %s", index.Type())
+		}
+		pair.Value = value
+		return value
+	default:
+		return newError("cannot assign to: %s", left.Type())
+	}
+}
+
+func evalPropertyAssignment(obj object.Object, prop string, val object.Object) object.Object {
+	hash, ok := obj.(*object.Hash)
+	if !ok {
+		return newError("property assignment only supported on objects, got %T", obj)
+	}
+
+	key := &object.String{Value: prop}
+	hash.Pairs[key.HashKey()] = object.HashPair{Key: key, Value: val}
+	return val
 }
 
 func nativeBoolToBooleanObject(input bool) *object.Boolean {
@@ -232,6 +294,8 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 		return &object.Integer{Value: leftVal - rightVal}
 	case "*":
 		return &object.Integer{Value: leftVal * rightVal}
+	case "%":
+		return &object.Integer{Value: leftVal % rightVal}
 	case "/":
 		if rightVal == 0 {
 			return newError("division by zero")

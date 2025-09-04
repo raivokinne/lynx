@@ -1,0 +1,9 @@
+let outer = fn (x) {
+    let inner = fn (y) {
+        return x * y;
+    }
+    return inner;
+}
+
+print(outer(3)(5)); // 15
+

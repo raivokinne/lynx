@@ -35,6 +35,7 @@ var precedences = map[token.TokenType]int{
 	token.LBRACKET: CALL,
 	token.LTE:      LESSEQ,
 	token.GTE:      GREATEREQ,
+	token.MODULOS:  PRODUCT,
 }
 
 type ParseError struct {
@@ -99,6 +100,7 @@ func New(l *lexer.Lexer) *Parser {
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
+	p.registerInfix(token.MODULOS, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
 	p.registerInfix(token.SLASH, p.parseInfixExpression)
 	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
@@ -188,7 +190,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	case token.IDENT:
-		if p.peekTokenIs(token.ASSIGN) {
+		if p.peekTokenIs(token.ASSIGN) || p.peekTokenIs(token.LBRACKET) {
 			return p.parseAssignmentStatement()
 		}
 		return p.parseExpressionStatement()
@@ -352,19 +354,27 @@ func (p *Parser) parseWhileStatement() ast.Statement {
 
 func (p *Parser) parseAssignmentStatement() *ast.Assignment {
 	stmt := &ast.Assignment{Token: p.curToken}
-	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-	if !p.expectPeek(token.ASSIGN) {
-		p.addError(
-			"SyntaxError",
-			"Missing assignment operator",
-		)
+
+	lhs := p.parseExpression(LOWEST)
+
+	if !isAssignable(lhs) {
+		p.addError("SyntaxError", "Invalid left-hand side in assignment")
 		return nil
 	}
+
+	if !p.expectPeek(token.ASSIGN) {
+		p.addError("SyntaxError", "Missing assignment operator")
+		return nil
+	}
+
 	p.nextToken()
+	stmt.Name = lhs
 	stmt.Value = p.parseExpression(LOWEST)
+
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
+
 	return stmt
 }
 
@@ -765,4 +775,13 @@ func (p *Parser) curPrecedence() int {
 		return p
 	}
 	return LOWEST
+}
+
+func isAssignable(expr ast.Expression) bool {
+	switch expr.(type) {
+	case *ast.Identifier, *ast.IndexExpression, *ast.PropertyAccess:
+		return true
+	default:
+		return false
+	}
 }
