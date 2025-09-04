@@ -460,51 +460,11 @@ func (c *Continue) String() string {
 	return out.String()
 }
 
-type Class struct {
-	Token   token.Token
-	Name    Expression
-	Methods []*Method
-}
-
-func (c *Class) statementNode()       {}
-func (c *Class) TokenLiteral() string { return c.Token.Literal }
-func (c *Class) String() string {
-	var out bytes.Buffer
-	out.WriteString("class ")
-	out.WriteString(c.Name.String())
-	out.WriteString(" ")
-	return out.String()
-}
-
-type Method struct {
-	Token      token.Token
-	Name       Expression
-	Parameters []*Identifier
-	Body       *BlockStatement
-}
-
-func (m *Method) statementNode()       {}
-func (m *Method) TokenLiteral() string { return m.Token.Literal }
-func (m *Method) String() string {
-	var out bytes.Buffer
-	out.WriteString("method ")
-	out.WriteString(m.Name.String())
-	out.WriteString("(")
-	for i, p := range m.Parameters {
-		if i > 0 {
-			out.WriteString(", ")
-		}
-		out.WriteString(p.String())
-	}
-	out.WriteString(") ")
-	out.WriteString(m.Body.String())
-	return out.String()
-}
-
 type ModuleLoad struct {
 	Token   token.Token
 	Name    Expression
 	Members []*Identifier
+	Child   Expression
 }
 
 func (ml *ModuleLoad) statementNode()       {}
@@ -520,6 +480,7 @@ func (ml *ModuleLoad) String() string {
 		}
 		out.WriteString(member.String())
 	}
+	out.WriteString(ml.Child.String())
 	out.WriteString(")")
 	return out.String()
 }

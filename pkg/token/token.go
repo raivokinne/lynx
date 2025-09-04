@@ -56,6 +56,7 @@ const (
 	TRUE     = "TRUE"
 	FALSE    = "FALSE"
 	IF       = "IF"
+	ELSEIF   = "ELSEIF"
 	ELSE     = "ELSE"
 	RETURN   = "RETURN"
 	FOR      = "FOR"
@@ -80,6 +81,7 @@ var keywords = map[string]TokenType{
 	"in":       IN,
 	"continue": CONTINUE,
 	"break":    BREAK,
+	"elseif":   ELSEIF,
 }
 
 func LookupIdent(ident string) TokenType {

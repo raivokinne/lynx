@@ -210,7 +210,9 @@ func (p *Parser) parseStatement() ast.Statement {
 func (p *Parser) parseAtExpression() ast.Statement {
 	stmt := &ast.ModuleLoad{Token: p.curToken}
 	p.nextToken()
+
 	stmt.Name = p.parseIdentifier()
+
 	if p.peekTokenIs(token.LPAREN) {
 		p.nextToken()
 		stmt.Members = p.parseIdentifierList()

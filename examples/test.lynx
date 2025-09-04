@@ -1,4 +1,9 @@
-@math(add, sub)
+let twice = fn(f, x) {
+	return f(f(x));
+};
 
-print(add(1, 2));
+let inc = fn(x) {
+	return x + 1;
+};
 
+twice(inc, 1);

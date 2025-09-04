@@ -839,7 +839,7 @@ func evalModuleLoad(node *ast.ModuleLoad, env *object.Env) object.Object {
 }
 
 func loadModule(name string, env *object.Env) error {
-	source, err := loadModuleSource(name)
+	source, err := loadModuleSource(name, env)
 	if err != nil {
 		return err
 	}
@@ -856,14 +856,19 @@ func loadModule(name string, env *object.Env) error {
 	return nil
 }
 
-func loadModuleSource(name string) ([]byte, error) {
-	cwd, _ := os.Getwd()
-	path := fmt.Sprintf("%s/%s.lynx", cwd, name)
-
-	source, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
+func loadModuleSource(name string, env *object.Env) ([]byte, error) {
+	possiblePaths := []string{
+		fmt.Sprintf("%s/%s.lynx", env.Dir, name),
 	}
 
-	return source, nil
+	var lastErr error
+	for _, path := range possiblePaths {
+		source, err := os.ReadFile(path)
+		if err == nil {
+			return source, nil
+		}
+		lastErr = err
+	}
+
+	return nil, fmt.Errorf("could not find module %s: %v", name, lastErr)
 }

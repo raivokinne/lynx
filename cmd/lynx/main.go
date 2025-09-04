@@ -9,6 +9,7 @@ import (
 	"lynx/pkg/repl"
 	"os"
 	"os/user"
+	"path/filepath"
 )
 
 func main() {
@@ -24,11 +25,18 @@ func main() {
 		repl.Start(os.Stdin, os.Stdout)
 	} else {
 		filename := args[0]
-		executeFile(filename)
+		absPath, err := filepath.Abs(filename)
+		if err != nil {
+			fmt.Printf("Error getting absolute path: %v\n", err)
+			os.Exit(1)
+		}
+
+		dir := filepath.Dir(absPath)
+		executeFile(filename, dir)
 	}
 }
 
-func executeFile(filename string) {
+func executeFile(filename string, dir string) {
 	input, err := os.ReadFile(filename)
 	if err != nil {
 		fmt.Printf("Error reading file: %v\n", err)
@@ -46,7 +54,9 @@ func executeFile(filename string) {
 		os.Exit(1)
 	}
 
-	env := object.New()
+	// fmt.Printf("Program: %s\n", program.String())
+
+	env := object.New(dir)
 	result := evaluator.Eval(program, env)
 
 	switch result := result.(type) {

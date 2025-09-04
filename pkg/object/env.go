@@ -6,12 +6,14 @@ type Env struct {
 	store  map[string]Object
 	consts map[string]bool
 	outer  *Env
+	Dir    string
 }
 
-func New() *Env {
+func New(dir string) *Env {
 	return &Env{
 		store:  make(map[string]Object),
 		consts: make(map[string]bool),
+		Dir:    dir,
 	}
 }
 
@@ -46,7 +48,7 @@ func (e *Env) Get(name string) (Object, bool) {
 }
 
 func (e *Env) NewEnclosedEnv() *Env {
-	enclosed := New()
+	enclosed := New(e.Dir)
 	enclosed.outer = e
 	return enclosed
 }
