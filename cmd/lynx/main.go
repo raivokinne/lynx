@@ -55,6 +55,7 @@ func executeFile(filename string, dir string) {
 	}
 
 	env := object.New(dir)
+	evaluator.RegisterBuiltins()
 	result := evaluator.Eval(program, env)
 
 	switch result := result.(type) {

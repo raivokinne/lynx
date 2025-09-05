@@ -1,0 +1,12 @@
+// let url = "https://httpbin.org/post";
+// let data = "{\"name\":\"John\"}";
+
+// let response = http_post(url, "application/json", data);
+
+// print(response);
+
+let html = http_get("https://example.com");
+print(html);
+
+
+
