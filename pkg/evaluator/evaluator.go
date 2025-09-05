@@ -28,6 +28,8 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 		return Eval(node.Expression, env)
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
+	case *ast.FloatLiteral:
+		return &object.Float{Value: node.Value}
 	case *ast.Boolean:
 		return nativeBoolToBooleanObject(node.Value)
 	case *ast.PrefixExpression:
@@ -160,6 +162,8 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 		return &object.Break{}
 	case *ast.ModuleLoad:
 		return evalModuleLoad(node, env)
+	case *ast.SwitchStatement:
+		return evalSwitchStatement(node, env)
 	default:
 		return newError("unknown node type: %T", node)
 	}
@@ -269,18 +273,35 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 
 func evalInfixExpression(operator string, left, right object.Object) object.Object {
 	switch {
+	case operator == "++":
+		return evalConcatExpression(left, right)
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
 	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
 		return evalStringInfixExpression(operator, left, right)
 	case operator == "==":
 		return nativeBoolToBooleanObject(left == right)
+	case operator == "and":
+		return nativeBoolToBooleanObject(left.Type() == object.BOOLEAN_OBJ && left.(*object.Boolean).Value)
+	case operator == "or":
+		return nativeBoolToBooleanObject(left.Type() == object.BOOLEAN_OBJ || left.(*object.Boolean).Value)
 	case operator == "!=":
 		return nativeBoolToBooleanObject(left != right)
 	case left.Type() != right.Type():
 		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
 	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+}
+
+func evalConcatExpression(left, right object.Object) object.Object {
+	switch left := left.(type) {
+	case *object.String:
+		return &object.String{Value: left.Value + right.(*object.String).Value}
+	case *object.Array:
+		return &object.Array{Elements: append(left.Elements, right.(*object.Array).Elements...)}
+	default:
+		return newError("cannot concatenate: %s", left.Type())
 	}
 }
 
@@ -326,8 +347,6 @@ func evalStringInfixExpression(operator string, left, right object.Object) objec
 	rightVal := right.(*object.String).Value
 
 	switch operator {
-	case "+":
-		return &object.String{Value: leftVal + rightVal}
 	case "==":
 		return nativeBoolToBooleanObject(leftVal == rightVal)
 	case "!=":
@@ -938,4 +957,83 @@ func loadModuleSource(name string, env *object.Env) ([]byte, error) {
 	}
 
 	return nil, fmt.Errorf("could not find module %s: %v", name, lastErr)
+}
+
+func evalSwitchInteger(node *ast.SwitchStatement, switchVal *object.Integer, env *object.Env) object.Object {
+	var defaultCase *ast.Case
+
+	for _, caseNode := range node.Cases {
+		if caseNode.Value == nil {
+			defaultCase = caseNode
+			continue
+		}
+
+		caseVal := Eval(caseNode.Value, env)
+		if isError(caseVal) {
+			return caseVal
+		}
+
+		if intVal, ok := caseVal.(*object.Integer); ok {
+			if intVal.Value == switchVal.Value {
+				return Eval(caseNode.Body, env)
+			}
+		}
+	}
+
+	if defaultCase != nil {
+		return Eval(defaultCase.Body, env)
+	}
+
+	return NULL
+}
+
+func evalSwitchString(node *ast.SwitchStatement, switchVal *object.String, env *object.Env) object.Object {
+	var defaultCase *ast.Case
+
+	for _, caseNode := range node.Cases {
+		if caseNode.Value == nil {
+			defaultCase = caseNode
+			continue
+		}
+
+		caseVal := Eval(caseNode.Value, env)
+		if isError(caseVal) {
+			return caseVal
+		}
+
+		if strVal, ok := caseVal.(*object.String); ok {
+			if strVal.Value == switchVal.Value {
+				return Eval(caseNode.Body, env)
+			}
+		}
+	}
+
+	if defaultCase != nil {
+		return Eval(defaultCase.Body, env)
+	}
+
+	return NULL
+}
+
+func evalSwitchStatement(node *ast.SwitchStatement, env *object.Env) object.Object {
+	val := Eval(node.Expression, env)
+	if isError(val) {
+		return val
+	}
+	switch val := val.(type) {
+	case *object.Integer:
+		return evalSwitchInteger(node, val, env)
+	case *object.String:
+		return evalSwitchString(node, val, env)
+	case *object.Boolean:
+		if val.Value {
+			return Eval(node.Cases[0].Body, env)
+		}
+		if len(node.Cases) > 1 {
+			return Eval(node.Cases[1].Body, env)
+		}
+		return NULL
+	default:
+		return newError("switch statement not supported on: %s", val.Type())
+	}
 }

@@ -128,7 +128,18 @@ func (l *Lexer) NextToken() token.Token {
 	case ',':
 		tok = l.newToken(token.COMMA, l.ch)
 	case '+':
-		tok = l.newToken(token.PLUS, l.ch)
+		if l.peekChar() == '+' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{
+				Type:    token.CONCAT,
+				Literal: string(ch) + string(l.ch),
+				Line:    currentLine,
+				Column:  currentColumn,
+			}
+		} else {
+			tok = l.newToken(token.PLUS, l.ch)
+		}
 	case '-':
 		tok = l.newToken(token.MINUS, l.ch)
 	case '!':

@@ -34,6 +34,11 @@ const (
 	LTE = "<="
 	GTE = ">="
 
+	AND = "and"
+	OR  = "or"
+
+	CONCAT = "++"
+
 	EQ     = "=="
 	NOT_EQ = "!="
 
@@ -52,20 +57,23 @@ const (
 	DOT = "."
 
 	// Keywords
-	FUNCTION = "FUNCTION"
 	LET      = "LET"
 	CONST    = "CONST"
 	TRUE     = "TRUE"
 	FALSE    = "FALSE"
 	IF       = "IF"
 	ELSE     = "ELSE"
+	WHILE    = "WHILE"
 	RETURN   = "RETURN"
 	FOR      = "FOR"
-	WHILE    = "WHILE"
 	IN       = "IN"
 	CONTINUE = "CONTINUE"
 	BREAK    = "BREAK"
+	FUNCTION = "FUNCTION"
 	AT       = "@"
+	SWITCH   = "SWITCH"
+	CASE     = "CASE"
+	DEFAULT  = "DEFAULT"
 )
 
 var keywords = map[string]TokenType{
@@ -82,6 +90,11 @@ var keywords = map[string]TokenType{
 	"in":       IN,
 	"continue": CONTINUE,
 	"break":    BREAK,
+	"and":      AND,
+	"or":       OR,
+	"switch":   SWITCH,
+	"case":     CASE,
+	"default":  DEFAULT,
 }
 
 func LookupIdent(ident string) TokenType {

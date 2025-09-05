@@ -157,6 +157,19 @@ func (il *IntegerLiteral) String() string {
 	return il.Token.Literal
 }
 
+type FloatLiteral struct {
+	Token token.Token
+	Value float64
+}
+
+func (fl *FloatLiteral) expressionNode() {}
+func (fl *FloatLiteral) TokenLiteral() string {
+	return fl.Token.Literal
+}
+func (fl *FloatLiteral) String() string {
+	return fl.Token.Literal
+}
+
 type PrefixExpression struct {
 	Token    token.Token
 	Operator string
@@ -480,5 +493,97 @@ func (ml *ModuleLoad) String() string {
 		out.WriteString(member.String())
 	}
 	out.WriteString(")")
+	return out.String()
+}
+
+type SwitchStatement struct {
+	Token      token.Token
+	Expression Expression
+	Cases      []*Case
+}
+
+func (ss *SwitchStatement) statementNode()       {}
+func (ss *SwitchStatement) TokenLiteral() string { return ss.Token.Literal }
+func (ss *SwitchStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString("switch ")
+	out.WriteString(ss.Expression.String())
+	out.WriteString(" {\n")
+	for _, c := range ss.Cases {
+		out.WriteString(c.String())
+		out.WriteString("\n")
+	}
+	out.WriteString("}")
+	return out.String()
+}
+
+type Case struct {
+	Token token.Token
+	Value Expression
+	Body  *BlockStatement
+}
+
+func (c *Case) statementNode()       {}
+func (c *Case) TokenLiteral() string { return c.Token.Literal }
+func (c *Case) String() string {
+	var out bytes.Buffer
+	out.WriteString("case ")
+	out.WriteString(c.Value.String())
+	out.WriteString(":\n")
+	for _, s := range c.Body.Statements {
+		out.WriteString(s.String())
+		out.WriteString("\n")
+	}
+	return out.String()
+}
+
+type ClassStatement struct {
+	Token      token.Token
+	Name       *Identifier
+	Superclass *Identifier
+	Methods    []*Method
+}
+
+func (cs *ClassStatement) statementNode()       {}
+func (cs *ClassStatement) TokenLiteral() string { return cs.Token.Literal }
+func (cs *ClassStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString("class ")
+	out.WriteString(cs.Name.String())
+	if cs.Superclass != nil {
+		out.WriteString(" < ")
+		out.WriteString(cs.Superclass.String())
+	}
+	out.WriteString(" {\n")
+	for _, m := range cs.Methods {
+		out.WriteString(m.String())
+		out.WriteString("\n")
+	}
+	out.WriteString("}")
+	return out.String()
+}
+
+type Method struct {
+	Token      token.Token
+	Name       *Identifier
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
+
+func (m *Method) statementNode()       {}
+func (m *Method) TokenLiteral() string { return m.Token.Literal }
+func (m *Method) String() string {
+	var out bytes.Buffer
+	out.WriteString("fn ")
+	out.WriteString(m.Name.String())
+	out.WriteString("(")
+	for i, p := range m.Parameters {
+		if i > 0 {
+			out.WriteString(", ")
+		}
+		out.WriteString(p.String())
+	}
+	out.WriteString(") ")
+	out.WriteString(m.Body.String())
 	return out.String()
 }

@@ -1,6 +1,57 @@
 import { AlertCircle, Download, Play, Trash2, LogOut, User, Terminal, Zap } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from '../contexts/AuthContext';
+import Prism from "prismjs";
+import Editor from "react-simple-code-editor";
+
+Prism.languages.lynx = {
+    comment: {
+        pattern: /\/\/.*/,
+        greedy: true,
+    },
+    string: {
+        pattern: /"(?:\\.|[^"\\])*"/,
+        greedy: true,
+    },
+    number: /\b\d+(?:\.\d+)?\b/,
+    keyword: /\b(?:if|else|for|in|while|return|break|continue|const|let|fn|true|false)\b/,
+    boolean: /\b(?:true|false)\b/,
+    operator: /[=+\-*/<>!]=?|&&|\|\||\.\.|\.|:/,
+    punctuation: /[{}[\]();,]/,
+    function: /\b[a-zA-Z_]\w*(?=\s*\()/,
+    identifier: /\b[a-zA-Z_]\w*\b/,
+};
+
+const highlight = (code: string) => {
+    let highlighted = code;
+
+    highlighted = highlighted.replace(
+        /\/\/.*/g,
+        '<span style="color: #6b7280; font-style: italic;">$&</span>'
+    );
+
+    highlighted = highlighted.replace(
+        /"(?:\\.|[^"\\])*"/g,
+        '<span style="color: #10b981;">$&</span>'
+    );
+
+    highlighted = highlighted.replace(
+        /\b(?:if|else|for|in|while|return|break|continue|const|let|fn|true|false)\b/g,
+        '<span style="color: #8b5cf6; font-weight: bold;">$&</span>'
+    );
+
+    highlighted = highlighted.replace(
+        /\b\d+(?:\.\d+)?\b/g,
+        '<span style="color: #f59e0b;">$&</span>'
+    );
+
+    highlighted = highlighted.replace(
+        /\b[a-zA-Z_]\w*(?=\s*\()/g,
+        '<span style="color: #3b82f6; font-weight: bold;">$&</span>'
+    );
+
+    return highlighted;
+};
 
 export default function Home() {
     const [code, setCode] = useState('');
@@ -8,6 +59,10 @@ export default function Home() {
     const [isRunning, setIsRunning] = useState(false);
     const [error, setError] = useState('');
     const { user, logout } = useAuth();
+
+    useEffect(() => {
+        Prism.highlightAll();
+    }, [code]);
 
     const executeCode = async () => {
         setIsRunning(true);
@@ -166,12 +221,23 @@ export default function Home() {
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[70vh]">
                         <div className="border-r border-white/20 bg-gradient-to-br from-gray-900/50 to-black/50">
-                            <div className="relative">
-                                <textarea
+                            <div className="relative h-[600px] lg:h-[70vh]">
+                                <Editor
                                     value={code}
-                                    onChange={(e) => setCode(e.target.value)}
-                                    className="w-full h-[600px] lg:h-[70vh] p-6 font-mono text-xl resize-none border-none outline-none bg-transparent text-white leading-relaxed placeholder:text-gray-500 selection:bg-white/30"
-                                    spellCheck="false"
+                                    onValueChange={setCode}
+                                    highlight={highlight}
+                                    padding={24}
+                                    className="w-full h-full font-mono text-base bg-transparent text-white leading-relaxed resize-none border-none outline-none"
+                                    textareaClassName="outline-none resize-none bg-transparent text-white caret-white selection:bg-white/30"
+                                    style={{
+                                        fontFamily: '"JetBrains Mono", monospace',
+                                        fontSize: 16,
+                                        lineHeight: 1.6,
+                                        backgroundColor: 'transparent',
+                                        color: 'white',
+                                        minHeight: '100%'
+                                    }}
+                                    placeholder="// Enter your Lynx code here..."
                                 />
                             </div>
                         </div>

@@ -15,6 +15,9 @@ const (
 	LESSGREATER // > or <
 	LESSEQ      // <=
 	GREATEREQ   // >=
+	CONCAT      // ++
+	AND         // and
+	OR          // or
 	SUM         // +
 	PRODUCT     // *
 	PREFIX      // -X or !X
@@ -37,6 +40,9 @@ var precedences = map[token.TokenType]int{
 	token.GTE:      GREATEREQ,
 	token.MODULOS:  PRODUCT,
 	token.POWER:    PRODUCT,
+	token.AND:      AND,
+	token.OR:       OR,
+	token.CONCAT:   CONCAT,
 }
 
 type ParseError struct {
@@ -88,6 +94,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
+	p.registerPrefix(token.FLOAT, p.parseFloatLiteral)
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
 	p.registerPrefix(token.TRUE, p.parseBoolean)
@@ -106,6 +113,9 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
 	p.registerInfix(token.SLASH, p.parseInfixExpression)
 	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
+	p.registerInfix(token.CONCAT, p.parseInfixExpression)
+	p.registerInfix(token.AND, p.parseInfixExpression)
+	p.registerInfix(token.OR, p.parseInfixExpression)
 	p.registerInfix(token.EQ, p.parseInfixExpression)
 	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
@@ -185,6 +195,20 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	return lit
 }
 
+func (p *Parser) parseFloatLiteral() ast.Expression {
+	lit := &ast.FloatLiteral{}
+	value, err := strconv.ParseFloat(p.curToken.Literal, 64)
+	if err != nil {
+		p.addError(
+			"ValueError",
+			fmt.Sprintf("Cannot parse '%s' as float", p.curToken.Literal),
+		)
+		return nil
+	}
+	lit.Value = value
+	return lit
+}
+
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.LET, token.CONST:
@@ -206,8 +230,141 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseBreakStatement()
 	case token.AT:
 		return p.parseAtExpression()
+	case token.SWITCH:
+		return p.parseSwitchStatement()
 	default:
 		return p.parseExpressionStatement()
+	}
+}
+
+func (p *Parser) parseSwitchStatement() ast.Statement {
+	switchStmt := &ast.SwitchStatement{Token: p.curToken}
+	p.nextToken()
+	switchStmt.Expression = p.parseExpression(LOWEST)
+	if !p.expectPeek(token.LBRACE) {
+		p.addError(
+			"SyntaxError",
+			"Missing opening brace",
+		)
+		return nil
+	}
+
+	switchStmt.Cases = p.parseCases()
+
+	if !p.expectPeek(token.RBRACE) {
+		p.addError(
+			"SyntaxError",
+			"Missing closing brace",
+		)
+		return nil
+	}
+
+	return switchStmt
+}
+
+func (p *Parser) parseCases() []*ast.Case {
+	cases := []*ast.Case{}
+
+	for !p.peekTokenIs(token.RBRACE) && !p.peekTokenIs(token.EOF) {
+		if p.peekTokenIs(token.CASE) {
+			p.nextToken()
+			caseStmt := p.parseCase()
+			if caseStmt != nil {
+				cases = append(cases, caseStmt)
+			}
+		} else if p.peekTokenIs(token.DEFAULT) {
+			p.nextToken()
+			defaultCase := p.parseDefaultCase()
+			if defaultCase != nil {
+				cases = append(cases, defaultCase)
+			}
+		} else {
+			p.addError(
+				"SyntaxError",
+				fmt.Sprintf("Expected 'case' or 'default', got %s", p.peekToken.Type),
+			)
+			return cases
+		}
+	}
+
+	return cases
+}
+
+func (p *Parser) parseCase() *ast.Case {
+	caseToken := p.curToken
+	p.nextToken()
+
+	caseValue := p.parseExpression(LOWEST)
+	if caseValue == nil {
+		p.addError(
+			"SyntaxError",
+			"Expected case value",
+		)
+		return nil
+	}
+
+	if !p.expectPeek(token.COLON) {
+		p.addError(
+			"SyntaxError",
+			"Expected ':' after case value",
+		)
+		return nil
+	}
+
+	var caseBody *ast.BlockStatement
+
+	if p.peekTokenIs(token.LBRACE) {
+		p.nextToken()
+		caseBody = p.parseBlockStatement()
+	} else {
+		p.nextToken()
+		stmt := p.parseStatement()
+		if stmt != nil {
+			caseBody = &ast.BlockStatement{
+				Token:      p.curToken,
+				Statements: []ast.Statement{stmt},
+			}
+		}
+	}
+
+	return &ast.Case{
+		Token: caseToken,
+		Value: caseValue,
+		Body:  caseBody,
+	}
+}
+
+func (p *Parser) parseDefaultCase() *ast.Case {
+	caseToken := p.curToken
+
+	if !p.expectPeek(token.COLON) {
+		p.addError(
+			"SyntaxError",
+			"Expected ':' after default",
+		)
+		return nil
+	}
+
+	var caseBody *ast.BlockStatement
+
+	if p.peekTokenIs(token.LBRACE) {
+		p.nextToken()
+		caseBody = p.parseBlockStatement()
+	} else {
+		p.nextToken()
+		stmt := p.parseStatement()
+		if stmt != nil {
+			caseBody = &ast.BlockStatement{
+				Token:      p.curToken,
+				Statements: []ast.Statement{stmt},
+			}
+		}
+	}
+
+	return &ast.Case{
+		Token: caseToken,
+		Value: nil,
+		Body:  caseBody,
 	}
 }
 

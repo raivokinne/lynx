@@ -16,6 +16,7 @@ type Object interface {
 
 const (
 	INTEGER_OBJ  = "INTEGER"
+	FLOAT_OBJ    = "FLOAT"
 	BOOLEAN_OBJ  = "BOOLEAN"
 	NULL_OBJ     = "NULL"
 	RETURN_OBJ   = "RETURN"
@@ -29,6 +30,13 @@ const (
 	CONTINUE_OBJ = "CONTINUE"
 	MODULE_OBJ   = "MODULE"
 )
+
+type Float struct {
+	Value float64
+}
+
+func (f *Float) Type() ObjectType { return FLOAT_OBJ }
+func (f *Float) Inspect() string  { return fmt.Sprintf("%f", f.Value) }
 
 type Integer struct {
 	Value int64

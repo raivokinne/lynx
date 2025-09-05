@@ -13,4 +13,3 @@ let bubbleSort = fn(arr) {
 }
 
 print(bubbleSort([5,3,8,1]));
-
