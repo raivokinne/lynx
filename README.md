@@ -225,7 +225,7 @@ let main = fn() {
 
 ## License
 
-MIT License - see LICENSE file for details.
+WTFPL License - see LICENSE file for details.
 
 ---
 
