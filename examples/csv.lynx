@@ -9,19 +9,19 @@ let parseCSV = fn(csvText) {
         let i = 0
         while (i < dataLines.len()) {
             let line = dataLines[i]
-            let values = line.split(",")
+                let values = line.split(",")
 
-            let record = {}
+                let record = {}
             let j = 0
-            while (j < headers.len()) {
-                let header = headers[j]
-                    let value = values[j]
-                    record[header] = value
-                    j = j + 1
-            }
+                while (j < headers.len()) {
+                    let header = headers[j]
+                        let value = values[j]
+                        record[header] = value
+                        j = j + 1
+                }
 
             records = records.push(record)
-            i = i + 1
+                i = i + 1
         }
 
     return {"headers": headers, "records": records}
@@ -29,6 +29,6 @@ let parseCSV = fn(csvText) {
 
 let parsedData = parseCSV(csvData)
 
-let main = fn() {
-    print(parsedData)
-}
+    let main = fn() {
+        print(parsedData)
+    }
