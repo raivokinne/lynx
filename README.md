@@ -68,18 +68,14 @@ let totalAge = users |> reduce(fn(acc, x) { acc + x.age }, 0)
 ### Modules
 
 ```lynx
-@arrays(map, filter, reduce)
-@strings(trim, split, replace, contains)
-@math(abs, max, min, pow, sqrt, factorial, gcd, lcm)
-@test(assertEqual, assert, assertTrue, assertFalse)
-@io(println, writeStdout, readStdin)
-@net(get, post)
+@arrays(map, filter)
 
 let main = fn() {
-    let text = "  Hello World  "
-    let clean = text |> trim()
-    let words = clean |> split(" ")
-    println(words)
+    let arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    let even = arr
+        |> map(fn(x) { x * 2 })
+        |> filter(fn(x) { x % 2 == 0 })
+    print(even)
 }
 ```
 
@@ -183,7 +179,7 @@ let fibonacci = fn(n) {
     return fibonacci(n - 1) + fibonacci(n - 2)
 }
 
-let sequence = map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], fibonacci)
+let sequence = map(range(1, 10), fibonacci)
 
 let main = fn() {
     print("Fibonacci sequence:", sequence)

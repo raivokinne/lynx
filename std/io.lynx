@@ -1,5 +1,5 @@
 let println = fn(x) {
-    if x == null { print("\n"); return null }
+    if x == null { error "io.println: null value" }
     print(x)
     print("\n")
     return null
