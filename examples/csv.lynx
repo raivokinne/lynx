@@ -29,3 +29,6 @@ let parseCSV = fn(csvText) {
 
 let parsedData = parseCSV(csvData)
 
+let main = fn() {
+    print(parsedData)
+}
