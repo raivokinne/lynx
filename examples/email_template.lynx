@@ -1,0 +1,35 @@
+let createTemplate = fn(templateStr) {
+    return {
+        "template": templateStr,
+        "render": fn(data) {
+            let result = templateStr
+
+            // Replace {{key}} with values
+            if (data.name and result.contains("{{name}}")) {
+                let parts = result.split("{{name}}")
+                result = parts.join(data.name)
+            }
+
+            if (data.title and result.contains("{{title}}")) {
+                let parts = result.split("{{title}}")
+                result = parts.join(data.title)
+            }
+
+            if (data.message and result.contains("{{message}}")) {
+                let parts = result.split("{{message}}")
+                result = parts.join(data.message)
+            }
+
+            return result
+        }
+    }
+}
+
+let emailTemplate = createTemplate("Hello {{name}},\n\n{{message}}\n\nBest regards,\nThe {{title}} Team")
+let renderedEmail = emailTemplate.render({
+    "name": "Alice",
+    "message": "Welcome to our platform!",
+    "title": "Lynx"
+})
+
+print(renderedEmail)

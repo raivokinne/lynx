@@ -165,8 +165,8 @@ export default function Home() {
                                 {isRunning ? (
                                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black"></div>
                                 ) : (
-                                    <Play size={20} className="transition-transform duration-200 group-hover:translate-x-0.5" />
-                                )}
+                                        <Play size={20} className="transition-transform duration-200 group-hover:translate-x-0.5" />
+                                    )}
                                 <span className="relative z-10">{isRunning ? 'Izpildās…' : 'Kompilēt un Palaist'}</span>
                                 {!isRunning && (
                                     <div className="absolute inset-0 rounded-2xl bg-white/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -249,9 +249,9 @@ export default function Home() {
                                     <div className="flex items-center gap-3">
                                         <div className="flex items-center gap-2">
                                             <div className={`w-3 h-3 rounded-full transition-all duration-300 ${output && !error ? 'bg-white shadow-lg shadow-white/50' :
-                                                error ? 'bg-gray-400 shadow-lg shadow-gray-400/50' :
-                                                    'bg-gray-600'
-                                                }`}></div>
+error ? 'bg-gray-400 shadow-lg shadow-gray-400/50' :
+'bg-gray-600'
+}`}></div>
                                             <h3 className="font-semibold text-gray-200">Konsoles izvade</h3>
                                         </div>
                                     </div>

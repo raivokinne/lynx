@@ -34,6 +34,8 @@ const (
 	LTE = "<="
 	GTE = ">="
 
+	PIPE = "|>"
+
 	AND = "and"
 	OR  = "or"
 
@@ -44,7 +46,6 @@ const (
 
 	// Delimiters
 	COMMA     = ","
-	SEMICOLON = ";"
 	COLON     = ":"
 
 	LPAREN   = "("
@@ -74,6 +75,9 @@ const (
 	SWITCH   = "SWITCH"
 	CASE     = "CASE"
 	DEFAULT  = "DEFAULT"
+	ON       = "ON"
+	CATCH    = "CATCH"
+	ERROR    = "ERROR"
 )
 
 var keywords = map[string]TokenType{
@@ -95,6 +99,9 @@ var keywords = map[string]TokenType{
 	"switch":   SWITCH,
 	"case":     CASE,
 	"default":  DEFAULT,
+	"on":       ON,
+	"catch":    CATCH,
+	"error":    ERROR,
 }
 
 func LookupIdent(ident string) TokenType {

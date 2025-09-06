@@ -81,7 +81,6 @@ func (vr *VarStatement) String() string {
 	if vr.Value != nil {
 		out.WriteString(vr.Value.String())
 	}
-	out.WriteString(";")
 	return out.String()
 }
 
@@ -105,7 +104,6 @@ func (ls *Assignment) String() string {
 	if ls.Value != nil {
 		out.WriteString(ls.Value.String())
 	}
-	out.WriteString(";")
 	return out.String()
 }
 
@@ -537,53 +535,83 @@ func (c *Case) String() string {
 	return out.String()
 }
 
-type ClassStatement struct {
-	Token      token.Token
-	Name       *Identifier
-	Superclass *Identifier
-	Methods    []*Method
+type PipeExpression struct {
+	Token token.Token
+	Left  Expression
+	Right Expression
 }
 
-func (cs *ClassStatement) statementNode()       {}
-func (cs *ClassStatement) TokenLiteral() string { return cs.Token.Literal }
-func (cs *ClassStatement) String() string {
+func (pe *PipeExpression) expressionNode()      {}
+func (pe *PipeExpression) TokenLiteral() string { return pe.Token.Literal }
+func (pe *PipeExpression) String() string {
 	var out bytes.Buffer
-	out.WriteString("class ")
-	out.WriteString(cs.Name.String())
-	if cs.Superclass != nil {
-		out.WriteString(" < ")
-		out.WriteString(cs.Superclass.String())
-	}
-	out.WriteString(" {\n")
-	for _, m := range cs.Methods {
-		out.WriteString(m.String())
-		out.WriteString("\n")
-	}
-	out.WriteString("}")
+	out.WriteString("(")
+	out.WriteString(pe.Left.String())
+	out.WriteString(" |> ")
+	out.WriteString(pe.Right.String())
+	out.WriteString(")")
 	return out.String()
 }
 
-type Method struct {
-	Token      token.Token
-	Name       *Identifier
-	Parameters []*Identifier
-	Body       *BlockStatement
+type Tuple struct {
+	Token    token.Token
+	Elements []Expression
 }
 
-func (m *Method) statementNode()       {}
-func (m *Method) TokenLiteral() string { return m.Token.Literal }
-func (m *Method) String() string {
+func (t *Tuple) expressionNode()      {}
+func (t *Tuple) TokenLiteral() string { return t.Token.Literal }
+func (t *Tuple) String() string {
 	var out bytes.Buffer
-	out.WriteString("fn ")
-	out.WriteString(m.Name.String())
 	out.WriteString("(")
-	for i, p := range m.Parameters {
+	for i, elem := range t.Elements {
 		if i > 0 {
 			out.WriteString(", ")
 		}
-		out.WriteString(p.String())
+		out.WriteString(elem.String())
 	}
-	out.WriteString(") ")
-	out.WriteString(m.Body.String())
+	out.WriteString(")")
+	return out.String()
+}
+
+type ErrorStatement struct {
+	Token token.Token
+	Value Expression
+}
+
+func (es *ErrorStatement) statementNode()       {}
+func (es *ErrorStatement) TokenLiteral() string { return es.Token.Literal }
+func (es *ErrorStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString("error ")
+	out.WriteString(es.Value.String())
+	return out.String()
+}
+
+type CatchStatement struct {
+	Token    token.Token
+	Body     *BlockStatement
+	ErrorVar *Identifier
+	OnBody   *BlockStatement
+}
+
+func (cs *CatchStatement) statementNode()       {}
+func (cs *CatchStatement) TokenLiteral() string { return cs.Token.Literal }
+func (cs *CatchStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString("catch ")
+	out.WriteString(cs.ErrorVar.String())
+	out.WriteString(" {\n")
+	for _, s := range cs.Body.Statements {
+		out.WriteString(s.String())
+		out.WriteString("\n")
+	}
+	out.WriteString("}")
+	out.WriteString("\n")
+	out.WriteString("on {\n")
+	for _, s := range cs.OnBody.Statements {
+		out.WriteString(s.String())
+		out.WriteString("\n")
+	}
+	out.WriteString("}")
 	return out.String()
 }

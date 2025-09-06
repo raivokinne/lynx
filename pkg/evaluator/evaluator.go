@@ -164,6 +164,14 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 		return evalModuleLoad(node, env)
 	case *ast.SwitchStatement:
 		return evalSwitchStatement(node, env)
+	case *ast.PipeExpression:
+		return evalPipeExpression(node, env)
+	case *ast.Tuple:
+		return evalTuple(node, env)
+	case *ast.ErrorStatement:
+		return evalErrorStatement(node, env)
+	case *ast.CatchStatement:
+		return evalCatchStatement(node, env)
 	default:
 		return newError("unknown node type: %T", node)
 	}
@@ -944,6 +952,8 @@ func loadModule(name string, env *object.Env) error {
 
 func loadModuleSource(name string, env *object.Env) ([]byte, error) {
 	possiblePaths := []string{
+		fmt.Sprintf("./std/%s.lynx", name),
+		fmt.Sprintf("/usr/local/lib/lynx/std/%s.lynx", name),
 		fmt.Sprintf("%s/%s.lynx", env.Dir, name),
 	}
 
@@ -1036,4 +1046,61 @@ func evalSwitchStatement(node *ast.SwitchStatement, env *object.Env) object.Obje
 	default:
 		return newError("switch statement not supported on: %s", val.Type())
 	}
+}
+
+func evalPipeExpression(pe *ast.PipeExpression, env *object.Env) object.Object {
+	left := Eval(pe.Left, env)
+	return evalPipeRight(pe.Right, left, env)
+}
+
+func evalPipeRight(right ast.Node, left object.Object, env *object.Env) object.Object {
+	switch rightExpr := right.(type) {
+	case *ast.CallExpression:
+		fn := Eval(rightExpr.Function, env)
+		args := []object.Object{left}
+		for _, arg := range rightExpr.Arguments {
+			args = append(args, Eval(arg, env))
+		}
+		return applyFunction(fn, args)
+	case *ast.Identifier:
+		fn := Eval(rightExpr, env)
+		return applyFunction(fn, []object.Object{left})
+	case *ast.PipeExpression:
+		intermediate := evalPipeRight(rightExpr.Left, left, env)
+		return evalPipeRight(rightExpr.Right, intermediate, env)
+	default:
+		return newError("invalid pipe target: %s", right.String())
+	}
+}
+
+func evalTuple(node *ast.Tuple, env *object.Env) object.Object {
+	elements := make([]object.Object, len(node.Elements))
+	for i, elem := range node.Elements {
+		elements[i] = Eval(elem, env)
+		if isError(elements[i]) {
+			return elements[i]
+		}
+	}
+	tuple := &object.Tuple{Elements: elements}
+	return tuple
+}
+
+func evalErrorStatement(node *ast.ErrorStatement, env *object.Env) object.Object {
+	val := Eval(node.Value, env)
+	if isError(val) {
+		return val
+	}
+	return &object.Error{Message: val.Inspect()}
+}
+
+func evalCatchStatement(catchStmt *ast.CatchStatement, env *object.Env) object.Object {
+	result := Eval(catchStmt.Body, env)
+
+	if errObj, ok := result.(*object.Error); ok && catchStmt.ErrorVar != nil {
+		catchEnv := env.NewEnclosedEnv()
+		catchEnv.Set(catchStmt.ErrorVar.Value, errObj, false)
+		return Eval(catchStmt.OnBody, catchEnv)
+	}
+
+	return result
 }

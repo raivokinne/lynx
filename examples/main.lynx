@@ -1,0 +1,5 @@
+let main = fn(args) {
+    let name = args[0]
+    let age = args[1]
+    print("Hello " ++ name ++ "! You are " ++ age ++ " years old.")
+}

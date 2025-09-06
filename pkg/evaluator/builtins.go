@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"lynx/pkg/object"
+	"math/rand/v2"
 	"net/http"
 	"strings"
 )
@@ -17,6 +18,38 @@ func RegisterBuiltins() {
 	builtins["range"] = &object.Builtin{Fn: builtinRange}
 	builtins["http_get"] = &object.Builtin{Fn: builtinHttpGet}
 	builtins["http_post"] = &object.Builtin{Fn: builtinHttpPost}
+	builtins["random"] = &object.Builtin{Fn: builtinRandom}
+	builtins["read"] = &object.Builtin{Fn: builtinRead}
+	builtins["write"] = &object.Builtin{Fn: builtinWrite}
+}
+
+func builtinRandom(args ...object.Object) object.Object {
+	if len(args) != 0 {
+		return newError("wrong number of arguments. got=%d, want=0", len(args))
+	}
+	return &object.Float{Value: rand.Float64()}
+}
+
+func builtinRead(args ...object.Object) object.Object {
+	if len(args) != 0 {
+		return newError("wrong number of arguments. got=%d, want=0", len(args))
+	}
+	var s string
+	fmt.Scanln(&s)
+	return &object.String{Value: s}
+}
+
+func builtinWrite(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("wrong number of arguments. got=%d, want=1", len(args))
+	}
+	switch arg := args[0].(type) {
+	case *object.String:
+		fmt.Print(arg.Value)
+	default:
+		return newError("argument to write must be STRING, got %T", arg)
+	}
+	return NULL
 }
 
 func builtinLen(args ...object.Object) object.Object {

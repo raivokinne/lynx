@@ -117,8 +117,6 @@ func (l *Lexer) NextToken() token.Token {
 		} else {
 			tok = l.newToken(token.ASSIGN, l.ch)
 		}
-	case ';':
-		tok = l.newToken(token.SEMICOLON, l.ch)
 	case '%':
 		tok = l.newToken(token.MODULOS, l.ch)
 	case '(':
@@ -127,6 +125,19 @@ func (l *Lexer) NextToken() token.Token {
 		tok = l.newToken(token.RPAREN, l.ch)
 	case ',':
 		tok = l.newToken(token.COMMA, l.ch)
+	case '|':
+		if l.peekChar() == '>' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{
+				Type:    token.PIPE,
+				Literal: string(ch) + string(l.ch),
+				Line:    currentLine,
+				Column:  currentColumn,
+			}
+		} else {
+			tok = l.newToken(token.OR, l.ch)
+		}
 	case '+':
 		if l.peekChar() == '+' {
 			ch := l.ch
@@ -254,6 +265,8 @@ func (l *Lexer) NextToken() token.Token {
 			}
 			return tok
 		} else {
+			// fmt.Printf("DEBUG: ILLEGAL character '%c' (U+%04X) at line %d, column %d\n",
+			// 	l.ch, l.ch, l.line, l.column)
 			l.addError(
 				fmt.Sprintf("Unexpected character '%c' (U+%04X)", l.ch, l.ch),
 				"lexical analysis",

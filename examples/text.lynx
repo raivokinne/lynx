@@ -1,0 +1,22 @@
+let text = "Hello, World! Welcome to Lynx programming."
+
+let processText = fn(input) {
+    let upperText = input.upper()
+    let lowerText = input.lower()
+    let length = input.len()
+    let words = input.split(" ")
+    let wordCount = words.len()
+
+    return {
+        "original": input,
+        "upper": upperText,
+        "lower": lowerText,
+        "length": length,
+        "words": words,
+        "wordCount": wordCount
+    }
+}
+
+let result = processText(text)
+
+print(result)

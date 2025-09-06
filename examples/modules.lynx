@@ -1,4 +1,0 @@
-@math(add, pow)
-
-print(math.pow(2, 8));
-

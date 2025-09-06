@@ -56,17 +56,59 @@ func executeFile(filename string, dir string) {
 
 	env := object.New(dir)
 	evaluator.RegisterBuiltins()
+
 	result := evaluator.Eval(program, env)
 
-	switch result := result.(type) {
-	case *object.Error:
-		fmt.Printf("Error: %s\n", result.Message)
+	if errorObj, ok := result.(*object.Error); ok {
+		fmt.Printf("Error: %s\n", errorObj.Message)
 		os.Exit(1)
+	}
+
+	mainObj, exists := env.Get("main")
+	if !exists {
+		fmt.Printf("Error: main function not found\n")
+		os.Exit(1)
+	}
+
+	mainFunc, ok := mainObj.(*object.Function)
+	if !ok {
+		fmt.Printf("Error: main is not a function\n")
+		os.Exit(1)
+	}
+
+	if len(mainFunc.Parameters) > 1 {
+		fmt.Printf("Error: main function takes 1 argument\n")
+		os.Exit(1)
+	}
+
+	args := os.Args[2:]
+	argsArray := make([]object.Object, len(args))
+	for i, arg := range args {
+		argsArray[i] = &object.String{Value: arg}
+	}
+
+	argsObj := &object.Array{Elements: argsArray}
+
+	var mainResult object.Object
+	if len(mainFunc.Parameters) == 0 {
+		mainResult = evaluator.ApplyFunction(mainFunc, []object.Object{})
+	} else {
+		mainResult = evaluator.ApplyFunction(mainFunc, []object.Object{argsObj})
+	}
+
+	switch mainResult := mainResult.(type) {
+	case *object.Error:
+		fmt.Printf("Runtime error in main: %s\n", mainResult.Message)
+		os.Exit(1)
+	case *object.Integer:
+		exitCode := int(mainResult.Value)
+		os.Exit(exitCode)
 	case *object.Return:
-		fmt.Printf("%s\n", result.Value.Inspect())
-	default:
-		if result != evaluator.NULL && result.Type() != object.NULL_OBJ {
-			fmt.Printf("%s\n", result.Inspect())
+		if returnVal, ok := mainResult.Value.(*object.Integer); ok {
+			os.Exit(int(returnVal.Value))
 		}
+		os.Exit(0)
+	default:
+		os.Exit(0)
 	}
 }

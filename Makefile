@@ -1,7 +1,7 @@
 BINARY_NAME = lynx
 MAIN_PACKAGE = ./cmd/lynx
 BUILD_DIR = ./web/server/build
-EXAMPLE ?= test.lynx
+EXAMPLE ?= main.lynx
 
 .PHONY: build clean run install test
 

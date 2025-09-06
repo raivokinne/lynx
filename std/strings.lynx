@@ -1,0 +1,98 @@
+let trim = fn(str) {
+    let start = 0
+    let end = str.len() - 1
+
+    // Find first non-whitespace character
+    while (start <= end and (str[start] == " " or str[start] == "\t" || str[start] == "\n")) {
+        start = start + 1
+    }
+
+    // Find last non-whitespace character
+    while (end >= start and (str[end] == " " or str[end] == "\t" || str[end] == "\n")) {
+        end = end - 1
+    }
+
+    if (start > end) {
+        return ""
+    }
+
+    return str.substr(start, end - start + 1)
+}
+
+let padLeft = fn(str, length, char) {
+    let padding = char or " "
+    let result = str
+    while (result.len() < length) {
+        result = padding.append(result)
+    }
+    return result
+}
+
+let padRight = fn(str, length, char) {
+    let padding = char or " "
+    let result = str
+    while (result.len() < length) {
+        result = result.append(padding)
+    }
+    return result
+}
+
+let startsWith = fn(str, prefix) {
+    if (prefix.len() > str.len()) {
+        return false
+    }
+    return str.substr(0, prefix.len()) == prefix
+}
+
+let endsWith = fn(str, suffix) {
+    if (suffix.len() > str.len()) {
+        return false
+    }
+    let start = str.len() - suffix.len()
+    return str.substr(start, suffix.len()) == suffix
+}
+
+let replace = fn(str, search, replacement) {
+    if (!str.contains(search)) {
+        return str
+    }
+
+    let parts = str.split(search)
+    return parts.join(replacement)
+}
+
+let replaceAll = fn(str, search, replacement) {
+    let result = str
+    while (result.contains(search)) {
+        result = replace(result, search, replacement)
+    }
+    return result
+}
+
+let repeat = fn(str, count) {
+    let result = ""
+    let i = 0
+    while (i < count) {
+        result = result.append(str)
+        i = i + 1
+    }
+    return result
+}
+
+let reverse = fn(str) {
+    let chars = []
+    let i = 0
+    while (i < str.len()) {
+        chars = chars.push(str.substr(i, 1))
+        i = i + 1
+    }
+
+    let reversed = []
+    let j = chars.len() - 1
+    while (j >= 0) {
+        reversed = reversed.push(chars[j])
+        j = j - 1
+    }
+
+    return reversed.join("")
+}

@@ -1,0 +1,31 @@
+let url = "https://example.com/path/to/resource?param1=value1&param2=value2"
+
+let parseURL = fn(urlString) {
+    let protocolParts = urlString.split("://")
+    let protocol = protocolParts.first()
+    let rest = protocolParts.last()
+
+    let domainPath = rest.split("/")
+    let domain = domainPath.first()
+    let pathParts = domainPath.rest()
+
+    let path = "/" ++ pathParts.join("/")
+
+    let queryString = ""
+    if (path.contains("?")) {
+        let pathQuery = path.split("?")
+        path = pathQuery.first()
+        queryString = pathQuery.last()
+    }
+
+    return {
+        "protocol": protocol,
+        "domain": domain,
+        "path": path,
+        "query": queryString
+    }
+}
+
+let parsedURL = parseURL(url)
+
+print(parsedURL)

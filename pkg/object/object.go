@@ -15,21 +15,31 @@ type Object interface {
 }
 
 const (
-	INTEGER_OBJ  = "INTEGER"
-	FLOAT_OBJ    = "FLOAT"
-	BOOLEAN_OBJ  = "BOOLEAN"
-	NULL_OBJ     = "NULL"
-	RETURN_OBJ   = "RETURN"
-	FUNCTION_OBJ = "FUNCTION"
-	STRING_OBJ   = "STRING"
-	ARRAY_OBJ    = "ARRAY"
-	HASH_OBJ     = "HASH"
-	BUILTIN_OBJ  = "BUILTIN"
-	ERROR_OBJ    = "ERROR"
-	BREAK_OBJ    = "BREAK"
-	CONTINUE_OBJ = "CONTINUE"
-	MODULE_OBJ   = "MODULE"
+	INTEGER_OBJ   = "INTEGER"
+	FLOAT_OBJ     = "FLOAT"
+	BOOLEAN_OBJ   = "BOOLEAN"
+	NULL_OBJ      = "NULL"
+	RETURN_OBJ    = "RETURN"
+	FUNCTION_OBJ  = "FUNCTION"
+	STRING_OBJ    = "STRING"
+	ARRAY_OBJ     = "ARRAY"
+	HASH_OBJ      = "HASH"
+	BUILTIN_OBJ   = "BUILTIN"
+	ERROR_OBJ     = "ERROR"
+	BREAK_OBJ     = "BREAK"
+	CONTINUE_OBJ  = "CONTINUE"
+	MODULE_OBJ    = "MODULE"
+	TUPLE_OBJ     = "TUPLE"
+	EXCEPTION_OBJ = "EXCEPTION"
+	MAIN_OBJ      = "MAIN"
 )
+
+type Main struct {
+	Fn func()
+}
+
+func (m *Main) Type() ObjectType { return MAIN_OBJ }
+func (m *Main) Inspect() string  { return "main function" }
 
 type Float struct {
 	Value float64
@@ -192,3 +202,28 @@ type Module struct {
 
 func (m *Module) Type() ObjectType { return "MODULE" }
 func (m *Module) Inspect() string  { return fmt.Sprintf("<module %s>", m.Name) }
+
+type Tuple struct {
+	Elements []Object
+}
+
+func (t *Tuple) Type() ObjectType { return TUPLE_OBJ }
+func (t *Tuple) Inspect() string {
+	var out string
+	elements := []string{}
+	for _, e := range t.Elements {
+		elements = append(elements, e.Inspect())
+	}
+	out += fmt.Sprintf("(%s)", strings.Join(elements, ", "))
+	return out
+}
+
+type Exception struct {
+	Value Error
+}
+
+func (e *Exception) Type() ObjectType { return EXCEPTION_OBJ }
+func (e *Exception) Inspect() string {
+	return e.Value.Inspect()
+}
+

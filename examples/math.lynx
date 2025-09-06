@@ -1,5 +1,0 @@
-let pow = fn(x, y) {
-    return x ^ y;
-};
-
-print(pow(2, 8));

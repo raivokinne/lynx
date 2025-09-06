@@ -1,0 +1,78 @@
+let PI = 3.14159265359
+let E = 2.71828182846
+
+let abs = fn(x) {
+    if x < 0 {
+        return -x
+    }
+    return x
+}
+
+let max = fn(a, b) {
+    if a > b {
+        return a
+    }
+    return b
+}
+
+let min = fn(a, b) {
+    if a < b {
+        return a
+    }
+    return b
+}
+
+let pow = fn(base, exp) {
+    if exp == 0 {
+        return 1
+    }
+    let result = 1
+    let i = 0
+    while i < exp {
+        result = result * base
+        i = i + 1
+    }
+    return result
+}
+
+let sqrt = fn(x) {
+    if x < 0 {
+        error "Cannot compute square root of negative number"
+    }
+    if x == 0 {
+        return 0
+    }
+    // Newton's method
+    let guess = x / 2
+    let precision = 0.000001
+    while true {
+        let newGuess = (guess + x / guess) / 2
+        if abs(newGuess - guess) < precision {
+            return newGuess
+        }
+        guess = newGuess
+    }
+}
+
+let factorial = fn(n) {
+    if n < 0 {
+        error "Factorial of negative number undefined"
+    }
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+let gcd = fn(a, b) {
+    while b != 0 {
+        let temp = b
+        b = a % b
+        a = temp
+    }
+    return a
+}
+
+let lcm = fn(a, b) {
+    return abs(a * b) / gcd(a, b)
+}
