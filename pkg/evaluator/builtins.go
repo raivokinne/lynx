@@ -7,6 +7,7 @@ import (
 	"math/rand/v2"
 	"net/http"
 	"strings"
+	"time"
 )
 
 var builtins = map[string]*object.Builtin{}
@@ -21,6 +22,20 @@ func RegisterBuiltins() {
 	builtins["random"] = &object.Builtin{Fn: builtinRandom}
 	builtins["read"] = &object.Builtin{Fn: builtinRead}
 	builtins["write"] = &object.Builtin{Fn: builtinWrite}
+	builtins["sleep"] = &object.Builtin{Fn: builtinSleep}
+}
+
+func builtinSleep(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("wrong number of arguments. got=%d, want=1", len(args))
+	}
+	switch arg := args[0].(type) {
+	case *object.Integer:
+		time.Sleep(time.Duration(arg.Value) * time.Millisecond)
+	default:
+		return newError("argument to sleep must be an integer")
+	}
+	return NULL
 }
 
 func builtinRandom(args ...object.Object) object.Object {

@@ -4,7 +4,6 @@ let createTemplate = fn(templateStr) {
         "render": fn(data) {
             let result = templateStr
 
-            // Replace {{key}} with values
             if (data.name and result.contains("{{name}}")) {
                 let parts = result.split("{{name}}")
                 result = parts.join(data.name)

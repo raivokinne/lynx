@@ -1,15 +1,17 @@
 let bubbleSort = fn(arr) {
-    let n = len(arr);
+    let n = len(arr)
     for i in range(0, n) {
         for j in range(0, n - i - 1) {
             if arr[j] > arr[j+1] {
-                let tmp = arr[j];
-                arr[j] = arr[j+1];
-                arr[j+1] = tmp;
+                let tmp = arr[j]
+                arr[j] = arr[j+1]
+                arr[j+1] = tmp
             }
         }
     }
-    return arr;
+    return arr
 }
 
-print(bubbleSort([5,3,8,1]));
+let main = fn() {
+    print(bubbleSort([3, 1, 6, 2, 4, 5]))
+}

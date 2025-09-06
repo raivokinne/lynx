@@ -297,21 +297,21 @@ app.use((_req, res) => {
 });
 
 initDb()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`🚀 Compiler server running on port ${PORT}`);
-      console.log(`📁 Temp directory: ${CONFIG.TEMP_DIR}`);
-      console.log(`⚡ Compiler path: ${CONFIG.COMPILER_PATH}`);
-      console.log(`⏱️  Execution timeout: ${CONFIG.EXECUTION_TIMEOUT}ms`);
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`🚀 Compiler server running on port ${PORT}`);
+            console.log(`📁 Temp directory: ${CONFIG.TEMP_DIR}`);
+            console.log(`⚡ Compiler path: ${CONFIG.COMPILER_PATH}`);
+            console.log(`⏱️  Execution timeout: ${CONFIG.EXECUTION_TIMEOUT}ms`);
 
-      cleanupTempFiles();
-      setInterval(cleanupTempFiles, 30 * 60 * 1000);
+            cleanupTempFiles();
+            setInterval(cleanupTempFiles, 30 * 60 * 1000);
+        });
+    })
+    .catch((err) => {
+        console.error("Failed to initialize database:", err);
+        process.exit(1);
     });
-  })
-  .catch((err) => {
-    console.error("Failed to initialize database:", err);
-    process.exit(1);
-  });
 
 process.on("SIGINT", () => {
   console.log("\n🛑 Shutting down server...");

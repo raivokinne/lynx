@@ -1,0 +1,16 @@
+let println = fn(x) {
+    if x == null { print("\n"); return null }
+    print(x)
+    print("\n")
+    return null
+}
+
+let writeStdout = fn(x) {
+    if write == null { error "io.writeStdout not available" }
+    write(x)
+}
+
+let readStdin = fn() {
+    if read == null { error "io.readStdin not available" }
+    return read()
+}
