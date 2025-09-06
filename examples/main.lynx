@@ -1,31 +1,15 @@
-let map = fn(arr, func) {
-    let result = []
-    let i = 0
-    while i < arr.len() {
-        result = result.push(func(arr[i]))
-        i = i + 1
+@arrays(map)
+
+let fibonacci = fn(n) {
+    if n <= 1 {
+        return n
     }
-    return result
+    return fibonacci(n - 1) + fibonacci(n - 2)
 }
 
-let filter = fn(arr, predicate) {
-    let result = []
-    let i = 0
-    while i < arr.len() {
-        if predicate(arr[i]) {
-            result = result.push(arr[i])
-        }
-        i = i + 1
-    }
-    return result
-}
+let sequence = map([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], fibonacci)
 
 let main = fn() {
-    let arr = [1, 2, 3, 4, 5]
-
-    let result = arr
-        |> map(fn(x) { return x ^ x })
-        |> filter(fn(x) { return x % 2 == 0 })
-
-    print(result)
+    print("Fibonacci sequence:", sequence)
 }
+
