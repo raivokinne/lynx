@@ -1,34 +1,34 @@
 let csvData = "name,age,city\nAlice,25,New York\nBob,30,Chicago\nCharlie,35,Seattle"
 
 let parseCSV = fn(csvText) {
-    let lines = csvText.split("\n")
-        let headers = lines.first().split(",")
-        let dataLines = lines.rest()
+let lines = csvText.split("\n")
+let headers = lines.first().split(",")
+let dataLines = lines.rest()
 
-        let records = []
-        let i = 0
-        while (i < dataLines.len()) {
-            let line = dataLines[i]
-                let values = line.split(",")
+let records = []
+let i = 0
+while (i < dataLines.len()) {
+let line = dataLines[i]
+let values = line.split(",")
 
-                let record = {}
-            let j = 0
-                while (j < headers.len()) {
-                    let header = headers[j]
-                        let value = values[j]
-                        record[header] = value
-                        j = j + 1
-                }
+let record = {}
+let j = 0
+while (j < headers.len()) {
+let header = headers[j]
+let value = values[j]
+record[header] = value
+j = j + 1
+}
 
-            records = records.push(record)
-                i = i + 1
-        }
+records = records.push(record)
+i = i + 1
+}
 
-    return {"headers": headers, "records": records}
+return {"headers": headers, "records": records}
 }
 
 let parsedData = parseCSV(csvData)
 
-    let main = fn() {
-        print(parsedData)
-    }
+let main = fn() {
+print(parsedData)
+}

@@ -13,6 +13,8 @@ Prism.languages.lynx = {
         pattern: /"(?:\\.|[^"\\])*"/,
         greedy: true,
     },
+
+
     number: /\b\d+(?:\.\d+)?\b/,
     keyword: /\b(?:if|else|for|in|while|return|break|continue|const|let|fn|true|false)\b/,
     boolean: /\b(?:true|false)\b/,

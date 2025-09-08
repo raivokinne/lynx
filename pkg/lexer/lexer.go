@@ -138,8 +138,8 @@ func (l *Lexer) NextToken() token.Token {
 		} else {
 			tok = l.newToken(token.OR, l.ch)
 		}
-	case '+':
-		if l.peekChar() == '+' {
+	case '#':
+		if l.peekChar() == '~' {
 			ch := l.ch
 			l.readChar()
 			tok = token.Token{
@@ -148,9 +148,11 @@ func (l *Lexer) NextToken() token.Token {
 				Line:    currentLine,
 				Column:  currentColumn,
 			}
-		} else {
-			tok = l.newToken(token.PLUS, l.ch)
 		}
+	case '$':
+		tok = l.newToken(token.SQUARE, l.ch)
+	case '+':
+		tok = l.newToken(token.PLUS, l.ch)
 	case '-':
 		tok = l.newToken(token.MINUS, l.ch)
 	case '!':

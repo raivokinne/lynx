@@ -31,15 +31,7 @@ const (
 	MODULE_OBJ    = "MODULE"
 	TUPLE_OBJ     = "TUPLE"
 	EXCEPTION_OBJ = "EXCEPTION"
-	MAIN_OBJ      = "MAIN"
 )
-
-type Main struct {
-	Fn func()
-}
-
-func (m *Main) Type() ObjectType { return MAIN_OBJ }
-func (m *Main) Inspect() string  { return "main function" }
 
 type Float struct {
 	Value float64

@@ -17,6 +17,7 @@ const (
 	LESSEQ      // <=
 	GREATEREQ   // >=
 	CONCAT      // ++
+	SQUARE      // _/
 	AND         // and
 	OR          // or
 	SUM         // +
@@ -44,6 +45,7 @@ var precedences = map[token.TokenType]int{
 	token.AND:      AND,
 	token.OR:       OR,
 	token.CONCAT:   CONCAT,
+	token.SQUARE:   SQUARE,
 	token.PIPE:     PIPE,
 }
 
@@ -99,6 +101,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.FLOAT, p.parseFloatLiteral)
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
+	p.registerPrefix(token.SQUARE, p.parsePrefixExpression)
 	p.registerPrefix(token.TRUE, p.parseBoolean)
 	p.registerPrefix(token.FALSE, p.parseBoolean)
 	p.registerPrefix(token.IF, p.parseIfExpression)
@@ -171,10 +174,6 @@ func (p *Parser) ParseProgram() *ast.Program {
 		stmt := p.parseStatement()
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
-		}
-		if len(p.errors) > 10 {
-			p.addError("ParserError", "Too many parse errors, stopping")
-			break
 		}
 		p.nextToken()
 	}

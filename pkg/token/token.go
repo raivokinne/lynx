@@ -28,6 +28,7 @@ const (
 	SLASH    = "/"
 	MODULOS  = "%"
 	POWER    = "^"
+	SQUARE   = "$"
 
 	LT  = "<"
 	GT  = ">"
@@ -39,7 +40,7 @@ const (
 	AND = "and"
 	OR  = "or"
 
-	CONCAT = "++"
+	CONCAT = "#~"
 
 	EQ     = "=="
 	NOT_EQ = "!="

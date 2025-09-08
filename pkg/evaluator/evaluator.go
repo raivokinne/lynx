@@ -253,9 +253,19 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
 		return evalBangOperatorExpression(right)
 	case "-":
 		return evalMinusPrefixOperatorExpression(right)
+	case "$":
+		return evalSquarePrefixOperatorExpression(right)
 	default:
 		return newError("unknown operator: %s%s", operator, right.Type())
 	}
+}
+
+func evalSquarePrefixOperatorExpression(right object.Object) object.Object {
+	if right.Type() != object.INTEGER_OBJ {
+		return newError("unknown operator: -%s", right.Type())
+	}
+	value := right.(*object.Integer).Value
+	return &object.Float{Value: math.Sqrt(float64(value))}
 }
 
 func evalBangOperatorExpression(right object.Object) object.Object {
@@ -281,7 +291,7 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 
 func evalInfixExpression(operator string, left, right object.Object) object.Object {
 	switch {
-	case operator == "++":
+	case operator == "#~":
 		return evalConcatExpression(left, right)
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
@@ -328,6 +338,8 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 		return &object.Integer{Value: leftVal % rightVal}
 	case "^":
 		return &object.Integer{Value: int64(math.Pow(float64(leftVal), float64(rightVal)))}
+	// case "$":
+	// 	return &object.Integer{Value: int64(math.Sqrt(float64(rightVal)))}
 	case "/":
 		if rightVal == 0 {
 			return newError("division by zero")
