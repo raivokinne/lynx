@@ -40,7 +40,7 @@ const (
 	AND = "and"
 	OR  = "or"
 
-	CONCAT = "#~"
+	CONCAT = "++"
 
 	EQ     = "=="
 	NOT_EQ = "!="

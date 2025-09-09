@@ -1,11 +1,13 @@
 package evaluator
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"lynx/pkg/object"
 	"math/rand/v2"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -23,6 +25,16 @@ func RegisterBuiltins() {
 	builtins["read"] = &object.Builtin{Fn: builtinRead}
 	builtins["write"] = &object.Builtin{Fn: builtinWrite}
 	builtins["sleep"] = &object.Builtin{Fn: builtinSleep}
+	builtins["readLine"] = &object.Builtin{Fn: builtinReadLine}
+}
+
+func builtinReadLine(args ...object.Object) object.Object {
+	if len(args) != 0 {
+		return newError("wrong number of arguments. got=%d, want=0", len(args))
+	}
+	reader := bufio.NewReader(os.Stdin)
+	text, _ := reader.ReadString('\n')
+	return &object.String{Value: text}
 }
 
 func builtinSleep(args ...object.Object) object.Object {

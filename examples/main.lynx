@@ -1,9 +1,1 @@
-const main = fn() {
-    print(add(1)(1))
-}
-
-let add = fn(x) {
-    fn (y) {
-       return x + y
-    }
-}
+print("Hello, " ++ "World!")
