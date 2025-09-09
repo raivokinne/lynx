@@ -589,10 +589,8 @@ let repl = fn() {
     }
 }
 
-let main = fn() {
-    repl()
-    println("Goodbye!")
-}
+repl()
+println("Goodbye!")
 ```
 
 ## Performance
