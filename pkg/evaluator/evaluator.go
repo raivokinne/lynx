@@ -172,6 +172,8 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 		return evalErrorStatement(node, env)
 	case *ast.CatchStatement:
 		return evalCatchStatement(node, env)
+	case *ast.Null:
+		return &object.Null{}
 	default:
 		return newError("unknown node type: %T", node)
 	}

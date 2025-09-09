@@ -386,45 +386,6 @@ let upper = upper(clean)
 let replaced = replace(clean, "World", "Lynx")
 ```
 
-#### `@io` - Input/Output Operations
-```lynx
-@io(readFile, writeFile, readLines, appendFile, fileExists, deleteFile)
-
-let content = readFile("data.txt")
-let lines = readLines("input.txt")
-writeFile("output.txt", "Hello, World!")
-
-if fileExists("config.json") {
-    let config = readFile("config.json")
-    // Process configuration
-}
-```
-
-#### `@net` - Network Operations
-```lynx
-@net(httpGet, httpPost, parseUrl, encodeUrl)
-
-let response = httpGet("https://api.example.com/data")
-let result = httpPost("https://api.example.com/submit", {"key": "value"})
-```
-
-#### `@test` - Testing Utilities
-```lynx
-@test(assertEqual, assertNotEqual, assertTrue, assertFalse, assertNil, describe, it)
-
-describe("Math operations", fn() {
-    it("should add numbers correctly", fn() {
-        assertEqual(add(2, 3), 5)
-        assertEqual(add(-1, 1), 0)
-    })
-
-    it("should handle division", fn() {
-        assertEqual(divide(10, 2), 5)
-        assertTrue(divide(1, 0) == null) // Should handle error
-    })
-})
-```
-
 ## Examples
 
 ### 1. Fibonacci Sequence
@@ -458,10 +419,8 @@ let fibonacciIter = fn(n) {
     return b
 }
 
-let main = fn() {
-    let sequence = map(range(0, 10), fibonacciIter)
-    println("Fibonacci sequence:", sequence)
-}
+let sequence = map(range(0, 10), fibonacciIter)
+println("Fibonacci sequence:", sequence)
 ```
 
 ### 2. Data Processing Pipeline
@@ -481,17 +440,15 @@ let processUserData = fn(rawData) {
         |> map(fn(user) { user.name })                   // Extract names only
 }
 
-let main = fn() {
-    let users = [
-        {"name": "  alice  ", "age": 25, "active": true},
-        {"name": "bob", "age": 17, "active": true},
-        {"name": "charlie", "age": 30, "active": false},
-        {"name": "diana", "age": 28, "active": true}
-    ]
+let users = [
+    {"name": "  alice  ", "age": 25, "active": true},
+    {"name": "bob", "age": 17, "active": true},
+    {"name": "charlie", "age": 30, "active": false},
+    {"name": "diana", "age": 28, "active": true}
+]
 
-    let processedNames = processUserData(users)
-    println("Processed users:", processedNames)
-}
+let processedNames = processUserData(users)
+println("Processed users:", processedNames)
 ```
 
 ### 3. File Processing with Error Handling
@@ -526,13 +483,11 @@ let processLogFile = fn(inputFile, outputFile) {
     }
 }
 
-let main = fn() {
-    let success = processLogFile("input.log", "output.log")
-    if success {
-        println("File processing completed")
-    } else {
-        println("File processing failed")
-    }
+let success = processLogFile("input.log", "output.log")
+if success {
+    println("File processing completed")
+} else {
+    println("File processing failed")
 }
 ```
 
@@ -564,15 +519,14 @@ let fetchUserPosts = fn(userId) {
     }
 }
 
-let main = fn() {
-    let posts = fetchUserPosts(1)
-    println("Found", len(posts), "posts")
+let posts = fetchUserPosts(1)
 
-    for post in posts {
-        println("Post", post.id, ":", post.title)
-        println("Word count:", post.wordCount)
-        println("---")
-    }
+println("Found", len(posts), "posts")
+
+for post in posts {
+    println("Post", post.id, ":", post.title)
+    println("Word count:", post.wordCount)
+    println("---")
 }
 ```
 

@@ -18,6 +18,7 @@ const (
 	INT   = "INT"    // 1343456
 	FLOAT = "FLOAT"  // 3.14, .5, 1e-10
 	STR   = "STRING" // "foobar"
+	NULL  = "NULL"   // null
 
 	// Operators
 	ASSIGN   = "="
@@ -103,6 +104,7 @@ var keywords = map[string]TokenType{
 	"on":       ON,
 	"catch":    CATCH,
 	"error":    ERROR,
+	"null":     NULL,
 }
 
 func LookupIdent(ident string) TokenType {

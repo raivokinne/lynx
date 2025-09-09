@@ -11,6 +11,7 @@ import (
 const (
 	_ int = iota
 	LOWEST
+	NULL        // null
 	PIPE        // |>
 	LESSGREATER // > or <
 	EQUALS      // ==
@@ -47,6 +48,7 @@ var precedences = map[token.TokenType]int{
 	token.CONCAT:   CONCAT,
 	token.SQUARE:   SQUARE,
 	token.PIPE:     PIPE,
+	token.NULL:     NULL,
 }
 
 type ParseError struct {
@@ -111,6 +113,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
 	p.registerPrefix(token.LPAREN, p.parseTuple)
+	p.registerPrefix(token.NULL, p.parseNull)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -943,6 +946,10 @@ func (p *Parser) parseTuple() ast.Expression {
 	exp := &ast.Tuple{Token: p.curToken}
 	exp.Elements = p.parseExpressionList(token.RPAREN)
 	return exp
+}
+
+func (p *Parser) parseNull() ast.Expression {
+	return &ast.Null{Token: p.curToken}
 }
 
 func (p *Parser) curTokenIs(t token.TokenType) bool {
