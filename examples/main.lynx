@@ -1,7 +1,2 @@
-let add = fn(a, b) {
-    a + b
-}
+_print(y)
 
-let result = add(1, 2)
-
-print(result)

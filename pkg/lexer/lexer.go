@@ -227,6 +227,15 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Line = currentLine
 			tok.Column = currentColumn
 			return tok
+		} else if l.peekChar() == '.' {
+			if l.peekChar() == '.' {
+				l.readChar()
+				tok.Type = token.SPREAD
+				tok.Literal = "..."
+				tok.Line = currentLine
+				tok.Column = currentColumn
+				return tok
+			}
 		} else {
 			tok = l.newToken(token.DOT, l.ch)
 		}
@@ -419,6 +428,7 @@ func (l *Lexer) readString() string {
 		)
 	}
 	result := l.processEscapeSequences(l.input[position:l.position])
+	// result := l.input[position:l.position]
 	if l.ch == '"' {
 		l.readChar()
 	}
@@ -449,16 +459,18 @@ func (l *Lexer) readCharLiteral() string {
 		return ""
 	}
 	result := l.processEscapeSequences(l.input[position:l.position])
+	// result := l.input[position:l.position]
 	l.readChar()
 	return result
 }
 
 func (l *Lexer) processEscapeSequences(s string) string {
 	result := make([]rune, 0, len(s))
+	runes := []rune(s)
 
-	for i, r := range s {
-		if r == '\\' && i+1 < len(s) {
-			next := rune(s[i+1])
+	for i := 0; i < len(runes); i++ {
+		if runes[i] == '\\' && i+1 < len(runes) {
+			next := runes[i+1]
 			switch next {
 			case 'n':
 				result = append(result, '\n')
@@ -475,13 +487,12 @@ func (l *Lexer) processEscapeSequences(s string) string {
 			case '0':
 				result = append(result, '\000')
 			default:
-				result = append(result, r, next)
+				result = append(result, runes[i], next)
 			}
 			i++
 		} else {
-			result = append(result, r)
+			result = append(result, runes[i])
 		}
 	}
-
 	return string(result)
 }

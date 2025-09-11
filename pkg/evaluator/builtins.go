@@ -8,6 +8,7 @@ import (
 	"math/rand/v2"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -15,17 +16,63 @@ import (
 var builtins = map[string]*object.Builtin{}
 
 func RegisterBuiltins() {
-	builtins["print"] = &object.Builtin{Fn: builtinPrint}
+	builtins["_print"] = &object.Builtin{Fn: builtinPrint}
 	builtins["len"] = &object.Builtin{Fn: builtinLen}
-	builtins["prompt"] = &object.Builtin{Fn: builtinPrompt}
 	builtins["range"] = &object.Builtin{Fn: builtinRange}
-	builtins["http_get"] = &object.Builtin{Fn: builtinHttpGet}
-	builtins["http_post"] = &object.Builtin{Fn: builtinHttpPost}
-	builtins["random"] = &object.Builtin{Fn: builtinRandom}
-	builtins["read"] = &object.Builtin{Fn: builtinRead}
-	builtins["write"] = &object.Builtin{Fn: builtinWrite}
-	builtins["sleep"] = &object.Builtin{Fn: builtinSleep}
-	builtins["readLine"] = &object.Builtin{Fn: builtinReadLine}
+	builtins["_http_get"] = &object.Builtin{Fn: builtinHttpGet}
+	builtins["_http_post"] = &object.Builtin{Fn: builtinHttpPost}
+	builtins["_random"] = &object.Builtin{Fn: builtinRandom}
+	builtins["_read"] = &object.Builtin{Fn: builtinRead}
+	builtins["_write"] = &object.Builtin{Fn: builtinWrite}
+	builtins["_sleep"] = &object.Builtin{Fn: builtinSleep}
+	builtins["_readLine"] = &object.Builtin{Fn: builtinReadLine}
+	builtins["int"] = &object.Builtin{Fn: builtinInt}
+	builtins["float"] = &object.Builtin{Fn: builtinFloat}
+	builtins["str"] = &object.Builtin{Fn: builtinStr}
+}
+
+func builtinStr(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("wrong number of arguments. got=%d, want=1", len(args))
+	}
+	switch arg := args[0].(type) {
+	case *object.String:
+		return &object.String{Value: arg.Value}
+	default:
+		return newError("argument to `str` must be a string")
+	}
+}
+
+func builtinInt(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("wrong number of arguments. got=%d, want=1", len(args))
+	}
+	switch arg := args[0].(type) {
+	case *object.String:
+		i, err := strconv.Atoi(arg.Value)
+		if err != nil {
+			return newError("%s", err.Error())
+		}
+		return &object.Integer{Value: int64(i)}
+	default:
+		return newError("argument to `int` must be a string")
+	}
+}
+
+func builtinFloat(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("wrong number of arguments. got=%d, want=1", len(args))
+	}
+	switch arg := args[0].(type) {
+	case *object.String:
+		f, err := strconv.ParseFloat(arg.Value, 64)
+		if err != nil {
+			return newError("%s", err.Error())
+		}
+		return &object.Float{Value: f}
+	default:
+		return newError("argument to `float` must be a string")
+	}
 }
 
 func builtinReadLine(args ...object.Object) object.Object {
@@ -34,6 +81,8 @@ func builtinReadLine(args ...object.Object) object.Object {
 	}
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
+	text = strings.TrimRight(text, "\r\n")
+
 	return &object.String{Value: text}
 }
 
@@ -107,20 +156,6 @@ func builtinRange(args ...object.Object) object.Object {
 		arr = append(arr, &object.Integer{Value: i})
 	}
 	return &object.Array{Elements: arr}
-}
-
-func builtinPrompt(args ...object.Object) object.Object {
-	if len(args) != 1 {
-		return newError("wrong number of arguments. got=%d, want=1", len(args))
-	}
-	msg, ok := args[0].(*object.String)
-	if !ok {
-		return newError("argument to `prompt` must be a string")
-	}
-	fmt.Print(msg.Value)
-	var s string
-	fmt.Scanln(&s)
-	return &object.String{Value: s}
 }
 
 func builtinHttpGet(args ...object.Object) object.Object {

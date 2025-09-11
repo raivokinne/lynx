@@ -101,8 +101,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 	p.registerPrefix(token.FLOAT, p.parseFloatLiteral)
-	p.registerPrefix(token.BANG, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
+	p.registerPrefix(token.BANG, p.parsePrefixExpression)
 	p.registerPrefix(token.SQUARE, p.parsePrefixExpression)
 	p.registerPrefix(token.TRUE, p.parseBoolean)
 	p.registerPrefix(token.FALSE, p.parseBoolean)
@@ -114,6 +114,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
 	p.registerPrefix(token.LPAREN, p.parseTuple)
 	p.registerPrefix(token.NULL, p.parseNull)
+	p.registerPrefix(token.SPREAD, p.parseSpread)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -758,11 +759,17 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 	p.nextToken()
 	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 	identifiers = append(identifiers, ident)
-	for p.peekTokenIs(token.COMMA) {
-		p.nextToken()
+	if p.peekTokenIs(token.SPREAD) {
 		p.nextToken()
 		ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 		identifiers = append(identifiers, ident)
+	} else {
+		for p.peekTokenIs(token.COMMA) {
+			p.nextToken()
+			p.nextToken()
+			ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+			identifiers = append(identifiers, ident)
+		}
 	}
 	if !p.expectPeek(token.RPAREN) {
 		p.addError(
@@ -950,6 +957,13 @@ func (p *Parser) parseTuple() ast.Expression {
 
 func (p *Parser) parseNull() ast.Expression {
 	return &ast.Null{Token: p.curToken}
+}
+
+func (p *Parser) parseSpread() ast.Expression {
+	exp := &ast.Spread{Token: p.curToken}
+	p.nextToken()
+	exp.Expression = p.parseExpression(LOWEST)
+	return exp
 }
 
 func (p *Parser) curTokenIs(t token.TokenType) bool {

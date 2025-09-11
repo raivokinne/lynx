@@ -30,6 +30,7 @@ const (
 	MODULOS  = "%"
 	POWER    = "^"
 	SQUARE   = "$"
+	SPREAD   = "..."
 
 	LT  = "<"
 	GT  = ">"
@@ -47,8 +48,8 @@ const (
 	NOT_EQ = "!="
 
 	// Delimiters
-	COMMA     = ","
-	COLON     = ":"
+	COMMA = ","
+	COLON = ":"
 
 	LPAREN   = "("
 	RPAREN   = ")"

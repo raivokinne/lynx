@@ -8,6 +8,25 @@ let abs = fn(x) {
     return x
 }
 
+let add = fn(a, b) {
+    return a + b
+}
+
+let sub = fn(a, b) {
+    return a - b
+}
+
+let mul = fn(a, b) {
+    return a * b
+}
+
+let div = fn(a, b) {
+    if b == 0 {
+        error "Division by zero"
+    }
+    return a / b
+}
+
 let max = fn(a, b) {
     if a > b {
         return a

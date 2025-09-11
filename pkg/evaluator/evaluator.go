@@ -140,7 +140,6 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 				return object
 			}
 			return evalPropertyAssignment(object, target.Property.Value, val)
-
 		default:
 			return newError("invalid assignment target: %T", node.Name)
 		}
@@ -174,6 +173,8 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 		return evalCatchStatement(node, env)
 	case *ast.Null:
 		return &object.Null{}
+	case *ast.Spread:
+		return evalSpread(node, env)
 	default:
 		return newError("unknown node type: %T", node)
 	}
@@ -1125,4 +1126,12 @@ func evalCatchStatement(catchStmt *ast.CatchStatement, env *object.Env) object.O
 	}
 
 	return result
+}
+
+func evalSpread(node *ast.Spread, env *object.Env) object.Object {
+	val := Eval(node.Expression, env)
+	if isError(val) {
+		return val
+	}
+	return val
 }

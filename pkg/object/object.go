@@ -218,4 +218,3 @@ func (e *Exception) Type() ObjectType { return EXCEPTION_OBJ }
 func (e *Exception) Inspect() string {
 	return e.Value.Inspect()
 }
-

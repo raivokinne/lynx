@@ -8,7 +8,7 @@ import (
 )
 
 func TestParser(t *testing.T) {
-	l := lexer.New("let a = 1;")
+	l := lexer.New("let a = 1")
 	p := parser.New(l)
 	program := p.ParseProgram()
 
