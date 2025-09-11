@@ -19,6 +19,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	if len(args) > 1 {
+		fmt.Printf("Too many arguments\n")
+		os.Exit(1)
+	}
+
 	dir := filepath.Dir(absPath)
 	executeFile(filename, dir)
 }

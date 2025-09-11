@@ -54,7 +54,7 @@ FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 
 const CONFIG = {
   COMPILER_PATH: "./build/lynx",
-  FILE_EXTENSION: ".go",
+  FILE_EXTENSION: ".lynx",
   EXECUTION_TIMEOUT: 10000,
   MAX_FILE_SIZE: 1024 * 1024,
   TEMP_DIR: "./temp",

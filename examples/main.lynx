@@ -1,1 +1,7 @@
-print(null)
+let add = fn(a, b) {
+    a + b
+}
+
+let result = add(1, 2)
+
+print(result)
