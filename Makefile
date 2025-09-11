@@ -1,5 +1,5 @@
 BINARY_NAME = lynx
-MAIN_PACKAGE = ./main.go
+MAIN_PACKAGE = ./lynx.go
 BUILD_DIR = ./web/server/build
 EXAMPLE ?= main.lynx
 

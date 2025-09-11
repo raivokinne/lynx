@@ -79,10 +79,9 @@ git clone https://github.com/raivokinne/lynx.git
 cd lynx
 
 # Build the interpreter
-make build
-
-# Verify installation
-./lynx --version
+make build-all
+cd build
+./lynx
 ```
 
 #### Alternative Installation Methods
