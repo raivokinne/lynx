@@ -100,7 +100,7 @@ Create `hello.lynx`:
 
 ```lynx
 let main = fn() {
-    println("Hello, Lynx!")
+    print("Hello, Lynx!")
 }
 ```
 
@@ -157,28 +157,28 @@ let doubled = applyTwice(fn(x) { x * 2 }, 4) // Returns 16
 ```lynx
 // If-else statements (no parentheses required)
 if x > 0 {
-    println("Positive")
+    print("Positive")
 } else if x < 0 {
-    println("Negative")
+    print("Negative")
 } else {
-    println("Zero")
+    print("Zero")
 }
 
 // While loops
 let i = 0
 while i < 10 {
-    println(i)
+    print(i)
     i = i + 1
 }
 
 // For-range loops
 for item in [1, 2, 3, 4, 5] {
-    println(item)
+    print(item)
 }
 
 // With index
 for item, index in ["a", "b", "c"] {
-    println("Item", index, ":", item)
+    print("Item", index, ":", item)
 }
 
 // Break and continue
@@ -189,7 +189,7 @@ for i in range(0, 100) {
     if i > 10 {
         break
     }
-    println(i)
+    print(i)
 }
 ```
 
@@ -283,10 +283,10 @@ let divide = fn(a, b) {
 let safeCalculation = fn(x, y) {
     catch err {
         let result = divide(x, y)
-        println("Result:", result)
+        print("Result:", result)
         return result
     } on {
-        println("Error occurred:", err)
+        print("Error occurred:", err)
         return 0
     }
 }
@@ -299,7 +299,7 @@ let processData = fn(data) {
         let result = saveData(processed)
         return result
     } on {
-        println("Processing failed:", err)
+        print("Processing failed:", err)
         return null
     }
 }
@@ -331,19 +331,19 @@ let processNumbers = fn(nums) {
 let processGrade = fn(grade) {
     switch grade {
         case "A" {
-            println("Excellent!")
+            print("Excellent!")
             return 4.0
         }
         case "B" {
-            println("Good job!")
+            print("Good job!")
             return 3.0
         }
         case "C" {
-            println("Satisfactory")
+            print("Satisfactory")
             return 2.0
         }
         default {
-            println("Needs improvement")
+            print("Needs improvement")
             return 0.0
         }
     }
@@ -419,7 +419,7 @@ let fibonacciIter = fn(n) {
 }
 
 let sequence = map(range(0, 10), fibonacciIter)
-println("Fibonacci sequence:", sequence)
+print("Fibonacci sequence:", sequence)
 ```
 
 ### 2. Data Processing Pipeline
@@ -447,7 +447,7 @@ let users = [
 ]
 
 let processedNames = processUserData(users)
-println("Processed users:", processedNames)
+print("Processed users:", processedNames)
 ```
 
 ### 3. File Processing with Error Handling
@@ -473,20 +473,20 @@ let processLogFile = fn(inputFile, outputFile) {
         let output = join(processedLines, "\n")
         writeFile(outputFile, output)
 
-        println("Successfully processed", len(lines), "lines")
+        print("Successfully processed", len(lines), "lines")
         return true
 
     } on {
-        println("Error processing file:", err)
+        print("Error processing file:", err)
         return false
     }
 }
 
 let success = processLogFile("input.log", "output.log")
 if success {
-    println("File processing completed")
+    print("File processing completed")
 } else {
-    println("File processing failed")
+    print("File processing failed")
 }
 ```
 
@@ -513,26 +513,25 @@ let fetchUserPosts = fn(userId) {
                 }
             })
     } on {
-        println("Failed to fetch posts:", err)
+        print("Failed to fetch posts:", err)
         return []
     }
 }
 
 let posts = fetchUserPosts(1)
 
-println("Found", len(posts), "posts")
+print("Found", len(posts), "posts")
 
 for post in posts {
-    println("Post", post.id, ":", post.title)
-    println("Word count:", post.wordCount)
-    println("---")
+    print("Post", post.id, ":", post.title)
+    print("Word count:", post.wordCount)
+    print("---")
 }
 ```
 
 ### 5. Simple Calculator REPL
 
 ```lynx
-@io(readLine, println)
 @strings(trim, split)
 @math(add, subtract, multiply, divide)
 
@@ -567,8 +566,8 @@ let calculate = fn(left, operator, right) {
 }
 
 let repl = fn() {
-    println("Simple Calculator (type 'quit' to exit)")
-    println("Enter expressions like: 5 + 3")
+    print("Simple Calculator (type 'quit' to exit)")
+    print("Enter expressions like: 5 + 3")
 
     while true {
         print("> ")
@@ -581,15 +580,15 @@ let repl = fn() {
         catch err {
             let (left, operator, right) = parseExpression(input)
             let result = calculate(left, operator, right)
-            println("Result:", result)
+            print("Result:", result)
         } on {
-            println("Error:", err)
+            print("Error:", err)
         }
     }
 }
 
 repl()
-println("Goodbye!")
+print("Goodbye!")
 ```
 
 ## Performance
