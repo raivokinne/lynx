@@ -660,19 +660,6 @@ export LYNX_PATH=/path/to/lynx/stdlib
 - Use iterative instead of recursive approaches for large inputs
 - Cache expensive calculations
 
-### Debug Mode
-
-```bash
-# Run with debug output
-./lynx --debug program.lynx
-
-# Verbose mode
-./lynx --verbose program.lynx
-
-# Check syntax only
-./lynx --check program.lynx
-```
-
 ### Getting Help
 
 - Check the [documentation](https://github.com/raivokinne/lynx/docs)
@@ -682,24 +669,6 @@ export LYNX_PATH=/path/to/lynx/stdlib
 ## Contributing
 
 We welcome contributions! Here's how to get started:
-
-### Development Setup
-
-```bash
-# Fork the repository on GitHub
-git clone https://github.com/yourusername/lynx.git
-cd lynx
-
-# Install development dependencies
-make dev-setup
-
-# Run tests
-make test
-
-# Build and test your changes
-make build
-./lynx examples/hello.lynx
-```
 
 ### Contribution Guidelines
 
