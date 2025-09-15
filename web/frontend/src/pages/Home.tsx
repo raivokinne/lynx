@@ -1,18 +1,12 @@
-import { AlertCircle, Download, Play, Trash2, LogOut, User, Terminal, Zap, Code, Shield, Sun, Moon } from "lucide-react";
+import { AlertCircle, Download, Play, Trash2, LogOut, User, Terminal, Zap, Code, Shield, Sun, Moon, Save, FolderOpen, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from '../contexts/AuthContext';
 import Editor from "react-simple-code-editor";
 
-const highlight = (code: string, isTerminalMode: boolean) => {
+const highlight = (code: string) => {
     let highlighted = code;
 
-    const colors = isTerminalMode ? {
-        comment: '#4ade80',
-        string: '#22c55e',
-        keyword: '#10b981',
-        number: '#34d399',
-        function: '#6ee7b7'
-    } : {
+    const colors = {
         comment: '#6b7280',
         string: '#059669',
         keyword: '#1f2937',
@@ -49,19 +43,49 @@ const highlight = (code: string, isTerminalMode: boolean) => {
 };
 
 export default function Home() {
-    const [code, setCode] = useState('');
-    const [output, setOutput] = useState('');
-    const [isRunning, setIsRunning] = useState(false);
-    const [error, setError] = useState('');
-    const [currentTime, setCurrentTime] = useState('');
-    const [isTerminalMode, setIsTerminalMode] = useState(false);
-    const [keySequence, setKeySequence] = useState('');
+    const [code, setCode] = useState<string>('');
+    const [output, setOutput] = useState<string>('');
+    const [isRunning, setIsRunning] = useState<boolean>(false);
+    const [error, setError] = useState<string>('');
+    const [currentTime, setCurrentTime] = useState<string>('');
+    const [keySequence, setKeySequence] = useState<string>('');
+    const [isSaving, setIsSaving] = useState<boolean>(false);
+    const [saveTitle, setSaveTitle] = useState<string>('');
+    const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
+    const [savedCodes, setSavedCodes] = useState<any[]>([]);
+    const [showLoadDialog, setShowLoadDialog] = useState<boolean>(false);
+    const [currentCodeId, setCurrentCodeId] = useState<string | null>(null);
+    const [currentCodeTitle, setCurrentCodeTitle] = useState<string>('Untitled');
+    const [lastSaved, setLastSaved] = useState<string>('');
     const { user, logout } = useAuth();
 
     const KONAMI_CODE = 'lynx';
+    const API_BASE = 'http://localhost:3001/api';
+
+    const getAuthToken = () => {
+        return localStorage.getItem('token');
+    };
 
     useEffect(() => {
-        // Atjaunina laiku katru sekundi
+        if (code) {
+            localStorage.setItem(`lynx_code_${user?.id}`, code);
+            localStorage.setItem(`lynx_code_title_${user?.id}`, currentCodeTitle);
+        }
+    }, [code, currentCodeTitle, user?.id]);
+
+    useEffect(() => {
+        if (user?.id) {
+            const savedCode = localStorage.getItem(`lynx_code_${user.id}`);
+            const savedTitle = localStorage.getItem(`lynx_code_title_${user.id}`);
+            if (savedCode) {
+                setCode(savedCode);
+                setCurrentCodeTitle(savedTitle || 'Untitled');
+            }
+            loadSavedCodes();
+        }
+    }, [user?.id]);
+
+    useEffect(() => {
         const interval = setInterval(() => {
             const now = new Date();
             setCurrentTime(now.toLocaleTimeString());
@@ -71,40 +95,41 @@ export default function Home() {
     }, []);
 
     useEffect(() => {
+        let resetTimer: number | undefined;
         const handleKeyPress = (e: KeyboardEvent) => {
-            const newSequence = keySequence + e.key.toLowerCase();
+            const newSequence = (keySequence + e.key.toLowerCase()).slice(-20); // keep buffer small
             setKeySequence(newSequence);
 
             if (newSequence.includes(KONAMI_CODE)) {
-                setIsTerminalMode(!isTerminalMode);
+                setIsTerminalMode(prev => !prev);
                 setKeySequence('');
             }
 
-            // Atiestata secību pēc 3 sekundēm
-            setTimeout(() => {
+            if (resetTimer) {
+                window.clearTimeout(resetTimer);
+            }
+            resetTimer = window.setTimeout(() => {
                 setKeySequence('');
             }, 3000);
         };
 
         window.addEventListener('keydown', handleKeyPress);
-        return () => window.removeEventListener('keydown', handleKeyPress);
-    }, [keySequence, isTerminalMode]);
+        return () => {
+            window.removeEventListener('keydown', handleKeyPress);
+            if (resetTimer) window.clearTimeout(resetTimer);
+        };
+    }, [keySequence]);
 
     const executeCode = async () => {
         setIsRunning(true);
 
-        const loadingMessages = isTerminalMode
-            ? '>>> SĀK KOMPILĀCIJAS SEKVENCES...\n>>> ANALIZĒ KODA STRUKTŪRU...\n>>> IZPILDA...\n'
-            : 'Kompilē kodu...\nAnalizē sintaksi...\nIzpilda...\n';
+        const loadingMessages = 'Kompilē kodu...\nAnalizē sintaksi...\nIzpilda...\n';
 
         setOutput(loadingMessages);
         setError('');
 
-        // Simulē kompilācijas aizkavi
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
         try {
-            const response = await fetch('http://localhost:3001/api/compile', {
+            const response = await fetch(`${API_BASE}/compile`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -120,14 +145,13 @@ export default function Home() {
 
             if (result.success) {
                 setOutput(`>>> COMPILATION SUCCESSFUL\n>>> OUTPUT:\n${result.output || '[NO OUTPUT - PROCESS COMPLETED]'}\n>>> END TRANSMISSION`);
+                setError('');
             } else {
                 setError(`>>> COMPILATION FAILED\n>>> ERROR LOG:\n${result.error || 'Unknown compilation error'}\n>>> END ERROR REPORT`);
                 setOutput('');
             }
-        } catch (error: any) {
-            const errorMessage = isTerminalMode
-                ? `>>> SAVIENOJUMA KĻŪDA\n>>> DETALIZĀCIJA: ${error.message}\n>>> KĻŪDU ZIŅOJUMA BEIGAS`
-                : `Kompilācijas kļūda:\n${error.message}`;
+        } catch (e: any) {
+            const errorMessage = `Kompilācijas kļūda:\n${e.message}`;
             setError(errorMessage);
             setOutput('');
         } finally {
@@ -135,10 +159,100 @@ export default function Home() {
         }
     };
 
+    const saveCode = async () => {
+        if (!saveTitle.trim()) {
+            alert('Lūdzu norādiet nosaukumu');
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            const response = await fetch(`${API_BASE}/code/save`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getAuthToken()}`
+                },
+                body: JSON.stringify({
+                    title: saveTitle,
+                    code
+                }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                setCurrentCodeId(result.id);
+                setCurrentCodeTitle(saveTitle);
+                setLastSaved(new Date().toLocaleTimeString());
+                setShowSaveDialog(false);
+                setSaveTitle('');
+                loadSavedCodes();
+
+                alert('Kods saglabāts veiksmīgi!');
+            } else {
+                throw new Error(result.error || 'Unknown error');
+            }
+        } catch (e: any) {
+            const errorMsg = `Saglabāšanas kļūda: ${e.message}`;
+            alert(errorMsg);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const loadSavedCodes = async () => {
+        try {
+            const response = await fetch(`${API_BASE}/code/list`, {
+                headers: {
+                    'Authorization': `Bearer ${getAuthToken()}`
+                }
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                setSavedCodes(result.codes || []);
+            } else {
+                setSavedCodes([]);
+            }
+        } catch (err) {
+            console.error('Error loading saved codes:', err);
+            setSavedCodes([]);
+        }
+    };
+
+    const loadCode = async (codeId: string) => {
+        try {
+            const response = await fetch(`${API_BASE}/code/${codeId}`, {
+                headers: {
+                    'Authorization': `Bearer ${getAuthToken()}`
+                }
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                setCode(result.code.code);
+                setCurrentCodeTitle(result.code.title);
+                setCurrentCodeId(result.code.id);
+                setShowLoadDialog(false);
+                setOutput('');
+                setError('');
+            } else {
+                throw new Error(result.error || 'Unknown error');
+            }
+        } catch (e: any) {
+            alert(`Kļūda ielādējot kodu: ${e.message}`);
+        }
+    };
+
     const clearCode = () => {
         setCode('');
         setOutput('');
         setError('');
+        setCurrentCodeId(null);
+        setCurrentCodeTitle('Untitled');
+        localStorage.removeItem(`lynx_code_${user?.id}`);
+        localStorage.removeItem(`lynx_code_title_${user?.id}`);
     };
 
     const downloadCode = () => {
@@ -146,269 +260,105 @@ export default function Home() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = isTerminalMode ? 'lynx_payload.lynx' : 'kods.lynx';
+        a.download = `${currentCodeTitle.replace(/[^a-zA-Z0-9]/g, '_')}.lynx`;
+        document.body.appendChild(a);
         a.click();
+        a.remove();
         URL.revokeObjectURL(url);
     };
 
-    if (isTerminalMode) {
-        return (
-            <div className="min-h-screen bg-black text-green-400 font-mono">
-                {/* ASCII Art Header */}
-                <div className="border-b border-green-500 bg-black">
-                    <div className="text-center py-2 text-green-500 text-xs">
-                        ╔══════════════════════════════════════════════════════════════════════════════════════╗
-                    </div>
-                </div>
-
-                {/* Header */}
-                <header className="bg-black border-b border-green-500">
-                    <div className="w-full mx-auto px-6">
-                        <div className="flex justify-between items-center h-16">
-                            <div className="flex items-center gap-4">
-                                <Shield className="w-6 h-6 text-green-400" />
-                                <div>
-                                    <h1 className="text-lg font-bold text-green-400 tracking-wider">
-                                        [ LYNX KOMPILATORS v2.1.4 ]
-                                    </h1>
-                                    <div className="text-xs text-green-600">DROŠS IZSTRĀDES TERMINĀLIS</div>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-6 text-sm">
-                                <div className="text-green-500">
-                                    SISTĒMAS_LAIKS: {currentTime}
-                                </div>
-                                <div className="flex items-center gap-2 border border-green-500 px-3 py-1">
-                                    <User className="w-4 h-4" />
-                                    <span>LIETOTĀJS: {user?.username?.toUpperCase()}</span>
-                                </div>
-                                <button
-                                    onClick={() => setIsTerminalMode(false)}
-                                    className="flex items-center gap-2 px-3 py-1 border border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-colors"
-                                >
-                                    <Sun className="w-4 h-4" />
-                                    IZSLĒGT_TERMINĀLI
-                                </button>
-                                <button
-                                    onClick={logout}
-                                    className="flex items-center gap-2 px-3 py-1 border border-red-500 text-red-400 hover:bg-red-500 hover:text-black transition-colors"
-                                >
-                                    <LogOut className="w-4 h-4" />
-                                    IZRAKSTĪTIES
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </header>
-
-                {/* Status Bar */}
-                <div className="bg-black border-b border-green-500 px-6 py-2 text-xs">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <span className="text-green-400">STATUSS: GATAVS</span>
-                            <span className="text-green-600">|</span>
-                            <span className="text-green-400">VALODA: LYNX</span>
-                            <span className="text-green-600">|</span>
-                            <span className="text-green-400">REŽĪMS: IZSTRĀDE</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                            <span className="text-green-400">SISTĒMA ONLINE</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Main Content */}
-                <div className="w-full mx-auto p-6">
-                    <div className="border border-green-500 bg-black">
-                        {/* Toolbar */}
-                        <div className="flex items-center justify-between p-4 border-b border-green-500 bg-black">
-                            <div className="flex items-center gap-4">
-                                <button
-                                    onClick={executeCode}
-                                    disabled={isRunning || !code.trim()}
-                                    className="flex items-center gap-2 bg-green-500 hover:bg-green-400 disabled:bg-gray-600 text-black disabled:text-gray-400 px-4 py-2 font-bold tracking-wide disabled:cursor-not-allowed transition-colors"
-                                >
-                                    {isRunning ? (
-                                        <>
-                                            <Zap className="w-4 h-4 animate-pulse" />
-                                            IZPILDA...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Play size={16} />
-                                            KOMPILĒT & PALAIST
-                                        </>
-                                    )}
-                                </button>
-                                {isRunning && (
-                                    <div className="flex items-center gap-2 text-green-400">
-                                        <div className="flex gap-1">
-                                            <div className="w-1 h-4 bg-green-400 animate-pulse"></div>
-                                            <div className="w-1 h-4 bg-green-400 animate-pulse" style={{animationDelay: '0.2s'}}></div>
-                                            <div className="w-1 h-4 bg-green-400 animate-pulse" style={{animationDelay: '0.4s'}}></div>
-                                        </div>
-                                        <span className="text-sm">APSTRĀDE...</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                <button
-                                    onClick={downloadCode}
-                                    disabled={!code.trim()}
-                                    className="flex items-center gap-2 border border-green-500 text-green-400 hover:bg-green-500 hover:text-black disabled:border-gray-600 disabled:text-gray-600 px-3 py-1 text-sm disabled:cursor-not-allowed transition-colors"
-                                >
-                                    <Download size={14} />
-                                    LEJUPIELĀDĒT
-                                </button>
-                                <button
-                                    onClick={clearCode}
-                                    disabled={!code.trim() && !output && !error}
-                                    className="flex items-center gap-2 border border-red-500 text-red-400 hover:bg-red-500 hover:text-black disabled:border-gray-600 disabled:text-gray-600 px-3 py-1 text-sm disabled:cursor-not-allowed transition-colors"
-                                >
-                                    <Trash2 size={14} />
-                                    NOTĪRĪT
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Error Panel */}
-                        {error && (
-                            <div className="mx-4 mt-4 border border-red-500 bg-black p-4">
-                                <div className="flex items-start gap-3">
-                                    <AlertCircle className="text-red-400 flex-shrink-0 mt-1" size={16} />
-                                    <div className="flex-1">
-                                        <h4 className="text-red-400 font-bold text-sm mb-2">[ ATRASTA KĻŪDA ]</h4>
-                                        <pre className="text-red-300 text-sm font-mono whitespace-pre-wrap bg-black border border-red-500 p-3 overflow-x-auto">
-{error}
-                                        </pre>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[70vh]">
-                            {/* Code Editor */}
-                            <div className="border-r border-green-500 bg-black">
-                                <div className="bg-black border-b border-green-500 px-4 py-2">
-                                    <div className="flex items-center gap-2 text-xs">
-                                        <Code className="w-4 h-4 text-green-400" />
-                                        <span className="text-green-400">AVOTKODS.lynx</span>
-                                        <span className="ml-auto text-green-600">RINDA: {(code.match(/\n/g) || []).length + 1}</span>
-                                    </div>
-                                </div>
-                                <div className="h-[600px] lg:h-[65vh] relative">
-                                    <Editor
-                                        value={code}
-                                        onValueChange={setCode}
-                                        highlight={(code) => highlight(code, true)}
-                                        padding={16}
-                                        className="w-full h-full font-mono text-sm bg-black text-green-400 leading-relaxed resize-none border-none outline-none"
-                                        textareaClassName="outline-none resize-none bg-black text-green-400 caret-green-400 selection:bg-green-900"
-                                        style={{
-                                            fontFamily: '"Courier New", monospace',
-                                            fontSize: 14,
-                                            lineHeight: 1.6,
-                                            backgroundColor: 'black',
-                                            color: '#4ade80',
-                                            minHeight: '100%'
-                                        }}
-                                        placeholder="// IEVADIET LYNX KODU ŠEIT..."
-                                    />
-                                    <div className="absolute bottom-2 right-2 text-xs text-green-600">
-                                        &gt;_
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Output Panel */}
-                            <div className="bg-black">
-                                <div className="bg-black border-b border-green-500 px-4 py-2">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-xs">
-                                            <Terminal className="w-4 h-4 text-green-400" />
-                                            <span className="text-green-400">SISTĒMAS_IZVADS.log</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className={`w-2 h-2 ${
-                                                output && !error ? 'bg-green-400 animate-pulse' :
-                                                error ? 'bg-red-400 animate-pulse' :
-                                                'bg-gray-600'
-                                            }`}></div>
-                                            <span className="text-xs text-green-600">
-                                                {output && !error ? 'VEIKSMĪGI' :
-                                                 error ? 'KĻŪDA' :
-                                                 'GAIDA'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="h-[600px] lg:h-[65vh] p-4 overflow-auto bg-black">
-                                    {!output && !error && (
-                                        <div className="flex flex-col items-center justify-center h-full text-center">
-                                            <div className="border border-green-500 p-6 bg-black">
-                                                <Terminal className="w-12 h-12 text-green-500 mx-auto mb-4" />
-                                                <div className="text-green-400 mb-2">[ TERMINĀLIS GATAVS ]</div>
-                                                <div className="text-green-600 text-sm">Gaida kompilācijas komandu...</div>
-                                                <div className="mt-4 text-green-500 text-xs animate-pulse">
-                                                    ████████████████████████
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {error && (
-                                        <div className="border border-red-500 bg-black p-4">
-                                            <div className="flex items-center gap-2 mb-3">
-                                                <AlertCircle className="w-5 h-5 text-red-400" />
-                                                <span className="text-red-400 font-bold">[ SISTĒMAS KĻŪDA ]</span>
-                                            </div>
-                                            <pre className="text-red-300 text-sm font-mono whitespace-pre-wrap overflow-x-auto bg-black border border-red-500 p-3">
-{error}
-                                            </pre>
-                                        </div>
-                                    )}
-                                    {output && (
-                                        <div className="border border-green-500 bg-black p-4">
-                                            <div className="flex items-center gap-2 mb-3">
-                                                <Zap className="w-5 h-5 text-green-400" />
-                                                <span className="text-green-400 font-bold">[ IZPILDES ŽURNĀLS ]</span>
-                                            </div>
-                                            <pre className="text-green-300 text-sm font-mono whitespace-pre-wrap overflow-x-auto bg-black border border-green-500 p-3">
-{output}
-                                            </pre>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="border-t border-green-500 bg-black px-6 py-2">
-                    <div className="text-center text-xs text-green-600">
-                        ╚══════════════════════════════════════════════════════════════════════════════════════╝
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    // Noklusētais tīrais melnbaltais dizains (latviskots)
     return (
         <div className="min-h-screen bg-white text-gray-900">
-            {/* Header */}
+            {showSaveDialog && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white border border-gray-300 rounded-lg p-6 max-w-md w-full mx-4 shadow-lg">
+                        <h3 className="text-gray-900 font-semibold mb-4">Saglabāt kodu</h3>
+                        <input
+                            type="text"
+                            value={saveTitle}
+                            onChange={(e) => setSaveTitle(e.target.value)}
+                            placeholder="Ievadiet nosaukumu"
+                            className="w-full border border-gray-300 rounded p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                            autoFocus
+                        />
+                        <div className="flex gap-3">
+                            <button
+                                onClick={saveCode}
+                                disabled={isSaving}
+                                className="flex-1 bg-gray-900 text-white p-2 rounded hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            >
+                                {isSaving ? 'Saglabā...' : 'Saglabāt'}
+                            </button>
+                            <button
+                                onClick={() => setShowSaveDialog(false)}
+                                className="flex-1 border border-gray-300 text-gray-700 p-2 rounded hover:bg-gray-50"
+                            >
+                                Atcelt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Load Dialog */}
+            {showLoadDialog && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white border border-gray-300 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 shadow-lg">
+                        <h3 className="text-gray-900 font-semibold mb-4">Saglabātie kodi</h3>
+                        <div className="max-h-64 overflow-y-auto mb-4">
+                            {savedCodes.length === 0 ? (
+                                <div className="text-gray-500 text-center py-8">Nav saglabātu kodu</div>
+                            ) : (
+                                savedCodes.map((savedCode) => (
+                                    <div
+                                        key={savedCode.id}
+                                        onClick={() => loadCode(savedCode.id)}
+                                        className="border border-gray-200 rounded p-4 mb-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <FileText className="w-4 h-4 text-gray-600" />
+                                            <div className="font-medium">{savedCode.title}</div>
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                            Izveidots: {new Date(savedCode.created_at).toLocaleString()}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowLoadDialog(false)}
+                                className="flex-1 border border-gray-300 text-gray-700 p-2 rounded hover:bg-gray-50"
+                            >
+                                Aizvērt
+                            </button>
+                            <button
+                                onClick={() => {
+                                    // Try to refresh list
+                                    loadSavedCodes();
+                                }}
+                                className="flex-1 border border-gray-300 text-gray-700 p-2 rounded hover:bg-gray-50"
+                            >
+                                Atsvaidzināt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <header className="bg-white border-b border-gray-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center">
+                            <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
                                 <Code className="w-6 h-6 text-white" />
                             </div>
                             <div>
                                 <h1 className="text-xl font-bold text-gray-900">Lynx IDE</h1>
+                                <div className="text-xs text-gray-500">
+                                    {currentCodeTitle} {lastSaved && `• Saglabāts: ${lastSaved}`}
+                                </div>
                             </div>
                         </div>
 
@@ -432,16 +382,14 @@ export default function Home() {
                 </div>
             </header>
 
-            {/* Main Content */}
             <div className="max-w-7xl mx-auto p-6">
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                    {/* Toolbar */}
                     <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={executeCode}
                                 disabled={isRunning || !code.trim()}
-                                className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white px-6 py-2.5 rounded-lg font-medium disabled:cursor-not-allowed transition-colors"
+                                className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium disabled:cursor-not-allowed transition-colors"
                             >
                                 {isRunning ? (
                                     <>
@@ -458,6 +406,27 @@ export default function Home() {
                         </div>
 
                         <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => {
+                                    setSaveTitle(currentCodeTitle);
+                                    setShowSaveDialog(true);
+                                }}
+                                disabled={!code.trim()}
+                                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                            >
+                                <Save size={16} />
+                                Saglabāt
+                            </button>
+                            <button
+                                onClick={() => {
+                                    loadSavedCodes();
+                                    setShowLoadDialog(true);
+                                }}
+                                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                                <FolderOpen size={16} />
+                                Ielādēt
+                            </button>
                             <button
                                 onClick={downloadCode}
                                 disabled={!code.trim()}
@@ -477,28 +446,13 @@ export default function Home() {
                         </div>
                     </div>
 
-                    {/* Error Panel */}
-                    {error && (
-                        <div className="mx-4 mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
-                            <div className="flex items-start gap-3">
-                                <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
-                                <div className="flex-1">
-                                    <h4 className="text-red-800 font-semibold text-sm mb-2">Kompilācijas kļūda</h4>
-                                    <pre className="text-red-700 text-sm bg-white border border-red-200 rounded p-3 overflow-x-auto">
-{error}
-                                    </pre>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                     <div className="grid grid-cols-1 lg:grid-cols-2">
-                        {/* Code Editor */}
+                        {/* Editor */}
                         <div className="border-r border-gray-200">
                             <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
                                 <div className="flex items-center gap-2 text-sm">
                                     <Code className="w-4 h-4 text-gray-600" />
-                                    <span className="text-gray-700 font-medium">main.lynx</span>
+                                    <span className="text-gray-700 font-medium">{currentCodeTitle}.lynx</span>
                                     <span className="ml-auto text-gray-500">Rinda: {(code.match(/\n/g) || []).length + 1}</span>
                                 </div>
                             </div>
@@ -523,7 +477,7 @@ export default function Home() {
                             </div>
                         </div>
 
-                        {/* Output Panel */}
+                        {/* Output */}
                         <div className="bg-white">
                             <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
                                 <div className="flex items-center justify-between">
@@ -582,13 +536,6 @@ export default function Home() {
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {/* Easter egg hint */}
-                <div className="mt-4 text-center">
-                    <p className="text-xs text-gray-400">
-                        Psst... pamēģini ierakstīt "lynx", lai atbloķētu ko īpašu 🐱
-                    </p>
                 </div>
             </div>
         </div>

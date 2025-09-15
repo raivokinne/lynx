@@ -629,7 +629,7 @@ func (n *Null) TokenLiteral() string {
 }
 
 type Spread struct {
-	Token token.Token
+	Token      token.Token
 	Expression Expression
 }
 

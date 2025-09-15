@@ -1,6 +1,6 @@
 import express, { json } from "express";
 import cors from "cors";
-import { exec } from "child_process";
+import { spawn } from "child_process";
 import {
   existsSync,
   mkdirSync,
@@ -32,30 +32,30 @@ async function initDb() {
   });
 
   await db.exec(`
-CREATE TABLE IF NOT EXISTS users (
-id TEXT PRIMARY KEY,
-username TEXT UNIQUE NOT NULL,
-password TEXT NOT NULL,
-created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)
-`);
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      username TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
 
   await db.exec(`
-CREATE TABLE IF NOT EXISTS codes (
-id TEXT PRIMARY KEY,
-user_id TEXT,
-title TEXT,
-code TEXT NOT NULL,
-created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)
-`);
+    CREATE TABLE IF NOT EXISTS codes (
+      id TEXT PRIMARY KEY,
+      user_id TEXT,
+      title TEXT,
+      code TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
 }
 
 const CONFIG = {
   COMPILER_PATH: "./build/lynx",
   FILE_EXTENSION: ".lynx",
-  EXECUTION_TIMEOUT: 10000,
+  EXECUTION_TIMEOUT: 100_000,
   MAX_FILE_SIZE: 1024 * 1024,
   TEMP_DIR: "./temp",
 };
@@ -68,7 +68,7 @@ function cleanupTempFiles() {
   try {
     const files = readdirSync(CONFIG.TEMP_DIR);
     const now = Date.now();
-    const maxAge = 60 * 60 * 1000; // 1 hour
+    const maxAge = 60 * 60 * 1000;
 
     files.forEach((file) => {
       const filePath = join(CONFIG.TEMP_DIR, file);
@@ -80,7 +80,7 @@ function cleanupTempFiles() {
       }
     });
   } catch (error) {
-    console.error("Error cleaning up temp files:", error.message);
+    console.error("Error cleaning up temp files:", error?.message ?? error);
   }
 }
 
@@ -96,47 +96,94 @@ function validateCode(code) {
 
 function executeCompiler(filePath) {
   return new Promise((resolve, reject) => {
-    const command = `${CONFIG.COMPILER_PATH} "${filePath}"`;
+    let stdout = "";
+    let stderr = "";
+    let finished = false;
 
-    const child = exec(
-      command,
-      {
-        timeout: CONFIG.EXECUTION_TIMEOUT,
-        maxBuffer: 1024 * 1024,
-      },
-      (error, stdout, stderr) => {
-        if (error) {
-          if (error.killed && error.signal === "SIGTERM") {
-            reject(new Error("Execution timed out"));
-          } else {
-            reject(new Error(stderr || error.message));
-          }
-        } else {
-          resolve(stdout);
+    const child = spawn(CONFIG.COMPILER_PATH, [filePath], {
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+
+    const timer = setTimeout(() => {
+      if (!finished) {
+        finished = true;
+        try {
+          child.kill("SIGTERM");
+        } catch (e) {
         }
-      },
-    );
-
-    setTimeout(() => {
-      if (!child.killed) {
-        child.kill("SIGTERM");
+        reject(new Error("Execution timed out"));
       }
     }, CONFIG.EXECUTION_TIMEOUT);
+
+    child.stdout?.on("data", (data) => {
+      stdout += data.toString();
+    });
+
+    child.stderr?.on("data", (data) => {
+      stderr += data.toString();
+    });
+
+    child.on("error", (err) => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer);
+      reject(new Error(`Failed to start compiler: ${err.message}`));
+    });
+
+    child.on("close", (code, signal) => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer);
+
+      if (code === 0) {
+        resolve(stdout);
+      } else {
+        const parts = [
+          `Compiler exited with code ${code}${signal ? ` (signal: ${signal})` : ""}`,
+        ];
+        if (stderr.trim()) parts.push(`STDERR: ${stderr.trim()}`);
+        if (stdout.trim()) parts.push(`STDOUT: ${stdout.trim()}`);
+        reject(new Error(parts.join("\n")));
+      }
+    });
   });
 }
 
 function authenticate(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  if (!authHeader)
-    return res.status(401).json({ success: false, error: "No token provided" });
+  try {
+    let rawHeader = req.headers["authorization"] || req.headers["Authorization"];
+    if (!rawHeader) {
+      return res.status(401).json({ success: false, error: "No token provided" });
+    }
 
-  const token = authHeader.split(" ")[1];
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err)
-      return res.status(403).json({ success: false, error: "Invalid token" });
-    req.user = user;
-    next();
-  });
+    if (Array.isArray(rawHeader)) rawHeader = rawHeader[0];
+
+    let token = String(rawHeader).trim();
+
+    if (token.toLowerCase().startsWith("bearer ")) {
+      token = token.split(" ")[1] || "";
+    }
+
+    token = token.replace(/^"(.*)"$/, "$1").trim();
+
+    if (!token) {
+      return res.status(401).json({ success: false, error: "Malformed authorization header (no token found)" });
+    }
+
+    try {
+      console.log(`[AUTH] token length=${token.length}, head=${token.slice(0,6)}..., tail=${token.slice(-6)}`);
+    } catch (e) { /* ignore */ }
+
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      req.user = decoded;
+      return next();
+    } catch (verr) {
+      return res.status(401).json({ success: false, error: `Invalid token: ${verr.message}` });
+    }
+  } catch (err) {
+    return res.status(500).json({ success: false, error: "Authentication middleware error" });
+  }
 }
 
 app.post("/api/register", async (req, res) => {
@@ -154,19 +201,27 @@ app.post("/api/register", async (req, res) => {
 
     await db.run(
       "INSERT INTO users (id, username, password) VALUES (?, ?, ?)",
-      [userId, username, hashed],
+      [userId, username, hashed]
     );
 
-    res.json({ success: true, message: "User registered successfully" });
+    res.json({ success: true, message: "User registered successfully", user: { id: userId, username } });
   } catch (error) {
-    console.error("Register error:", error.message);
-    res.status(500).json({ success: false, error: "Registration failed" });
+    console.error("Register error:", error?.message ?? error);
+    const message =
+      error && String(error.message).includes("UNIQUE constraint")
+        ? "Username already taken"
+        : "Registration failed";
+    res.status(400).json({ success: false, error: message });
   }
 });
 
 app.post("/api/login", async (req, res) => {
   try {
     const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ success: false, error: "Username and password required" });
+    }
 
     const user = await db.get("SELECT * FROM users WHERE username = ?", [
       username,
@@ -187,12 +242,12 @@ app.post("/api/login", async (req, res) => {
     const token = jwt.sign(
       { id: user.id, username: user.username },
       JWT_SECRET,
-      { expiresIn: "1h" },
+      { expiresIn: "1h" }
     );
 
-    res.json({ success: true, token });
+    res.json({ success: true, token, user: { id: user.id, username: user.username } });
   } catch (error) {
-    console.error("Login error:", error.message);
+    console.error("Login error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Login failed" });
   }
 });
@@ -220,15 +275,15 @@ app.post("/api/compile", async (req, res) => {
       output: output || "Program executed successfully (no output)",
     });
   } catch (error) {
-    console.error("Compilation error:", error.message);
-    res.json({ success: false, error: error.message });
+    console.error("Compilation error:", error?.message ?? error);
+    res.json({ success: false, error: error?.message ?? String(error) });
   } finally {
     if (tempFilePath && existsSync(tempFilePath)) {
       try {
         unlinkSync(tempFilePath);
         console.log(`Cleaned up temp file: ${basename(tempFilePath)}`);
       } catch (cleanupError) {
-        console.error("Error cleaning up temp file:", cleanupError.message);
+        console.error("Error cleaning up temp file:", cleanupError?.message ?? cleanupError);
       }
     }
   }
@@ -238,19 +293,17 @@ app.post("/api/code/save", authenticate, async (req, res) => {
   try {
     const { title, code } = req.body;
     if (!code)
-      return res
-        .status(400)
-        .json({ success: false, error: "Code is required" });
+      return res.status(400).json({ success: false, error: "Code is required" });
 
     const codeId = uuidv4();
     await db.run(
       "INSERT INTO codes (id, user_id, title, code) VALUES (?, ?, ?, ?)",
-      [codeId, req.user.id, title || "Untitled", code],
+      [codeId, req.user.id, title || "Untitled", code]
     );
 
     res.json({ success: true, message: "Code saved successfully", id: codeId });
   } catch (error) {
-    console.error("Save code error:", error.message);
+    console.error("Save code error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to save code" });
   }
 });
@@ -259,11 +312,11 @@ app.get("/api/code/list", authenticate, async (req, res) => {
   try {
     const codes = await db.all(
       "SELECT id, title, created_at FROM codes WHERE user_id = ? ORDER BY created_at DESC",
-      [req.user.id],
+      [req.user.id]
     );
     res.json({ success: true, codes });
   } catch (error) {
-    console.error("List code error:", error.message);
+    console.error("List code error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to fetch codes" });
   }
 });
@@ -273,7 +326,7 @@ app.get("/api/code/:id", authenticate, async (req, res) => {
     const { id } = req.params;
     const code = await db.get(
       "SELECT id, title, code, created_at FROM codes WHERE id = ? AND user_id = ?",
-      [id, req.user.id],
+      [id, req.user.id]
     );
 
     if (!code) {
@@ -282,47 +335,57 @@ app.get("/api/code/:id", authenticate, async (req, res) => {
 
     res.json({ success: true, code });
   } catch (error) {
-    console.error("Get code error:", error.message);
+    console.error("Get code error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to fetch code" });
   }
-});
-
-app.use((error, _req, res) => {
-  console.error("Unhandled error:", error);
-  res.status(500).json({ success: false, error: "Internal server error" });
 });
 
 app.use((_req, res) => {
   res.status(404).json({ success: false, error: "Endpoint not found" });
 });
 
-initDb()
-    .then(() => {
-        app.listen(PORT, () => {
-            console.log(`🚀 Compiler server running on port ${PORT}`);
-            console.log(`📁 Temp directory: ${CONFIG.TEMP_DIR}`);
-            console.log(`⚡ Compiler path: ${CONFIG.COMPILER_PATH}`);
-            console.log(`⏱️  Execution timeout: ${CONFIG.EXECUTION_TIMEOUT}ms`);
-
-            cleanupTempFiles();
-            setInterval(cleanupTempFiles, 30 * 60 * 1000);
-        });
-    })
-    .catch((err) => {
-        console.error("Failed to initialize database:", err);
-        process.exit(1);
-    });
-
-process.on("SIGINT", () => {
-  console.log("\n🛑 Shutting down server...");
-  cleanupTempFiles();
-  if (db) db.close();
-  process.exit(0);
+app.use((err, _req, res, _next) => {
+  console.error("Unhandled error:", err?.message ?? err);
+  res.status(500).json({ success: false, error: "Internal server error" });
 });
 
-process.on("SIGTERM", () => {
-  console.log("\n🛑 Shutting down server...");
-  cleanupTempFiles();
-  if (db) db.close();
-  process.exit(0);
+initDb()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Compiler server running on port ${PORT}`);
+      console.log(`📁 Temp directory: ${CONFIG.TEMP_DIR}`);
+      console.log(`⚡ Compiler path: ${CONFIG.COMPILER_PATH}`);
+      console.log(`⏱️  Execution timeout: ${CONFIG.EXECUTION_TIMEOUT}ms`);
+
+      cleanupTempFiles();
+      setInterval(cleanupTempFiles, 30 * 60 * 1000);
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to initialize database:", err);
+    process.exit(1);
+  });
+
+async function shutdown(signal) {
+  try {
+    console.log(`\n🛑 Shutting down server... (${signal})`);
+    cleanupTempFiles();
+    if (db && typeof db.close === "function") {
+      try {
+        await db.close();
+        console.log("DB connection closed");
+      } catch (closeErr) {
+        console.warn("Error closing DB:", closeErr?.message ?? closeErr);
+      }
+    }
+  } finally {
+    process.exit(0);
+  }
+}
+
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Rejection:", reason);
 });
