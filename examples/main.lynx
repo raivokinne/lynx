@@ -1,9 +1,9 @@
 @io(println)
 
-let i = 0
-
-while i < 1000000000000000000 {
-    i = i + 1
+let add = fn(x) {
+	fn(y) {
+		x + y
+	}
 }
 
-println(i)
+println(add(1)(2))

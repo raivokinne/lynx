@@ -21,32 +21,12 @@ export default function Register() {
 		return <Navigate to="/" replace />;
 	}
 
-	const validateForm = () => {
-		if (formData.username.length < 3) {
-			return 'Username must be at least 3 characters long';
-		}
-		if (formData.password.length < 6) {
-			return 'Password must be at least 6 characters long';
-		}
-		if (formData.password !== formData.confirmPassword) {
-			return 'Passwords do not match';
-		}
-		return null;
-	};
-
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsLoading(true);
 		setError('');
 
-		const validationError = validateForm();
-		if (validationError) {
-			setError(validationError);
-			setIsLoading(false);
-			return;
-		}
-
-		const result = await register(formData.username, formData.password);
+		const result = await register(formData.username, formData.password, formData.confirmPassword);
 
 		if (result.success) {
 			setSuccess(true);

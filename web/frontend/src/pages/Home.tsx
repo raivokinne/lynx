@@ -54,7 +54,7 @@ export default function Home() {
     const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
     const [savedCodes, setSavedCodes] = useState<any[]>([]);
     const [showLoadDialog, setShowLoadDialog] = useState<boolean>(false);
-    const [currentCodeId, setCurrentCodeId] = useState<string | null>(null);
+    const [_, setCurrentCodeId] = useState<string | null>(null);
     const [currentCodeTitle, setCurrentCodeTitle] = useState<string>('Untitled');
     const [lastSaved, setLastSaved] = useState<string>('');
     const { user, logout } = useAuth();
@@ -271,7 +271,7 @@ export default function Home() {
         <div className="min-h-screen bg-white text-gray-900">
             {showSaveDialog && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white border border-gray-300 rounded-lg p-6 max-w-md w-full mx-4 shadow-lg">
+                    <div className="bg-white border border-gray-300 rounded-lg p-6 max-w-md w-full mx-4">
                         <h3 className="text-gray-900 font-semibold mb-4">Saglabāt kodu</h3>
                         <input
                             type="text"
@@ -303,7 +303,7 @@ export default function Home() {
             {/* Load Dialog */}
             {showLoadDialog && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white border border-gray-300 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 shadow-lg">
+                    <div className="bg-white border border-gray-300 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96">
                         <h3 className="text-gray-900 font-semibold mb-4">Saglabātie kodi</h3>
                         <div className="max-h-64 overflow-y-auto mb-4">
                             {savedCodes.length === 0 ? (
@@ -335,7 +335,6 @@ export default function Home() {
                             </button>
                             <button
                                 onClick={() => {
-                                    // Try to refresh list
                                     loadSavedCodes();
                                 }}
                                 className="flex-1 border border-gray-300 text-gray-700 p-2 rounded hover:bg-gray-50"
@@ -347,7 +346,7 @@ export default function Home() {
                 </div>
             )}
 
-            <header className="bg-white border-b border-gray-200 shadow-sm">
+            <header className="bg-white border-b border-gray-200">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center gap-3">
@@ -356,9 +355,6 @@ export default function Home() {
                             </div>
                             <div>
                                 <h1 className="text-xl font-bold text-gray-900">Lynx IDE</h1>
-                                <div className="text-xs text-gray-500">
-                                    {currentCodeTitle} {lastSaved && `• Saglabāts: ${lastSaved}`}
-                                </div>
                             </div>
                         </div>
 
@@ -383,8 +379,8 @@ export default function Home() {
             </header>
 
             <div className="max-w-7xl mx-auto p-6">
-                <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                    <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                    <div className="flex items-center justify-between p-4 bg-gray-50">
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={executeCode}
@@ -460,7 +456,7 @@ export default function Home() {
                                 <Editor
                                     value={code}
                                     onValueChange={setCode}
-                                    highlight={(code) => highlight(code, false)}
+                                    highlight={(code) => highlight(code)}
                                     padding={20}
                                     className="w-full h-full font-mono text-sm bg-white text-gray-900 leading-relaxed resize-none border-none outline-none"
                                     textareaClassName="outline-none resize-none bg-white text-gray-900 caret-gray-900 selection:bg-gray-200"
@@ -502,7 +498,7 @@ export default function Home() {
                             <div className="h-[600px] lg:h-[65vh] p-6 overflow-auto bg-gray-50">
                                 {!output && !error && (
                                     <div className="flex flex-col items-center justify-center h-full text-center">
-                                        <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm">
+                                        <div className="bg-white border border-gray-200 rounded-lg p-8">
                                             <Terminal className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                                             <div className="text-gray-900 font-medium mb-2">Gatavs kompilēt</div>
                                             <div className="text-gray-500 text-sm">
