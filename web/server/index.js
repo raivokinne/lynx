@@ -141,8 +141,8 @@ function executeCompiler(filePath) {
 				const parts = [
 					`Compiler exited with code ${code}${signal ? ` (signal: ${signal})` : ""}`,
 				];
-				if (stderr.trim()) parts.push(`STDERR: ${stderr.trim()}`);
-				if (stdout.trim()) parts.push(`STDOUT: ${stdout.trim()}`);
+				if (stderr.trim()) parts.push(`${stderr.trim()}`);
+				if (stdout.trim()) parts.push(`${stdout.trim()}`);
 				reject(new Error(parts.join("\n")));
 			}
 		});
@@ -171,7 +171,7 @@ function authenticate(req, res, next) {
 		}
 
 		try {
-			console.log(`[AUTH] token length=${token.length}, head=${token.slice(0,6)}..., tail=${token.slice(-6)}`);
+			console.log(`[AUTH] token length=${token.length}, head=${token.slice(0, 6)}..., tail=${token.slice(-6)}`);
 		} catch (e) { /* ignore */ }
 
 		try {
@@ -203,7 +203,7 @@ app.post("/api/register", async (req, res) => {
 		}
 
 		var passw = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,20}$/;
-		if(!password.match(passw)){
+		if (!password.match(passw)) {
 			return res
 				.status(400)
 				.json({ success: false, error: "Bad password" });

@@ -1,9 +1,0 @@
-let get = fn(url) {
-    if _http_get == null { error "net.get not available" }
-    return _http_get(url)
-}
-
-let post = fn(url, body, headers) {
-    if _http_post == null { error "net.post not available" }
-    return _http_post(url, body, headers)
-}

@@ -1,540 +1,781 @@
-import { AlertCircle, Download, Play, Trash2, LogOut, User, Terminal, Zap, Code, Shield, Sun, Moon, Save, FolderOpen, FileText } from "lucide-react";
+import { AlertCircle, Download, Play, Trash2, LogOut, User, Terminal, Code, Save, FolderOpen, FileText, Settings, Moon, Sun, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from '../contexts/AuthContext';
-import Editor from "react-simple-code-editor";
+import MonacoEditor from '../components/Editor';
 
-const highlight = (code: string) => {
-    let highlighted = code;
+interface SavedCode {
+	id: string;
+	title: string;
+	code: string;
+	createdAt: string;
+	updatedAt: string;
+}
 
-    const colors = {
-        comment: '#6b7280',
-        string: '#059669',
-        keyword: '#1f2937',
-        number: '#0f172a',
-        function: '#374151'
-    };
-
-    highlighted = highlighted.replace(
-        /\/\/.*/g,
-        `<span style="color: ${colors.comment}; font-style: italic;">$&</span>`
-    );
-
-    highlighted = highlighted.replace(
-        /"(?:\\.|[^"\\])*"/g,
-        `<span style="color: ${colors.string};">$&</span>`
-    );
-
-    highlighted = highlighted.replace(
-        /\b(?:if|else|for|in|while|return|break|continue|const|let|fn|true|false)\b/g,
-        `<span style="color: ${colors.keyword}; font-weight: bold;">$&</span>`
-    );
-
-    highlighted = highlighted.replace(
-        /\b\d+(?:\.\d+)?\b/g,
-        `<span style="color: ${colors.number};">$&</span>`
-    );
-
-    highlighted = highlighted.replace(
-        /\b[a-zA-Z_]\w*(?=\s*\()/g,
-        `<span style="color: ${colors.function}; font-weight: bold;">$&</span>`
-    );
-
-    return highlighted;
+type EditorSettings = {
+	themeDark: string;
+	themeLight: string;
+	fontSize: number;
+	minimap: { enabled: boolean };
+	lineNumbers: string; // 'on' | 'off' | 'relative'
+	wordWrap: string; // 'on' | 'off'
+	tabSize: number;
+	fontFamily: string;
+	readOnly: boolean;
 };
 
-export default function Home() {
-    const [code, setCode] = useState<string>('');
-    const [output, setOutput] = useState<string>('');
-    const [isRunning, setIsRunning] = useState<boolean>(false);
-    const [error, setError] = useState<string>('');
-    const [currentTime, setCurrentTime] = useState<string>('');
-    const [keySequence, setKeySequence] = useState<string>('');
-    const [isSaving, setIsSaving] = useState<boolean>(false);
-    const [saveTitle, setSaveTitle] = useState<string>('');
-    const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
-    const [savedCodes, setSavedCodes] = useState<any[]>([]);
-    const [showLoadDialog, setShowLoadDialog] = useState<boolean>(false);
-    const [_, setCurrentCodeId] = useState<string | null>(null);
-    const [currentCodeTitle, setCurrentCodeTitle] = useState<string>('Untitled');
-    const [lastSaved, setLastSaved] = useState<string>('');
-    const { user, logout } = useAuth();
+export const Home: React.FC = () => {
+	const [code, setCode] = useState<string>('');
+	const [output, setOutput] = useState<string>('');
+	const [isRunning, setIsRunning] = useState<boolean>(false);
+	const [error, setError] = useState<string>('');
+	const [currentTime, setCurrentTime] = useState<string>('');
+	const [isTerminalMode, setIsTerminalMode] = useState<boolean>(false);
+	const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
+	const [savedCodes, setSavedCodes] = useState<SavedCode[]>([]);
+	const [showLoadDialog, setShowLoadDialog] = useState<boolean>(false);
+	const [currentCodeTitle, setCurrentCodeTitle] = useState<string>('Untitled');
+	const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
+	const [saveTitle, setSaveTitle] = useState<string>('');
+	const { user, logout } = useAuth();
 
-    const KONAMI_CODE = 'lynx';
-    const API_BASE = 'http://localhost:3001/api';
+	const API_BASE = 'http://localhost:3001/api';
+	const getAuthToken = () => localStorage.getItem('token');
 
-    const getAuthToken = () => {
-        return localStorage.getItem('token');
-    };
+	// canonical defaults
+	const defaultSettings: EditorSettings = {
+		themeDark: 'hc-black',
+		themeLight: 'vs',
+		fontSize: 14,
+		minimap: { enabled: true },
+		lineNumbers: 'on',
+		wordWrap: 'on',
+		tabSize: 2,
+		fontFamily: 'JetBrains Mono, Fira Code, Monaco, Consolas, monospace',
+		readOnly: false
+	};
 
-    useEffect(() => {
-        if (code) {
-            localStorage.setItem(`lynx_code_${user?.id}`, code);
-            localStorage.setItem(`lynx_code_title_${user?.id}`, currentCodeTitle);
-        }
-    }, [code, currentCodeTitle, user?.id]);
+	// Normalize incoming settings (from localStorage or older schema)
+	const normalizeEditorSettings = (raw: any): EditorSettings => {
+		console.log('Normalizing settings:', raw); // Debug log
 
-    useEffect(() => {
-        if (user?.id) {
-            const savedCode = localStorage.getItem(`lynx_code_${user.id}`);
-            const savedTitle = localStorage.getItem(`lynx_code_title_${user.id}`);
-            if (savedCode) {
-                setCode(savedCode);
-                setCurrentCodeTitle(savedTitle || 'Untitled');
-            }
-            loadSavedCodes();
-        }
-    }, [user?.id]);
+		if (!raw || typeof raw !== 'object') {
+			console.log('Using default settings');
+			return { ...defaultSettings };
+		}
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const now = new Date();
-            setCurrentTime(now.toLocaleTimeString());
-        }, 1000);
+		const res: EditorSettings = {
+			themeDark: typeof raw.themeDark === 'string' ? raw.themeDark : defaultSettings.themeDark,
+			themeLight: typeof raw.themeLight === 'string' ? raw.themeLight : defaultSettings.themeLight,
+			fontSize: typeof raw.fontSize === 'number' && Number.isFinite(raw.fontSize) ? raw.fontSize : defaultSettings.fontSize,
+			minimap: {
+				enabled: Boolean(raw.minimap?.enabled ?? raw.minimap ?? defaultSettings.minimap.enabled)
+			},
+			lineNumbers: typeof raw.lineNumbers === 'string' ? raw.lineNumbers : defaultSettings.lineNumbers,
+			wordWrap: typeof raw.wordWrap === 'string' ? raw.wordWrap : defaultSettings.wordWrap,
+			tabSize: typeof raw.tabSize === 'number' && Number.isFinite(raw.tabSize) ? raw.tabSize : defaultSettings.tabSize,
+			fontFamily: typeof raw.fontFamily === 'string' ? raw.fontFamily : defaultSettings.fontFamily,
+			readOnly: Boolean(raw.readOnly ?? defaultSettings.readOnly)
+		};
 
-        return () => clearInterval(interval);
-    }, []);
+		console.log('Normalized settings:', res); // Debug log
+		return res;
+	};
 
-    useEffect(() => {
-        let resetTimer: number | undefined;
-        const handleKeyPress = (e: KeyboardEvent) => {
-            const newSequence = (keySequence + e.key.toLowerCase()).slice(-20); // keep buffer small
-            setKeySequence(newSequence);
 
-            if (newSequence.includes(KONAMI_CODE)) {
-                setIsTerminalMode(prev => !prev);
-                setKeySequence('');
-            }
+	// editorSettings state (persisted) with normalization to avoid controlled/uncontrolled problems
+	const [editorSettings, setEditorSettings] = useState<EditorSettings>(() => {
+		try {
+			const raw = localStorage.getItem('lynx_editor_settings');
+			return raw ? normalizeEditorSettings(JSON.parse(raw)) : defaultSettings;
+		} catch (e) {
+			return defaultSettings;
+		}
+	});
 
-            if (resetTimer) {
-                window.clearTimeout(resetTimer);
-            }
-            resetTimer = window.setTimeout(() => {
-                setKeySequence('');
-            }, 3000);
-        };
+	const [showSettings, setShowSettings] = useState(false);
 
-        window.addEventListener('keydown', handleKeyPress);
-        return () => {
-            window.removeEventListener('keydown', handleKeyPress);
-            if (resetTimer) window.clearTimeout(resetTimer);
-        };
-    }, [keySequence]);
+	// persist settings on change (already normalized)
+	useEffect(() => {
+		try {
+			localStorage.setItem('lynx_editor_settings', JSON.stringify(editorSettings));
+		} catch (e) {
+			console.error('Failed to persist editor settings', e);
+		}
+	}, [editorSettings]);
 
-    const executeCode = async () => {
-        setIsRunning(true);
+	// useEffect(() => {
+	// 	const interval = setInterval(() => setCurrentTime(new Date().toLocaleTimeString()), 1000);
+	// 	return () => clearInterval(interval);
+	// }, []);
 
-        const loadingMessages = 'Kompilē kodu...\nAnalizē sintaksi...\nIzpilda...\n';
+	useEffect(() => {
+		if (user?.id) {
+			const savedCode = localStorage.getItem(`lynx_code_${user.id}`);
+			const savedTitle = localStorage.getItem(`lynx_code_title_${user.id}`);
+			if (savedCode) {
+				setCode(savedCode);
+				setCurrentCodeTitle(savedTitle || 'Untitled');
+			}
+			loadSavedCodes();
+		}
+	}, [user?.id]);
 
-        setOutput(loadingMessages);
-        setError('');
+	// Auto-save current code
+	useEffect(() => {
+		if (user?.id && code) {
+			localStorage.setItem(`lynx_code_${user.id}`, code);
+			localStorage.setItem(`lynx_code_title_${user.id}`, currentCodeTitle);
+		}
+	}, [code, currentCodeTitle, user?.id]);
 
-        try {
-            const response = await fetch(`${API_BASE}/compile`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ code }),
-            });
+	// Load saved codes from localStorage
+	const loadSavedCodes = () => {
+		if (!user?.id) return;
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+		try {
+			const saved = localStorage.getItem(`lynx_saved_codes_${user.id}`);
+			if (saved) {
+				setSavedCodes(JSON.parse(saved));
+			}
+		} catch (error) {
+			console.error('Error loading saved codes:', error);
+		}
+	};
 
-            const result = await response.json();
+	// Save current code
+	const saveCode = () => {
+		if (!user?.id || !saveTitle.trim()) return;
 
-            if (result.success) {
-                setOutput(`>>> COMPILATION SUCCESSFUL\n>>> OUTPUT:\n${result.output || '[NO OUTPUT - PROCESS COMPLETED]'}\n>>> END TRANSMISSION`);
-                setError('');
-            } else {
-                setError(`>>> COMPILATION FAILED\n>>> ERROR LOG:\n${result.error || 'Unknown compilation error'}\n>>> END ERROR REPORT`);
-                setOutput('');
-            }
-        } catch (e: any) {
-            const errorMessage = `Kompilācijas kļūda:\n${e.message}`;
-            setError(errorMessage);
-            setOutput('');
-        } finally {
-            setIsRunning(false);
-        }
-    };
+		const newCode: SavedCode = {
+			id: Date.now().toString(),
+			title: saveTitle.trim(),
+			code: code,
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString()
+		};
 
-    const saveCode = async () => {
-        if (!saveTitle.trim()) {
-            alert('Lūdzu norādiet nosaukumu');
-            return;
-        }
+		const updatedCodes = [...savedCodes, newCode];
+		setSavedCodes(updatedCodes);
+		localStorage.setItem(`lynx_saved_codes_${user.id}`, JSON.stringify(updatedCodes));
 
-        setIsSaving(true);
-        try {
-            const response = await fetch(`${API_BASE}/code/save`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getAuthToken()}`
-                },
-                body: JSON.stringify({
-                    title: saveTitle,
-                    code
-                }),
-            });
+		setCurrentCodeTitle(saveTitle.trim());
+		setSaveTitle('');
+		setShowSaveDialog(false);
+	};
 
-            const result = await response.json();
+	// Load a saved code
+	const loadCode = (savedCode: SavedCode) => {
+		setCode(savedCode.code);
+		setCurrentCodeTitle(savedCode.title);
+		setShowLoadDialog(false);
+		setOutput('');
+		setError('');
+	};
 
-            if (result.success) {
-                setCurrentCodeId(result.id);
-                setCurrentCodeTitle(saveTitle);
-                setLastSaved(new Date().toLocaleTimeString());
-                setShowSaveDialog(false);
-                setSaveTitle('');
-                loadSavedCodes();
+	// Delete a saved code
+	const deleteCode = (codeId: string) => {
+		if (!user?.id) return;
 
-                alert('Kods saglabāts veiksmīgi!');
-            } else {
-                throw new Error(result.error || 'Unknown error');
-            }
-        } catch (e: any) {
-            const errorMsg = `Saglabāšanas kļūda: ${e.message}`;
-            alert(errorMsg);
-        } finally {
-            setIsSaving(false);
-        }
-    };
+		const updatedCodes = savedCodes.filter(c => c.id !== codeId);
+		setSavedCodes(updatedCodes);
+		localStorage.setItem(`lynx_saved_codes_${user.id}`, JSON.stringify(updatedCodes));
+	};
 
-    const loadSavedCodes = async () => {
-        try {
-            const response = await fetch(`${API_BASE}/code/list`, {
-                headers: {
-                    'Authorization': `Bearer ${getAuthToken()}`
-                }
-            });
+	// simple executeCode stub similar to original
+	const executeCode = async () => {
+		setIsRunning(true);
+		setOutput('Kompilē kodu...\n');
+		setError('');
 
-            const result = await response.json();
-            if (result.success) {
-                setSavedCodes(result.codes || []);
-            } else {
-                setSavedCodes([]);
-            }
-        } catch (err) {
-            console.error('Error loading saved codes:', err);
-            setSavedCodes([]);
-        }
-    };
+		try {
+			const response = await fetch(`${API_BASE}/compile`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ code })
+			});
+			const result = await response.json();
+			if (result.success) setOutput(result.output || '[NO OUTPUT]');
+			else setError(result.error || 'Unknown error');
+		} catch (e: any) {
+			setError(e.message || String(e));
+		} finally { setIsRunning(false); }
+	};
 
-    const loadCode = async (codeId: string) => {
-        try {
-            const response = await fetch(`${API_BASE}/code/${codeId}`, {
-                headers: {
-                    'Authorization': `Bearer ${getAuthToken()}`
-                }
-            });
+	const downloadCode = () => {
+		const blob = new Blob([code], { type: 'text/plain' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `${currentCodeTitle.replace(/[^a-zA-Z0-9]/g, '_')}.lynx`;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		URL.revokeObjectURL(url);
+	};
 
-            const result = await response.json();
-            if (result.success) {
-                setCode(result.code.code);
-                setCurrentCodeTitle(result.code.title);
-                setCurrentCodeId(result.code.id);
-                setShowLoadDialog(false);
-                setOutput('');
-                setError('');
-            } else {
-                throw new Error(result.error || 'Unknown error');
-            }
-        } catch (e: any) {
-            alert(`Kļūda ielādējot kodu: ${e.message}`);
-        }
-    };
+	const clearCode = () => {
+		setCode('');
+		setOutput('');
+		setError('');
+		setCurrentCodeTitle('Untitled');
+	};
 
-    const clearCode = () => {
-        setCode('');
-        setOutput('');
-        setError('');
-        setCurrentCodeId(null);
-        setCurrentCodeTitle('Untitled');
-        localStorage.removeItem(`lynx_code_${user?.id}`);
-        localStorage.removeItem(`lynx_code_title_${user?.id}`);
-    };
+	const updateSetting = (key: keyof EditorSettings | 'minimap', value: any) => {
+		console.log('Updating setting:', key, value); // Debug log
 
-    const downloadCode = () => {
-        const blob = new Blob([code], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${currentCodeTitle.replace(/[^a-zA-Z0-9]/g, '_')}.lynx`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-    };
+		setEditorSettings(prev => {
+			let next: any = { ...prev };
 
-    return (
-        <div className="min-h-screen bg-white text-gray-900">
-            {showSaveDialog && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white border border-gray-300 rounded-lg p-6 max-w-md w-full mx-4">
-                        <h3 className="text-gray-900 font-semibold mb-4">Saglabāt kodu</h3>
-                        <input
-                            type="text"
-                            value={saveTitle}
-                            onChange={(e) => setSaveTitle(e.target.value)}
-                            placeholder="Ievadiet nosaukumu"
-                            className="w-full border border-gray-300 rounded p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                            autoFocus
-                        />
-                        <div className="flex gap-3">
-                            <button
-                                onClick={saveCode}
-                                disabled={isSaving}
-                                className="flex-1 bg-gray-900 text-white p-2 rounded hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                            >
-                                {isSaving ? 'Saglabā...' : 'Saglabāt'}
-                            </button>
-                            <button
-                                onClick={() => setShowSaveDialog(false)}
-                                className="flex-1 border border-gray-300 text-gray-700 p-2 rounded hover:bg-gray-50"
-                            >
-                                Atcelt
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+			if (key === 'minimap') {
+				if (typeof value === 'boolean') {
+					next.minimap = { enabled: value };
+				} else if (typeof value === 'string') {
+					next.minimap = { enabled: value === 'on' };
+				} else {
+					next.minimap = { ...(prev.minimap || {}), ...(value || {}) };
+				}
+			} else {
+				next[key] = value;
+			}
 
-            {/* Load Dialog */}
-            {showLoadDialog && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white border border-gray-300 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96">
-                        <h3 className="text-gray-900 font-semibold mb-4">Saglabātie kodi</h3>
-                        <div className="max-h-64 overflow-y-auto mb-4">
-                            {savedCodes.length === 0 ? (
-                                <div className="text-gray-500 text-center py-8">Nav saglabātu kodu</div>
-                            ) : (
-                                savedCodes.map((savedCode) => (
-                                    <div
-                                        key={savedCode.id}
-                                        onClick={() => loadCode(savedCode.id)}
-                                        className="border border-gray-200 rounded p-4 mb-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                                    >
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <FileText className="w-4 h-4 text-gray-600" />
-                                            <div className="font-medium">{savedCode.title}</div>
-                                        </div>
-                                        <div className="text-xs text-gray-500">
-                                            Izveidots: {new Date(savedCode.created_at).toLocaleString()}
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => setShowLoadDialog(false)}
-                                className="flex-1 border border-gray-300 text-gray-700 p-2 rounded hover:bg-gray-50"
-                            >
-                                Aizvērt
-                            </button>
-                            <button
-                                onClick={() => {
-                                    loadSavedCodes();
-                                }}
-                                className="flex-1 border border-gray-300 text-gray-700 p-2 rounded hover:bg-gray-50"
-                            >
-                                Atsvaidzināt
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+			const normalized = normalizeEditorSettings(next);
+			console.log('New settings after update:', normalized); // Debug log
+			return normalized;
+		});
+	};
 
-            <header className="bg-white border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="flex justify-between items-center h-16">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
-                                <Code className="w-6 h-6 text-white" />
-                            </div>
-                            <div>
-                                <h1 className="text-xl font-bold text-gray-900">Lynx IDE</h1>
-                            </div>
-                        </div>
+	// Reset settings to default (normalized)
+	const resetSettings = () => {
+		setEditorSettings(normalizeEditorSettings(defaultSettings));
+	};
 
-                        <div className="flex items-center gap-4">
-                            <div className="text-sm text-gray-500">
-                                {currentTime}
-                            </div>
-                            <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border">
-                                <User className="w-4 h-4 text-gray-600" />
-                                <span className="text-sm text-gray-700">{user?.username}</span>
-                            </div>
-                            <button
-                                onClick={logout}
-                                className="flex items-center gap-2 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                            >
-                                <LogOut className="w-4 h-4" />
-                                Izrakstīties
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </header>
+	// Save Dialog Component
+	const SaveDialog = () => (
+		<div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+			<div className={`max-w-md w-full mx-4 p-6 rounded-xl ${isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'} border`}>
+				<div className="flex items-center justify-between mb-4">
+					<h3 className={`${isDarkMode ? 'text-white' : 'text-black'} font-semibold`}>Saglabāt kodu</h3>
+					<button onClick={() => setShowSaveDialog(false)} className={`p-1 rounded ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
+						<X className="w-4 h-4" />
+					</button>
+				</div>
 
-            <div className="max-w-7xl mx-auto p-6">
-                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                    <div className="flex items-center justify-between p-4 bg-gray-50">
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={executeCode}
-                                disabled={isRunning || !code.trim()}
-                                className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium disabled:cursor-not-allowed transition-colors"
-                            >
-                                {isRunning ? (
-                                    <>
-                                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                                        Izpilda...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Play size={16} />
-                                        Palaist kodu
-                                    </>
-                                )}
-                            </button>
-                        </div>
+				<div className="space-y-4">
+					<div>
+						<label className={`block text-sm mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+							Nosaukums
+						</label>
+						<input
+							type="text"
+							value={saveTitle}
+							onChange={(e) => setSaveTitle(e.target.value)}
+							placeholder="Ievadi koda nosaukumu..."
+							className={`w-full p-3 rounded-lg border ${isDarkMode
+								? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400'
+								: 'bg-white border-gray-300 text-black placeholder-gray-500'
+								}`}
+							autoFocus
+						/>
+					</div>
 
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => {
-                                    setSaveTitle(currentCodeTitle);
-                                    setShowSaveDialog(true);
-                                }}
-                                disabled={!code.trim()}
-                                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <Save size={16} />
-                                Saglabāt
-                            </button>
-                            <button
-                                onClick={() => {
-                                    loadSavedCodes();
-                                    setShowLoadDialog(true);
-                                }}
-                                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                            >
-                                <FolderOpen size={16} />
-                                Ielādēt
-                            </button>
-                            <button
-                                onClick={downloadCode}
-                                disabled={!code.trim()}
-                                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <Download size={16} />
-                                Lejupielādēt
-                            </button>
-                            <button
-                                onClick={clearCode}
-                                disabled={!code.trim() && !output && !error}
-                                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <Trash2 size={16} />
-                                Notīrīt
-                            </button>
-                        </div>
-                    </div>
+					<div className="flex gap-3">
+						<button
+							onClick={() => setShowSaveDialog(false)}
+							className={`flex-1 p-3 rounded-lg border ${isDarkMode
+								? 'border-gray-700 text-gray-300 hover:bg-gray-800'
+								: 'border-gray-300 text-gray-700 hover:bg-gray-50'
+								}`}
+						>
+							Atcelt
+						</button>
+						<button
+							onClick={saveCode}
+							disabled={!saveTitle.trim()}
+							className={`flex-1 p-3 rounded-lg text-white ${saveTitle.trim()
+								? 'bg-blue-600 hover:bg-blue-700'
+								: 'bg-gray-400 cursor-not-allowed'
+								}`}
+						>
+							Saglabāt
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2">
-                        {/* Editor */}
-                        <div className="border-r border-gray-200">
-                            <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
-                                <div className="flex items-center gap-2 text-sm">
-                                    <Code className="w-4 h-4 text-gray-600" />
-                                    <span className="text-gray-700 font-medium">{currentCodeTitle}.lynx</span>
-                                    <span className="ml-auto text-gray-500">Rinda: {(code.match(/\n/g) || []).length + 1}</span>
-                                </div>
-                            </div>
-                            <div className="h-[600px] lg:h-[65vh] relative bg-white">
-                                <Editor
-                                    value={code}
-                                    onValueChange={setCode}
-                                    highlight={(code) => highlight(code)}
-                                    padding={20}
-                                    className="w-full h-full font-mono text-sm bg-white text-gray-900 leading-relaxed resize-none border-none outline-none"
-                                    textareaClassName="outline-none resize-none bg-white text-gray-900 caret-gray-900 selection:bg-gray-200"
-                                    style={{
-                                        fontFamily: '"SF Mono", "Monaco", "Inconsolata", "Roboto Mono", monospace',
-                                        fontSize: 14,
-                                        lineHeight: 1.6,
-                                        backgroundColor: 'white',
-                                        color: '#111827',
-                                        minHeight: '100%'
-                                    }}
-                                    placeholder="// Ievadiet savu Lynx kodu šeit..."
-                                />
-                            </div>
-                        </div>
+	// Load Dialog Component
+	const LoadDialog = () => (
+		<div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+			<div className={`max-w-2xl w-full mx-4 p-6 rounded-xl ${isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'} border max-h-[80vh]`}>
+				<div className="flex items-center justify-between mb-4">
+					<h3 className={`${isDarkMode ? 'text-white' : 'text-black'} font-semibold`}>Ielādēt kodu</h3>
+					<button onClick={() => setShowLoadDialog(false)} className={`p-1 rounded ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
+						<X className="w-4 h-4" />
+					</button>
+				</div>
 
-                        {/* Output */}
-                        <div className="bg-white">
-                            <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <Terminal className="w-4 h-4 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">Konsoles izvads</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className={`w-2 h-2 rounded-full ${
-                                            output && !error ? 'bg-green-500' :
-                                            error ? 'bg-red-500' :
-                                            'bg-gray-400'
-                                        }`}></div>
-                                        <span className="text-xs text-gray-500">
-                                            {output && !error ? 'Gatavs' :
-                                             error ? 'Kļūda' :
-                                             'Gaida'}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="h-[600px] lg:h-[65vh] p-6 overflow-auto bg-gray-50">
-                                {!output && !error && (
-                                    <div className="flex flex-col items-center justify-center h-full text-center">
-                                        <div className="bg-white border border-gray-200 rounded-lg p-8">
-                                            <Terminal className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                            <div className="text-gray-900 font-medium mb-2">Gatavs kompilēt</div>
-                                            <div className="text-gray-500 text-sm">
-                                                Ieraksti kodu un nospied "Palaist kodu", lai redzētu izvadu
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                                {error && (
-                                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <AlertCircle className="w-5 h-5 text-red-500" />
-                                            <span className="text-red-800 font-semibold">Kļūda</span>
-                                        </div>
-                                        <pre className="text-red-700 text-sm bg-white border border-red-200 rounded p-3 overflow-x-auto">
-{error}
-                                        </pre>
-                                    </div>
-                                )}
-                                {output && (
-                                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <Zap className="w-5 h-5 text-green-600" />
-                                            <span className="text-green-800 font-semibold">Izvads</span>
-                                        </div>
-                                        <pre className="text-green-800 text-sm bg-white border border-green-200 rounded p-3 overflow-x-auto">
-{output}
-                                        </pre>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
+				<div className="space-y-2 max-h-96 overflow-y-auto">
+					{savedCodes.length === 0 ? (
+						<div className={`text-center py-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+							Nav saglabātu kodu
+						</div>
+					) : (
+						savedCodes.map((savedCode) => (
+							<div key={savedCode.id} className={`p-4 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} flex items-center justify-between`}>
+								<div className="flex-1">
+									<div className={`font-medium ${isDarkMode ? 'text-white' : 'text-black'}`}>
+										{savedCode.title}
+									</div>
+									<div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+										Saglabāts: {new Date(savedCode.createdAt).toLocaleDateString('lv-LV')} {new Date(savedCode.createdAt).toLocaleTimeString('lv-LV')}
+									</div>
+									<div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+										{savedCode.code.length} simboli, {(savedCode.code.match(/\n/g) || []).length + 1} rindas
+									</div>
+								</div>
+								<div className="flex gap-2">
+									<button
+										onClick={() => loadCode(savedCode)}
+										className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+										title="Ielādēt"
+									>
+										<FolderOpen className="w-4 h-4" />
+									</button>
+									<button
+										onClick={() => deleteCode(savedCode.id)}
+										className={`p-2 rounded-lg ${isDarkMode ? 'bg-red-900 text-red-300 hover:bg-red-800' : 'bg-red-100 text-red-600 hover:bg-red-200'}`}
+										title="Dzēst"
+									>
+										<Trash2 className="w-4 h-4" />
+									</button>
+								</div>
+							</div>
+						))
+					)}
+				</div>
+
+				<div className="mt-4 pt-4 border-t">
+					<button
+						onClick={() => setShowLoadDialog(false)}
+						className={`w-full p-3 rounded-lg border ${isDarkMode
+							? 'border-gray-700 text-gray-300 hover:bg-gray-800'
+							: 'border-gray-300 text-gray-700 hover:bg-gray-50'
+							}`}
+					>
+						Aizvērt
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+
+	// Settings UI content
+	const SettingsModal = () => {
+
+		return (
+			<div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+				<div className={`max-w-lg w-full mx-4 p-6 rounded-xl ${isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'} border max-h-[80vh] overflow-y-auto`}>
+					<div className="flex items-center justify-between mb-4">
+						<h3 className={`${isDarkMode ? 'text-white' : 'text-black'} font-semibold`}>Redaktora iestatījumi</h3>
+						<button onClick={() => setShowSettings(false)} className={`p-1 rounded ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
+							<X className="w-4 h-4" />
+						</button>
+					</div>
+
+					<div className="space-y-4">
+						<div className="space-y-3">
+							<label className={`block text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+								Tumšā tēma
+							</label>
+							<select
+								value={editorSettings.themeDark || 'hc-black'}
+								onChange={(e) => {
+									console.log('Dark theme changing to:', e.target.value);
+									updateSetting('themeDark', e.target.value);
+								}}
+								className={`w-full p-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${isDarkMode
+										? 'bg-gray-800 border-gray-600 text-white'
+										: 'bg-white border-gray-300 text-gray-900'
+									}`}
+							>
+								<option value="hc-black">High Contrast Black</option>
+								<option value="vs-dark">VS Dark</option>
+								<option value="monokai">Monokai</option>
+							</select>
+						</div>
+
+						<div className="space-y-3">
+							<label className={`block text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+								Gaišā tēma
+							</label>
+							<select
+								value={editorSettings.themeLight || 'vs'}
+								onChange={(e) => {
+									console.log('Light theme changing to:', e.target.value);
+									updateSetting('themeLight', e.target.value);
+								}}
+								className={`w-full p-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${isDarkMode
+										? 'bg-gray-800 border-gray-600 text-white'
+										: 'bg-white border-gray-300 text-gray-900'
+									}`}
+							>
+								<option value="vs">VS Light</option>
+								<option value="hc-light">High Contrast Light</option>
+							</select>
+						</div>
+
+						<div className="space-y-3">
+							<label className={`block text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+								Fonta izmērs: {editorSettings.fontSize}
+							</label>
+							<input
+								type="range"
+								min={10}
+								max={36}
+								value={editorSettings.fontSize || 14}
+								onChange={(e) => {
+									const newSize = Number(e.target.value);
+									console.log('Font size changing to:', newSize);
+									updateSetting('fontSize', newSize);
+								}}
+								className={`w-full`}
+							/>
+							<div className="flex justify-between text-xs text-gray-500">
+								<span>10px</span>
+								<span>36px</span>
+							</div>
+						</div>
+
+						<div className="space-y-3">
+							<label className={`block text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+								Mini karte
+							</label>
+							<select
+								value={editorSettings.minimap?.enabled ? 'on' : 'off'}
+								onChange={(e) => {
+									console.log('Minimap changing to:', e.target.value);
+									updateSetting('minimap', e.target.value === 'on');
+								}}
+								className={`w-full p-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${isDarkMode
+										? 'bg-gray-800 border-gray-600 text-white'
+										: 'bg-white border-gray-300 text-gray-900'
+									}`}
+							>
+								<option value="on">Ieslēgta</option>
+								<option value="off">Izslēgta</option>
+							</select>
+						</div>
+
+						<div className="space-y-3">
+							<label className={`block text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+								Rindu numuri
+							</label>
+							<select
+								value={editorSettings.lineNumbers || 'on'}
+								onChange={(e) => {
+									console.log('Line numbers changing to:', e.target.value);
+									updateSetting('lineNumbers', e.target.value);
+								}}
+								className={`w-full p-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${isDarkMode
+										? 'bg-gray-800 border-gray-600 text-white'
+										: 'bg-white border-gray-300 text-gray-900'
+									}`}
+							>
+								<option value="on">Ieslēgti</option>
+								<option value="off">Izslēgti</option>
+								<option value="relative">Relatīvi</option>
+							</select>
+						</div>
+
+						<div className="space-y-3">
+							<label className={`block text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+								Teksta pārnešana
+							</label>
+							<select
+								value={editorSettings.wordWrap || 'on'}
+								onChange={(e) => {
+									console.log('Word wrap changing to:', e.target.value);
+									updateSetting('wordWrap', e.target.value);
+								}}
+								className={`w-full p-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${isDarkMode
+										? 'bg-gray-800 border-gray-600 text-white'
+										: 'bg-white border-gray-300 text-gray-900'
+									}`}
+							>
+								<option value="on">Ieslēgta</option>
+								<option value="off">Izslēgta</option>
+							</select>
+						</div>
+
+						<div className="space-y-3">
+							<label className={`block text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+								Tab izmērs
+							</label>
+							<select
+								value={editorSettings.tabSize?.toString() || '2'}
+								onChange={(e) => {
+									const newTabSize = Number(e.target.value);
+									console.log('Tab size changing to:', newTabSize);
+									updateSetting('tabSize', newTabSize);
+								}}
+								className={`w-full p-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${isDarkMode
+										? 'bg-gray-800 border-gray-600 text-white'
+										: 'bg-white border-gray-300 text-gray-900'
+									}`}
+							>
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="3">3</option>
+								<option value="4">4</option>
+								<option value="6">6</option>
+								<option value="8">8</option>
+							</select>
+						</div>
+
+						<div className="space-y-3">
+							<label className={`block text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+								Fonta saime
+							</label>
+							<input
+								type="text"
+								value={editorSettings.fontFamily || defaultSettings.fontFamily}
+								onChange={(e) => {
+									console.log('Font family changing to:', e.target.value);
+									updateSetting('fontFamily', e.target.value);
+								}}
+								className={`w-full p-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${isDarkMode
+										? 'bg-gray-800 border-gray-600 text-white'
+										: 'bg-white border-gray-300 text-gray-900'
+									}`}
+							/>
+						</div>
+
+						<div className="flex items-center space-x-3">
+							<input
+								id="readonly-checkbox"
+								type="checkbox"
+								checked={!!editorSettings.readOnly}
+								onChange={(e) => {
+									console.log('Read only changing to:', e.target.checked);
+									updateSetting('readOnly', e.target.checked);
+								}}
+								className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+							/>
+							<label htmlFor="readonly-checkbox" className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+								Tikai lasāms
+							</label>
+						</div>
+					</div>
+
+					<div className="mt-6 flex gap-3">
+						<button
+							onClick={() => {
+								console.log('Resetting settings to:', defaultSettings);
+								setEditorSettings({ ...defaultSettings });
+							}}
+							className={`flex-1 p-3 rounded-lg border ${isDarkMode
+								? 'border-gray-700 text-gray-300 hover:bg-gray-800'
+								: 'border-gray-300 text-gray-700 hover:bg-gray-50'
+								}`}
+						>
+							Atiestatīt
+						</button>
+						<button
+							onClick={() => setShowSettings(false)}
+							className="flex-1 p-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+						>
+							Saglabāt
+						</button>
+					</div>
+				</div>
+			</div>
+		);
+	};
+
+	// Merge editorSettings into a shape the MonacoEditor expects in `options` prop
+	const monacoOptions = {
+		minimap: editorSettings.minimap ?? { enabled: true },
+		fontSize: editorSettings.fontSize ?? 14,
+		lineNumbers: editorSettings.lineNumbers ?? 'on',
+		wordWrap: editorSettings.wordWrap ?? 'on',
+		tabSize: editorSettings.tabSize ?? 2,
+		fontFamily: editorSettings.fontFamily,
+		readOnly: editorSettings.readOnly ?? false,
+		renderLineHighlight: 'all',
+		smoothScrolling: true,
+		automaticLayout: true,
+	};
+
+	return (
+		<div className={`min-h-screen ${isDarkMode ? 'bg-black text-white' : 'bg-white text-black'} transition-colors duration-200`}>
+			{showSettings && <SettingsModal />}
+			{showSaveDialog && <SaveDialog />}
+			{showLoadDialog && <LoadDialog />}
+
+			<header className={`${isDarkMode ? 'bg-black border-gray-700' : 'bg-white border-gray-200'} border-b`}>
+				<div className="max-w-full px-6 py-2 flex items-center justify-between">
+					<div className="flex items-center gap-3">
+						<div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDarkMode ? 'bg-white' : 'bg-black'}`}>
+							<Code className={`${isDarkMode ? 'text-black' : 'text-white'} w-5 h-5`} />
+						</div>
+						<h1 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-black'}`}>Lynx IDE</h1>
+					</div>
+
+					<div className="flex items-center gap-3">
+						<div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{currentTime}</div>
+						<button
+							onClick={() => setIsDarkMode(prev => !prev)}
+							className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+						>
+							{isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+						</button>
+						<div className={`flex items-center gap-2 px-3 py-1.5 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'} rounded-lg`}>
+							<User className="w-4 h-4" />
+							<span className="text-sm">{user?.username}</span>
+						</div>
+						<button
+							onClick={logout}
+							className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg ${isDarkMode ? 'border-gray-700 hover:bg-gray-800' : 'border-gray-300 hover:bg-gray-50'}`}
+						>
+							<LogOut className="w-4 h-4" />
+							<span className="text-sm">Iziet</span>
+						</button>
+					</div>
+				</div>
+			</header>
+
+			<div className="flex h-[calc(100vh-3.5rem)]">
+				<div className={`${isDarkMode ? 'bg-black border-gray-700' : 'bg-white border-gray-200'} w-12 border-r flex flex-col items-center py-4 space-y-3`}>
+					<button
+						onClick={executeCode}
+						disabled={isRunning || !code.trim()}
+						className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} disabled:opacity-50`}
+						title="Palaist kodu"
+					>
+						{isRunning ? <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" /> : <Play size={16} />}
+					</button>
+					<button
+						onClick={() => { setSaveTitle(currentCodeTitle); setShowSaveDialog(true); }}
+						className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+						title="Saglabāt kodu"
+					>
+						<Save size={16} />
+					</button>
+					<button
+						onClick={() => setShowLoadDialog(true)}
+						className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+						title="Ielādēt kodu"
+					>
+						<FolderOpen size={16} />
+					</button>
+					<button
+						onClick={downloadCode}
+						className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+						title="Lejupielādēt kodu"
+					>
+						<Download size={16} />
+					</button>
+					<button
+						onClick={clearCode}
+						className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+						title="Notīrīt kodu"
+					>
+						<Trash2 size={16} />
+					</button>
+
+					<div className="flex-1" />
+
+					<button
+						onClick={() => setShowSettings(true)}
+						className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+						title="Redaktora iestatījumi"
+					>
+						<Settings size={16} />
+					</button>
+				</div>
+
+				<div className="flex-1 flex">
+					<div className="flex-1 flex flex-col">
+						<div className={`${isDarkMode ? 'bg-black border-gray-700' : 'bg-gray-50 border-gray-200'} border-b px-4 py-2 flex items-center justify-between`}>
+							<div className="flex items-center gap-2 text-sm">
+								<Code className="w-4 h-4" />
+								<span className="font-medium">{currentCodeTitle}.lynx</span>
+							</div>
+							<div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+								Rindas: {(code.match(/\n/g) || []).length + 1} | Simboli: {code.length}
+							</div>
+						</div>
+
+						<div className="flex-1">
+							<MonacoEditor
+								value={code}
+								onChange={(v) => setCode(v)}
+								language={'lynx'}
+								theme={isDarkMode ? editorSettings.themeDark : editorSettings.themeLight}
+								readOnly={editorSettings.readOnly}
+								height={'100%'}
+								options={monacoOptions}
+							/>
+						</div>
+					</div>
+
+					<div className={`${isDarkMode ? 'bg-black border-gray-700' : 'bg-white border-gray-200'} w-96 border-l flex flex-col`}>
+						<div className={`border-b px-4 py-2 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+							<div className="flex items-center justify-between">
+								<div className="flex items-center gap-2 text-sm">
+									<Terminal className="w-4 h-4" />
+									<span className="font-medium">Konsoles izvads</span>
+								</div>
+								<div className="flex items-center gap-2">
+									<div className={`w-2 h-2 rounded-full ${output && !error ? 'bg-green-500' :
+										error ? 'bg-red-500' :
+											'bg-gray-400'
+										}`}></div>
+									<span className="text-xs">
+										{output && !error ? 'Gatavs' : error ? 'Kļūda' : 'Gaida'}
+									</span>
+								</div>
+							</div>
+						</div>
+
+						<div className="flex-1 p-4 overflow-auto">
+							{!output && !error && (
+								<div className="flex items-center justify-center h-full">
+									<div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+										Gatavs kompilēt
+									</div>
+								</div>
+							)}
+							{error && (
+								<div className="space-y-2">
+									<div className="flex items-center gap-2 text-red-500 text-sm font-medium">
+										<AlertCircle className="w-4 h-4" />
+										Kļūda
+									</div>
+									<pre className={`text-sm font-mono whitespace-pre-wrap ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>
+										{error}
+									</pre>
+								</div>
+							)}
+							{output && (
+								<div className="space-y-2">
+									<div className="flex items-center gap-2 text-green-500 text-sm font-medium">
+										<Terminal className="w-4 h-4" />
+										Izvads
+									</div>
+									<pre className={`text-sm font-mono whitespace-pre-wrap ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+										{output}
+									</pre>
+								</div>
+							)}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+};
+
+export default Home;
 

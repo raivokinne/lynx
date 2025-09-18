@@ -975,7 +975,6 @@ func loadModule(name string, env *object.Env) error {
 
 func loadModuleSource(name string, env *object.Env) ([]byte, error) {
 	possiblePaths := []string{
-		fmt.Sprintf("./std/%s.lynx", name),
 		fmt.Sprintf("/usr/local/lib/lynx/std/%s.lynx", name),
 		fmt.Sprintf("%s/%s.lynx", env.Dir, name),
 	}
