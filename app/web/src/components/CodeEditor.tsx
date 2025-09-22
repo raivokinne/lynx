@@ -69,7 +69,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           className={`${isDarkMode ? "bg-black border-gray-700" : "bg-gray-50 border-gray-200"} border-b px-4 py-2 flex items-center justify-between`}
         >
           {savedCodes.map((code) => (
-            <div className="flex justify-between items-center w-full p-1 px-4">
+            <div
+              key={code.id}
+              className="flex justify-between items-center w-full p-1 px-4"
+            >
               <button
                 onClick={() => onLoad(code)}
                 className="flex gap-2 items-center text-sm"

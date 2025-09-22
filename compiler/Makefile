@@ -1,6 +1,6 @@
 BINARY_NAME = lynx
 MAIN_PACKAGE = ./lynx.go
-BUILD_DIR = ./web/server/build
+BUILD_DIR = ../app/server/build
 EXAMPLE ?= main.lynx
 
 .PHONY: build clean run install test
