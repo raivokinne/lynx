@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { useEditorSettings } from "../hooks/useEditorSettings";
 import { useCodeManagement } from "../hooks/useCodeManagement";
 import { useCodeExecution } from "../hooks/useCodeExecution";
 import { Header } from "../components/Header";
@@ -8,13 +7,22 @@ import { Sidebar } from "../components/Sidebar";
 import { CodeEditor } from "../components/CodeEditor";
 import { OutputPanel } from "../components/OutputPanel";
 import { SaveDialog } from "../components/SaveDialog";
-import { LoadDialog } from "../components/LoadDialog";
 import { SettingsModal } from "../components/SettingsModal";
 import type { SavedCode } from "../types/types";
+import { useSettings } from "../hooks/useSettings";
 
 export const Home: React.FC = () => {
   const { user, logout } = useAuth();
-  const { editorSettings, updateSetting, resetSettings } = useEditorSettings();
+  const {
+    editorSettings,
+    updateSetting,
+    resetSettings,
+    saveSettings,
+    loading,
+    errorSettings,
+    clearError,
+    hasUnsavedChanges,
+  } = useSettings();
   const {
     code,
     setCode,
@@ -67,6 +75,11 @@ export const Home: React.FC = () => {
           onUpdateSetting={updateSetting}
           onResetSettings={resetSettings}
           onClose={() => setShowSettings(false)}
+          onClearError={clearError}
+          onSaveSettings={saveSettings}
+          error={errorSettings}
+          hasUnsavedChanges={hasUnsavedChanges}
+          loading={loading}
         />
       )}
 
@@ -77,16 +90,6 @@ export const Home: React.FC = () => {
           setSaveTitle={setSaveTitle}
           onSave={handleSaveCode}
           onClose={() => setShowSaveDialog(false)}
-        />
-      )}
-
-      {showLoadDialog && (
-        <LoadDialog
-          isDarkMode={isDarkMode}
-          savedCodes={savedCodes}
-          onLoad={handleLoadCode}
-          onDelete={deleteCode}
-          onClose={() => setShowLoadDialog(false)}
         />
       )}
 
@@ -120,6 +123,9 @@ export const Home: React.FC = () => {
             currentCodeTitle={currentCodeTitle}
             editorSettings={editorSettings}
             onChange={setCode}
+            onSaveCode={saveCode}
+            savedCodes={savedCodes}
+            onLoad={handleLoadCode}
           />
 
           <OutputPanel isDarkMode={isDarkMode} output={output} error={error} />
