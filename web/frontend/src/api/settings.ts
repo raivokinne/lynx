@@ -1,7 +1,6 @@
 import type { EditorSettings } from "../types/types";
 import { getAuthToken } from "../utils/utils";
-
-const API_BASE_URL = "http://localhost:3001";
+import { API_BASE } from "../types/constants";
 
 export const settingsAPI = {
   async getSettings(): Promise<{
@@ -12,7 +11,7 @@ export const settingsAPI = {
     const token = getAuthToken();
     if (!token) throw new Error("No authentication token");
 
-    const response = await fetch(`${API_BASE_URL}/api/settings`, {
+    const response = await fetch(`${API_BASE}/settings`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -27,7 +26,7 @@ export const settingsAPI = {
     const token = getAuthToken();
     if (!token) throw new Error("No authentication token");
 
-    const response = await fetch(`${API_BASE_URL}/api/settings`, {
+    const response = await fetch(`${API_BASE}/settings`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -43,7 +42,7 @@ export const settingsAPI = {
     const token = getAuthToken();
     if (!token) throw new Error("No authentication token");
 
-    const response = await fetch(`${API_BASE_URL}/api/settings`, {
+    const response = await fetch(`${API_BASE}/settings`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,

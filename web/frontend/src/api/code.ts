@@ -1,7 +1,6 @@
+import { API_BASE } from "../types/constants";
 import type { SavedCode } from "../types/types";
 import { getAuthToken } from "../utils/utils";
-
-const API_BASE_URL = "http://localhost:3001";
 
 export const codeApi = {
   async saveCode(
@@ -11,7 +10,7 @@ export const codeApi = {
     const token = getAuthToken();
     if (!token) throw new Error("No authentication token");
 
-    const response = await fetch(`${API_BASE_URL}/api/code/save`, {
+    const response = await fetch(`${API_BASE}/code/save`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -31,7 +30,7 @@ export const codeApi = {
     const token = getAuthToken();
     if (!token) throw new Error("No authentication token");
 
-    const response = await fetch(`${API_BASE_URL}/api/code/list`, {
+    const response = await fetch(`${API_BASE}/code/list`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -46,7 +45,7 @@ export const codeApi = {
     const token = getAuthToken();
     if (!token) throw new Error("No authentication token");
 
-    const response = await fetch(`${API_BASE_URL}/api/code/${id}`, {
+    const response = await fetch(`${API_BASE}/code/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -59,7 +58,7 @@ export const codeApi = {
     const token = getAuthToken();
     if (!token) throw new Error("No authentication token");
 
-    const response = await fetch(`${API_BASE_URL}/api/code/${id}`, {
+    const response = await fetch(`${API_BASE}/code/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
