@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Code, Plus } from "lucide-react";
+import { Code, Plus, X } from "lucide-react";
 import MonacoEditor from "./MonacoEditor";
 import type { EditorSettings, SavedCode } from "../types/types";
 import { SaveDialog } from "./SaveDialog";
@@ -13,6 +13,7 @@ interface CodeEditorProps {
   onChange: (value: string) => void;
   onSaveCode: (title: string) => void;
   onLoad: (savedCode: SavedCode) => void;
+  deleteCode: (codeId: string) => Promise<boolean>;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -23,6 +24,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   onChange,
   onSaveCode,
   onLoad,
+  deleteCode,
 }) => {
   const [saveTitle, setSaveTitle] = useState<string>("");
   const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
@@ -67,13 +69,21 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           className={`${isDarkMode ? "bg-black border-gray-700" : "bg-gray-50 border-gray-200"} border-b px-4 py-2 flex items-center justify-between`}
         >
           {savedCodes.map((code) => (
-            <button
-              onClick={() => onLoad(code)}
-              className="flex gap-2 items-center text-sm"
-            >
-              <Code className="w-4 h-4" />
-              <span className="font-medium">{code.title}</span>
-            </button>
+            <div className="flex justify-between items-center w-full p-1 px-4">
+              <button
+                onClick={() => onLoad(code)}
+                className="flex gap-2 items-center text-sm"
+              >
+                <Code className="w-4 h-4" />
+                <span className="font-medium">{code.title}</span>
+              </button>
+              <button
+                onClick={() => deleteCode(code.id)}
+                className="flex gap-2 items-center text-sm"
+              >
+                <X className="w-4 h-4 bg-red-500 text-white rounded-sm" />
+              </button>
+            </div>
           ))}
           <button
             onClick={handleShow}

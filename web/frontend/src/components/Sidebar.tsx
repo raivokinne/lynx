@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Play,
-  Save,
-  FolderOpen,
-  Download,
-  Trash2,
-  Settings,
-} from "lucide-react";
+import { Play, Download, Trash2, Settings, BookOpen } from "lucide-react";
 
 interface SidebarProps {
   isDarkMode: boolean;
@@ -14,10 +7,10 @@ interface SidebarProps {
   canRun: boolean;
   onRunCode: () => void;
   onSave: () => void;
-  onLoad: () => void;
   onDownload: () => void;
   onClear: () => void;
   onSettings: () => void;
+  onDocs: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -25,11 +18,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isRunning,
   canRun,
   onRunCode,
-  onSave,
-  onLoad,
   onDownload,
   onClear,
   onSettings,
+  onDocs,
 }) => (
   <div
     className={`${isDarkMode ? "bg-black border-gray-700" : "bg-white border-gray-200"} w-12 border-r flex flex-col items-center py-4 space-y-3`}
@@ -43,7 +35,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {isRunning ? (
         <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
       ) : (
-        <Play size={16} />
+        <Play size={24} />
       )}
     </button>
 
@@ -52,7 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       className={`p-2 rounded-lg ${isDarkMode ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
       title="Lejupielādēt kodu"
     >
-      <Download size={16} />
+      <Download size={24} />
     </button>
 
     <button
@@ -60,7 +52,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       className={`p-2 rounded-lg ${isDarkMode ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
       title="Notīrīt kodu"
     >
-      <Trash2 size={16} />
+      <Trash2 size={24} />
     </button>
 
     <div className="flex-1" />
@@ -70,7 +62,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       className={`p-2 rounded-lg ${isDarkMode ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
       title="Redaktora iestatījumi"
     >
-      <Settings size={16} />
+      <Settings size={24} />
+    </button>
+
+    <button
+      onClick={onDocs}
+      className={`p-2 rounded-lg ${isDarkMode ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
+      title="Redaktora iestatījumi"
+    >
+      <BookOpen size={24} />
     </button>
   </div>
 );

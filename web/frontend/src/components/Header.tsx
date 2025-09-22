@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { Code, Sun, Moon, User, LogOut } from "lucide-react";
 
 interface HeaderProps {
@@ -12,31 +12,40 @@ export const Header: React.FC<HeaderProps> = ({
   isDarkMode,
   username,
   onToggleTheme,
-  onLogout
+  onLogout,
 }) => (
-  <header className={`${isDarkMode ? 'bg-black border-gray-700' : 'bg-white border-gray-200'} border-b`}>
-    <div className="max-w-full px-6 py-2 flex items-center justify-between">
+  <header
+    className={`${isDarkMode ? "bg-black border-gray-700" : "bg-white border-gray-200"} border-b`}
+  >
+    <div className="max-w-full px-2 py-2 flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDarkMode ? 'bg-white' : 'bg-black'}`}>
-          <Code className={`${isDarkMode ? 'text-black' : 'text-white'} w-5 h-5`} />
-        </div>
-        <h1 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-black'}`}>Lynx IDE</h1>
+        <h1
+          className={`text-lg font-bold ${isDarkMode ? "text-white" : "text-black"}`}
+        >
+          Lynx IDE
+        </h1>
       </div>
 
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleTheme}
-          className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+          className={`p-2 rounded-lg ${isDarkMode ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
         >
-          {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          {isDarkMode ? (
+            <Sun className="w-4 h-4" />
+          ) : (
+            <Moon className="w-4 h-4" />
+          )}
         </button>
-        <div className={`flex items-center gap-2 px-3 py-1.5 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'} rounded-lg`}>
+        <div
+          className={`flex items-center gap-2 px-3 py-1.5 ${isDarkMode ? "bg-gray-900" : "bg-gray-100"} rounded-lg`}
+        >
           <User className="w-4 h-4" />
           <span className="text-sm">{username}</span>
         </div>
         <button
           onClick={onLogout}
-          className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg ${isDarkMode ? 'border-gray-700 hover:bg-gray-800' : 'border-gray-300 hover:bg-gray-50'}`}
+          className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg ${isDarkMode ? "border-gray-700 hover:bg-gray-800" : "border-gray-300 hover:bg-gray-50"}`}
         >
           <LogOut className="w-4 h-4" />
           <span className="text-sm">Iziet</span>
@@ -45,4 +54,3 @@ export const Header: React.FC<HeaderProps> = ({
     </div>
   </header>
 );
-

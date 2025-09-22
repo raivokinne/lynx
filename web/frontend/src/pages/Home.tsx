@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { useCodeManagement } from "../hooks/useCodeManagement";
 import { useCodeExecution } from "../hooks/useCodeExecution";
 import { Header } from "../components/Header";
@@ -10,6 +10,7 @@ import { SaveDialog } from "../components/SaveDialog";
 import { SettingsModal } from "../components/SettingsModal";
 import type { SavedCode } from "../types/types";
 import { useSettings } from "../hooks/useSettings";
+import { DocsModal } from "../components/DocsModal";
 
 export const Home: React.FC = () => {
   const { user, logout } = useAuth();
@@ -39,8 +40,8 @@ export const Home: React.FC = () => {
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
-  const [showLoadDialog, setShowLoadDialog] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [showDocs, setShowDocs] = useState<boolean>(false);
   const [saveTitle, setSaveTitle] = useState<string>("");
 
   const handleSaveCode = () => {
@@ -51,13 +52,16 @@ export const Home: React.FC = () => {
 
   const handleLoadCode = (savedCode: SavedCode) => {
     loadCode(savedCode);
-    setShowLoadDialog(false);
     clearOutput();
   };
 
   const handleClearCode = () => {
     clearCode();
     clearOutput();
+  };
+
+  const handleCloseDocs = () => {
+    setShowDocs(!showDocs);
   };
 
   const handleExecuteCode = () => {
@@ -93,6 +97,10 @@ export const Home: React.FC = () => {
         />
       )}
 
+      {showDocs && (
+        <DocsModal isDarkMode={isDarkMode} onClose={handleCloseDocs} />
+      )}
+
       <Header
         isDarkMode={isDarkMode}
         username={user?.username}
@@ -110,10 +118,10 @@ export const Home: React.FC = () => {
             setSaveTitle(currentCodeTitle);
             setShowSaveDialog(true);
           }}
-          onLoad={() => setShowLoadDialog(true)}
           onDownload={downloadCode}
           onClear={handleClearCode}
           onSettings={() => setShowSettings(true)}
+          onDocs={handleCloseDocs}
         />
 
         <div className="flex-1 flex">
@@ -126,6 +134,7 @@ export const Home: React.FC = () => {
             onSaveCode={saveCode}
             savedCodes={savedCodes}
             onLoad={handleLoadCode}
+            deleteCode={deleteCode}
           />
 
           <OutputPanel isDarkMode={isDarkMode} output={output} error={error} />
