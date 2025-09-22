@@ -23,8 +23,9 @@ const (
 	OR          // or
 	SUM         // +
 	PRODUCT     // *
-	PREFIX      // -X or !X
-	CALL        // myFunction(X)
+
+	PREFIX // -X or !X
+	CALL   // myFunction(X)
 )
 
 var precedences = map[token.TokenType]int{

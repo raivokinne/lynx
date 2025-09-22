@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useEditorSettings } from '../hooks/useEditorSettings';
-import { useCodeManagement } from '../hooks/useCodeManagement';
-import { useCodeExecution } from '../hooks/useCodeExecution';
-import { Header } from '../components/Header';
-import { Sidebar } from '../components/Sidebar';
-import { CodeEditor } from '../components/CodeEditor';
-import { OutputPanel } from '../components/OutputPanel';
-import { SaveDialog } from '../components/SaveDialog';
-import { LoadDialog } from '../components/LoadDialog';
-import { SettingsModal } from '../components/SettingsModal';
+import React, { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { useEditorSettings } from "../hooks/useEditorSettings";
+import { useCodeManagement } from "../hooks/useCodeManagement";
+import { useCodeExecution } from "../hooks/useCodeExecution";
+import { Header } from "../components/Header";
+import { Sidebar } from "../components/Sidebar";
+import { CodeEditor } from "../components/CodeEditor";
+import { OutputPanel } from "../components/OutputPanel";
+import { SaveDialog } from "../components/SaveDialog";
+import { LoadDialog } from "../components/LoadDialog";
+import { SettingsModal } from "../components/SettingsModal";
+import type { SavedCode } from "../types/types";
 
 export const Home: React.FC = () => {
   const { user, logout } = useAuth();
@@ -23,23 +24,24 @@ export const Home: React.FC = () => {
     loadCode,
     deleteCode,
     clearCode,
-    downloadCode
+    downloadCode,
   } = useCodeManagement(user?.id);
-  const { output, error, isRunning, executeCode, clearOutput } = useCodeExecution();
+  const { output, error, isRunning, executeCode, clearOutput } =
+    useCodeExecution();
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
   const [showLoadDialog, setShowLoadDialog] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [saveTitle, setSaveTitle] = useState<string>('');
+  const [saveTitle, setSaveTitle] = useState<string>("");
 
   const handleSaveCode = () => {
     saveCode(saveTitle);
-    setSaveTitle('');
+    setSaveTitle("");
     setShowSaveDialog(false);
   };
 
-  const handleLoadCode = (savedCode: any) => {
+  const handleLoadCode = (savedCode: SavedCode) => {
     loadCode(savedCode);
     setShowLoadDialog(false);
     clearOutput();
@@ -55,7 +57,9 @@ export const Home: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-black text-white' : 'bg-white text-black'} transition-colors duration-200`}>
+    <div
+      className={`min-h-screen ${isDarkMode ? "bg-black text-white" : "bg-white text-black"} transition-colors duration-200`}
+    >
       {showSettings && (
         <SettingsModal
           isDarkMode={isDarkMode}
@@ -89,7 +93,7 @@ export const Home: React.FC = () => {
       <Header
         isDarkMode={isDarkMode}
         username={user?.username}
-        onToggleTheme={() => setIsDarkMode(prev => !prev)}
+        onToggleTheme={() => setIsDarkMode((prev) => !prev)}
         onLogout={logout}
       />
 
@@ -118,11 +122,7 @@ export const Home: React.FC = () => {
             onChange={setCode}
           />
 
-          <OutputPanel
-            isDarkMode={isDarkMode}
-            output={output}
-            error={error}
-          />
+          <OutputPanel isDarkMode={isDarkMode} output={output} error={error} />
         </div>
       </div>
     </div>
