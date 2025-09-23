@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from "react";
 
 declare global {
   interface Window {
@@ -11,7 +11,7 @@ interface MonacoEditorProps {
   value?: string;
   onChange?: (value: string) => void;
   language?: string;
-  theme?: 'vs' | 'vs-dark' | 'hc-black' | string;
+  theme?: "vs" | "vs-dark" | "hc-black" | string;
   height?: string;
   width?: string;
   readOnly?: boolean;
@@ -19,36 +19,43 @@ interface MonacoEditorProps {
 }
 
 const MonacoEditor: React.FC<MonacoEditorProps> = ({
-  value = '',
+  value = "",
   onChange,
-  language = 'lynx',
-  theme = 'vs-dark',
-  height = '400px',
-  width = '100%',
+  language = "lynx",
+  theme = "vs-dark",
+  height = "400px",
+  width = "100%",
   readOnly = false,
-  options = {}
+  options = {},
 }) => {
   const editorRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isEditorReady, setIsEditorReady] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
 
   const initializeEditor = useCallback(() => {
     if (!containerRef.current || editorRef.current || !window.monaco) return;
 
     try {
-      if (!window.monaco.languages.getLanguages().find((l: any) => l.id === 'lynx')) {
-        window.monaco.languages.register({ id: 'lynx' });
-        window.monaco.languages.setMonarchTokensProvider('lynx', {
+      if (
+        !window.monaco.languages
+          .getLanguages()
+          .find((l: any) => l.id === "lynx")
+      ) {
+        window.monaco.languages.register({ id: "lynx" });
+        window.monaco.languages.setMonarchTokensProvider("lynx", {
           tokenizer: {
             root: [
-              [/\/\/.*$/, 'comment'],
-              [/\"(?:\\.|[^\"\\])*\"/, 'string'],
-              [/\b(?:if|else|for|in|while|return|break|continue|const|let|fn|true|false)\b/, 'keyword'],
-              [/\b\d+(?:\.\d+)?\b/, 'number'],
-              [/[a-zA-Z_]\w*(?=\s*\()/, 'function']
-            ]
-          }
+              [/\/\/.*$/, "comment"],
+              [/\"(?:\\.|[^\"\\])*\"/, "string"],
+              [
+                /\b(?:if|else|for|in|while|return|break|continue|const|let|fn|true|false)\b/,
+                "keyword",
+              ],
+              [/\b\d+(?:\.\d+)?\b/, "number"],
+              [/[a-zA-Z_]\w*(?=\s*\()/, "function"],
+            ],
+          },
         });
       }
 
@@ -60,25 +67,29 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
         automaticLayout: true,
         selectOnLineNumbers: true,
         roundedSelection: false,
-        cursorStyle: 'line',
+        cursorStyle: "line",
         fontSize: 14,
-        lineNumbers: 'on',
+        lineNumbers: "on",
         glyphMargin: true,
         folding: true,
         tabIndex: 0,
-        ...options
+        ...options,
       };
 
-      editorRef.current = window.monaco.editor.create(containerRef.current, initialOptions);
+      editorRef.current = window.monaco.editor.create(
+        containerRef.current,
+        initialOptions,
+      );
 
       editorRef.current.onDidChangeModelContent(() => {
-        if (onChange && editorRef.current) onChange(editorRef.current.getValue());
+        if (onChange && editorRef.current)
+          onChange(editorRef.current.getValue());
       });
 
       setTimeout(() => editorRef.current?.focus(), 100);
       setIsEditorReady(true);
     } catch (err: any) {
-      console.error('Error initializing Monaco Editor:', err);
+      console.error("Error initializing Monaco Editor:", err);
       setError(err?.message || String(err));
     }
   }, [value, language, theme, readOnly, options, onChange]);
@@ -89,14 +100,19 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
       return;
     }
 
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js';
+    const script = document.createElement("script");
+    script.src =
+      "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js";
     script.async = true;
     script.onload = () => {
-      window.require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
-      window.require(['vs/editor/editor.main'], () => initializeEditor());
+      window.require.config({
+        paths: {
+          vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs",
+        },
+      });
+      window.require(["vs/editor/editor.main"], () => initializeEditor());
     };
-    script.onerror = () => setError('Failed to load Monaco Editor');
+    script.onerror = () => setError("Failed to load Monaco Editor");
 
     if (!document.querySelector('script[src*="monaco-editor"]')) {
       document.head.appendChild(script);
@@ -151,7 +167,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
       try {
         editorRef.current.updateOptions({ readOnly, ...options });
       } catch (e) {
-        console.warn('Failed to update editor options', e);
+        console.warn("Failed to update editor options", e);
       }
     }
   }, [options, readOnly, isEditorReady]);
@@ -164,7 +180,10 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
 
   if (error) {
     return (
-      <div style={{ height, width }} className="flex items-center justify-center bg-red-50 border border-red-200 rounded">
+      <div
+        style={{ height, width }}
+        className="flex items-center justify-center bg-red-50 border border-red-200 rounded"
+      >
         <div className="text-center text-red-600">
           <div className="font-semibold">Editor Error</div>
           <div className="text-sm mt-1">{error}</div>
@@ -192,8 +211,8 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
       <div
         ref={containerRef}
         onClick={handleContainerClick}
-        style={{ height: '100%', width: '100%' }}
-        className={`${!isEditorReady ? 'invisible' : 'visible'} cursor-text`}
+        style={{ height: "100%", width: "100%" }}
+        className={`${!isEditorReady ? "invisible" : "visible"} cursor-text`}
       />
     </div>
   );

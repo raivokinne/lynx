@@ -16,7 +16,7 @@ import (
 var builtins = map[string]*object.Builtin{}
 
 func RegisterBuiltins() {
-	builtins["_print"] = &object.Builtin{Fn: builtinPrint}
+	builtins["println"] = &object.Builtin{Fn: builtinPrint}
 	builtins["len"] = &object.Builtin{Fn: builtinLen}
 	builtins["range"] = &object.Builtin{Fn: builtinRange}
 	builtins["_http_get"] = &object.Builtin{Fn: builtinHttpGet}
@@ -195,11 +195,10 @@ func builtinHttpPost(args ...object.Object) object.Object {
 }
 
 func builtinPrint(args ...object.Object) object.Object {
-	for i, arg := range args {
-		if i > 0 {
-			fmt.Print(" ")
-		}
-		fmt.Println(arg.Inspect())
+	out := []string{}
+	for _, arg := range args {
+		out = append(out, arg.Inspect())
 	}
+	fmt.Println(strings.Join(out, " "))
 	return NULL
 }

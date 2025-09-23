@@ -23,7 +23,7 @@ export const Home: React.FC = () => {
     errorSettings,
     clearError,
     hasUnsavedChanges,
-  } = useSettings();
+  } = useSettings(user?.id);
   const {
     code,
     setCode,
@@ -38,7 +38,7 @@ export const Home: React.FC = () => {
   const { output, error, isRunning, executeCode, clearOutput } =
     useCodeExecution();
 
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showDocs, setShowDocs] = useState<boolean>(false);

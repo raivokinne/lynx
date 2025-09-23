@@ -18,8 +18,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isRunning,
   canRun,
   onRunCode,
-  onDownload,
-  onClear,
+  // onDownload,
+  // onClear,
   onSettings,
   onDocs,
 }) => (
@@ -39,21 +39,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
     </button>
 
-    <button
+    {/*<button
       onClick={onDownload}
       className={`p-2 rounded-lg ${isDarkMode ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
       title="Lejupielādēt kodu"
     >
       <Download size={24} />
-    </button>
+    </button>*/}
 
-    <button
+    {/*<button
       onClick={onClear}
       className={`p-2 rounded-lg ${isDarkMode ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
       title="Notīrīt kodu"
     >
       <Trash2 size={24} />
-    </button>
+    </button>*/}
 
     <div className="flex-1" />
 

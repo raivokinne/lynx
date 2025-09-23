@@ -19,14 +19,6 @@ export const Header: React.FC<HeaderProps> = ({
   >
     <div className="max-w-full px-2 py-2 flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <h1
-          className={`text-lg font-bold ${isDarkMode ? "text-white" : "text-black"}`}
-        >
-          Lynx IDE
-        </h1>
-      </div>
-
-      <div className="flex items-center gap-3">
         <button
           onClick={onToggleTheme}
           className={`p-2 rounded-lg ${isDarkMode ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}

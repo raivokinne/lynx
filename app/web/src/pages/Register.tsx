@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
 import { Eye, EyeOff, UserPlus, AlertCircle, CheckCircle } from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
+import { Link } from "react-router";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -15,13 +15,9 @@ export default function Register() {
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { register, user } = useAuth();
+  const { register } = useAuth();
 
-  if (user) {
-    return <Navigate to="/" replace />;
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
@@ -35,13 +31,13 @@ export default function Register() {
     if (result.success) {
       setSuccess(true);
     } else {
-      setError(result.error || "Registration failed");
+      setError(result.error || "Reģistrācija neizdevās");
     }
 
     setIsLoading(false);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -52,23 +48,23 @@ export default function Register() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
         <div className="max-w-md w-full">
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/10 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl mb-4">
+          <div className="bg-black border-2 border-white rounded-lg shadow-lg p-8 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full mb-6">
               <CheckCircle className="w-8 h-8 text-black" />
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Account Created!
+            <h1 className="text-3xl font-bold text-white mb-4">
+              Konts izveidots!
             </h1>
-            <p className="text-gray-300 mb-6">
-              Your account has been successfully created.
+            <p className="text-gray-300 mb-8">
+              Jūsu konts ir veiksmīgi izveidots.
             </p>
             <Link
               to="/login"
-              className="w-full bg-white hover:bg-gray-100 text-black font-medium py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] inline-block"
+              className="w-full bg-white hover:bg-gray-200 text-black font-medium py-3 px-4 rounded border-2 border-white transition-colors duration-200"
             >
-              Sign in to your account
+              Pieteikties kontā
             </Link>
           </div>
         </div>
@@ -77,33 +73,29 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        <div className="bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/10">
+        <div className="bg-black border-2 p-8">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl mb-4">
-              <UserPlus className="w-8 h-8 text-black" />
-            </div>
             <h1 className="text-3xl font-bold text-white mb-2">
-              Create Account
+              Izveidot kontu
             </h1>
-            <p className="text-gray-300">Join us today and get started</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-6">
             {error && (
-              <div className="flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 text-sm backdrop-blur-sm">
+              <div className="flex items-center gap-2 p-4 bg-red-900/50 border border-red-500 rounded text-red-300 text-sm">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 {error}
               </div>
             )}
 
-            <div className="space-y-1">
+            <div className="space-y-2">
               <label
                 htmlFor="username"
-                className="block text-sm font-medium text-gray-200"
+                className="block text-sm font-medium text-white"
               >
-                Username
+                Lietotājvārds
               </label>
               <input
                 id="username"
@@ -112,17 +104,17 @@ export default function Register() {
                 required
                 value={formData.username}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-white/20 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/40 transition-all duration-200 bg-white/5 focus:bg-white/10 text-white placeholder:text-gray-400"
-                placeholder="Choose a username"
+                className="w-full px-4 py-3 border-2 border-white rounded focus:outline-none focus:ring-2 focus:ring-gray-500 bg-black text-white placeholder:text-gray-400"
+                placeholder="Izvēlieties lietotājvārdu"
               />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-2">
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-200"
+                className="block text-sm font-medium text-white"
               >
-                Password
+                Parole
               </label>
               <div className="relative">
                 <input
@@ -132,13 +124,13 @@ export default function Register() {
                   required
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 pr-12 border border-white/20 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/40 transition-all duration-200 bg-white/5 focus:bg-white/10 text-white placeholder:text-gray-400"
-                  placeholder="Create a password"
+                  className="w-full px-4 py-3 pr-12 border-2 border-white rounded focus:outline-none focus:ring-2 focus:ring-gray-500 bg-black text-white placeholder:text-gray-400"
+                  placeholder="Izveidojiet paroli"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -149,12 +141,12 @@ export default function Register() {
               </div>
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-2">
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-200"
+                className="block text-sm font-medium text-white"
               >
-                Confirm Password
+                Apstipriniet paroli
               </label>
               <div className="relative">
                 <input
@@ -164,13 +156,13 @@ export default function Register() {
                   required
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 pr-12 border border-white/20 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/40 transition-all duration-200 bg-white/5 focus:bg-white/10 text-white placeholder:text-gray-400"
-                  placeholder="Confirm your password"
+                  className="w-full px-4 py-3 pr-12 border-2 border-white rounded focus:outline-none focus:ring-2 focus:ring-gray-500 bg-black text-white placeholder:text-gray-400"
+                  placeholder="Apstipriniet savu paroli"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -182,32 +174,32 @@ export default function Register() {
             </div>
 
             <button
-              type="submit"
+              onClick={handleSubmit}
               disabled={isLoading}
-              className="w-full bg-white hover:bg-gray-100 disabled:bg-gray-400 text-black font-medium py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-white hover:bg-gray-200 disabled:bg-gray-600 text-black font-medium py-3 px-4 rounded border-2 border-white transition-colors duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
-                  Creating account...
+                  Izveido kontu...
                 </>
               ) : (
                 <>
                   <UserPlus className="w-4 h-4" />
-                  Create Account
+                  Izveidot kontu
                 </>
               )}
             </button>
-          </form>
+          </div>
 
           <div className="mt-8 text-center">
             <p className="text-gray-300">
-              Already have an account?{" "}
+              Jau ir konts?{" "}
               <Link
                 to="/login"
-                className="text-white hover:text-gray-200 font-medium transition-colors underline decoration-white/30 hover:decoration-white/60"
+                className="text-white hover:text-gray-300 font-medium transition-colors underline cursor-pointer"
               >
-                Sign in
+                Pieteikties
               </Link>
             </p>
           </div>

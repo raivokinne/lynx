@@ -298,14 +298,22 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 		return evalConcatExpression(left, right)
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
+	case left.Type() == object.FLOAT_OBJ && right.Type() == object.FLOAT_OBJ:
+		return evalFloatInfixExpression(operator, left, right)
 	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
 		return evalStringInfixExpression(operator, left, right)
 	case operator == "==":
 		return nativeBoolToBooleanObject(left == right)
 	case operator == "and":
-		return nativeBoolToBooleanObject(left.Type() == object.BOOLEAN_OBJ && left.(*object.Boolean).Value)
+		if left.Type() != object.BOOLEAN_OBJ || right.Type() != object.BOOLEAN_OBJ {
+			return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
+		}
+		return nativeBoolToBooleanObject(left.(*object.Boolean).Value && right.(*object.Boolean).Value)
 	case operator == "or":
-		return nativeBoolToBooleanObject(left.Type() == object.BOOLEAN_OBJ || left.(*object.Boolean).Value)
+		if left.Type() != object.BOOLEAN_OBJ || right.Type() != object.BOOLEAN_OBJ {
+			return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
+		}
+		return nativeBoolToBooleanObject(left.(*object.Boolean).Value || right.(*object.Boolean).Value)
 	case operator == "!=":
 		return nativeBoolToBooleanObject(left != right)
 	case left.Type() != right.Type():
@@ -323,6 +331,43 @@ func evalConcatExpression(left, right object.Object) object.Object {
 		return &object.Array{Elements: append(left.Elements, right.(*object.Array).Elements...)}
 	default:
 		return newError("cannot concatenate: %s", left.Type())
+	}
+}
+
+func evalFloatInfixExpression(operator string, left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+
+	switch operator {
+	case "+":
+		return &object.Float{Value: leftVal + rightVal}
+	case "-":
+		return &object.Float{Value: leftVal - rightVal}
+	case "*":
+		return &object.Float{Value: leftVal * rightVal}
+	case "^":
+		return &object.Float{Value: math.Pow(leftVal, rightVal)}
+	case "$":
+		return &object.Float{Value: math.Sqrt(rightVal)}
+	case "/":
+		if rightVal == 0 {
+			return newError("division by zero")
+		}
+		return &object.Float{Value: leftVal / rightVal}
+	case "<":
+		return nativeBoolToBooleanObject(leftVal < rightVal)
+	case ">":
+		return nativeBoolToBooleanObject(leftVal > rightVal)
+	case ">=":
+		return nativeBoolToBooleanObject(leftVal >= rightVal)
+	case "<=":
+		return nativeBoolToBooleanObject(leftVal <= rightVal)
+	case "==":
+		return nativeBoolToBooleanObject(leftVal == rightVal)
+	case "!=":
+		return nativeBoolToBooleanObject(leftVal != rightVal)
+	default:
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 
@@ -370,6 +415,12 @@ func evalStringInfixExpression(operator string, left, right object.Object) objec
 	rightVal := right.(*object.String).Value
 
 	switch operator {
+	case "+":
+		return &object.String{Value: leftVal + rightVal}
+	case "or":
+		return nativeBoolToBooleanObject(leftVal != "" || rightVal != "")
+	case "and":
+		return nativeBoolToBooleanObject(leftVal != "" && rightVal != "")
 	case "==":
 		return nativeBoolToBooleanObject(leftVal == rightVal)
 	case "!=":
@@ -672,6 +723,11 @@ func evalStringMethod(obj *object.String, method string, args []object.Object) o
 		}
 		end := min(start.Value+length.Value, int64(len(obj.Value)))
 		return &object.String{Value: obj.Value[start.Value:end]}
+	case "trim":
+		if len(args) != 0 {
+			return newError("string.trim does not take any arguments, got=%d", len(args))
+		}
+		return &object.String{Value: strings.TrimSpace(obj.Value)}
 	default:
 		return newError("unknown method: %s", method)
 	}

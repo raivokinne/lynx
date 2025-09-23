@@ -1,9 +1,53 @@
-@io(println)
+let parseExpression = fn(input) {
+    let parts = input.trim().split(" ")
+    if len(parts) != 3 {
+        error "Invalid expression format. Use: <number> <operator> <number>"
+    }
 
-let add = fn(x) {
-	fn(y) {
-		x + y
-	}
+    let left = float(parts[0])
+    let operator = parts[1]
+    let right = float(parts[2])
+
+    return [left, operator, right]
 }
 
-println(add(1)(2))
+let calculate = fn(left, operator, right) {
+    switch operator {
+        case "+": { return left + right }
+        case "-": { return left - right }
+        case "*": { return left * right }
+        case "/": {
+            if right == 0 {
+                error "Division by zero"
+            }
+            return left / right
+        }
+        default: {
+            error "Unknown operator: " ++ operator
+        }
+    }
+}
+
+let repl = fn() {
+    println("Simple Calculator (type 'quit' to exit)")
+    println("Enter expressions like: 5 + 3")
+
+    while true {
+        println("> ")
+        let input = _readLine()
+
+        if input.trim() == "quit" {
+            break
+        }
+
+        catch {
+            let results = parseExpression(input)
+            let result = calculate(results[0], results[1], results[2])
+            println("Result:", result)
+        } on err {
+            println("Error:", err)
+        }
+    }
+}
+
+repl()
