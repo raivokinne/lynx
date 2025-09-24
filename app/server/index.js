@@ -6,9 +6,9 @@ import { login, register } from "./handlers/auth.js";
 import { compiler } from "./handlers/compile.js";
 import { deleteCode, getCode, listCode, saveCode } from "./handlers/code.js";
 import {
-  deleteSettings,
-  getSettings,
-  saveSettings,
+    deleteSettings,
+    getSettings,
+    saveSettings,
 } from "./handlers/settings.js";
 import { cleanupTempFiles } from "./utils.js";
 import { initDb } from "./db.js";
@@ -20,15 +20,15 @@ app.use(cors());
 app.use(json({ limit: "10mb" }));
 
 export const CONFIG = {
-  COMPILER_PATH: "./build/lynx",
-  FILE_EXTENSION: ".lynx",
-  EXECUTION_TIMEOUT: 100_000,
-  MAX_FILE_SIZE: 1024 * 1024,
-  TEMP_DIR: "./temp",
+    COMPILER_PATH: "./build/lynx",
+    FILE_EXTENSION: ".lynx",
+    EXECUTION_TIMEOUT: 100_000,
+    MAX_FILE_SIZE: 1024 * 1024,
+    TEMP_DIR: "./temp",
 };
 
 if (!existsSync(CONFIG.TEMP_DIR)) {
-  mkdirSync(CONFIG.TEMP_DIR, { recursive: true });
+    mkdirSync(CONFIG.TEMP_DIR, { recursive: true });
 }
 
 app.post("/api/register", register);
@@ -46,51 +46,51 @@ app.post("/api/settings", authenticate, saveSettings);
 app.delete("/api/settings", authenticate, deleteSettings);
 
 app.use((_req, res) => {
-  res.status(404).json({ success: false, error: "Endpoint not found" });
+    res.status(404).json({ success: false, error: "Endpoint not found" });
 });
 
 app.use((err, _req, res, _next) => {
-  console.error("Unhandled error:", err?.message ?? err);
-  res.status(500).json({ success: false, error: "Internal server error" });
+    console.error("Unhandled error:", err?.message ?? err);
+    res.status(500).json({ success: false, error: "Internal server error" });
 });
 
 initDb()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`🚀 Compiler server running on port ${PORT}`);
-      console.log(`📁 Temp directory: ${CONFIG.TEMP_DIR}`);
-      console.log(`⚡ Compiler path: ${CONFIG.COMPILER_PATH}`);
-      console.log(`⏱️  Execution timeout: ${CONFIG.EXECUTION_TIMEOUT}ms`);
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`🚀 Compiler server running on port ${PORT}`);
+            console.log(`📁 Temp directory: ${CONFIG.TEMP_DIR}`);
+            console.log(`⚡ Compiler path: ${CONFIG.COMPILER_PATH}`);
+            console.log(`⏱️  Execution timeout: ${CONFIG.EXECUTION_TIMEOUT}ms`);
 
-      cleanupTempFiles();
-      setInterval(cleanupTempFiles, 30 * 60 * 1000);
+            cleanupTempFiles();
+            setInterval(cleanupTempFiles, 30 * 60 * 1000);
+        });
+    })
+    .catch((err) => {
+        console.error("Failed to initialize database:", err);
+        process.exit(1);
     });
-  })
-  .catch((err) => {
-    console.error("Failed to initialize database:", err);
-    process.exit(1);
-  });
 
 async function shutdown(signal) {
-  try {
-    console.log(`\n🛑 Shutting down server... (${signal})`);
-    cleanupTempFiles();
-    if (db && typeof db.close === "function") {
-      try {
-        await db.close();
-        console.log("DB connection closed");
-      } catch (closeErr) {
-        console.warn("Error closing DB:", closeErr?.message ?? closeErr);
-      }
+    try {
+        console.log(`\n🛑 Shutting down server... (${signal})`);
+        cleanupTempFiles();
+        if (db && typeof db.close === "function") {
+            try {
+                await db.close();
+                console.log("DB connection closed");
+            } catch (closeErr) {
+                console.warn("Error closing DB:", closeErr?.message ?? closeErr);
+            }
+        }
+    } finally {
+        process.exit(0);
     }
-  } finally {
-    process.exit(0);
-  }
 }
 
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 
 process.on("unhandledRejection", (reason) => {
-  console.error("Unhandled Rejection:", reason);
+    console.error("Unhandled Rejection:", reason);
 });

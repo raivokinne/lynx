@@ -31,6 +31,7 @@ func (e *Env) Assign(name string, val Object) Object {
 	if isConst, ok := e.consts[name]; ok && isConst {
 		return &Error{Message: fmt.Sprintf("cannot assign to constant: %s", name)}
 	}
+
 	if _, ok := e.store[name]; ok {
 		e.store[name] = val
 		return val

@@ -21,10 +21,10 @@ func RegisterBuiltins() {
 	builtins["range"] = &object.Builtin{Fn: builtinRange}
 	builtins["_http_get"] = &object.Builtin{Fn: builtinHttpGet}
 	builtins["_http_post"] = &object.Builtin{Fn: builtinHttpPost}
-	builtins["_random"] = &object.Builtin{Fn: builtinRandom}
+	builtins["random"] = &object.Builtin{Fn: builtinRandom}
 	builtins["_read"] = &object.Builtin{Fn: builtinRead}
 	builtins["_write"] = &object.Builtin{Fn: builtinWrite}
-	builtins["_sleep"] = &object.Builtin{Fn: builtinSleep}
+	builtins["sleep"] = &object.Builtin{Fn: builtinSleep}
 	builtins["_readLine"] = &object.Builtin{Fn: builtinReadLine}
 	builtins["int"] = &object.Builtin{Fn: builtinInt}
 	builtins["float"] = &object.Builtin{Fn: builtinFloat}

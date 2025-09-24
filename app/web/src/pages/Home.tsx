@@ -32,8 +32,6 @@ export const Home: React.FC = () => {
     saveCode,
     loadCode,
     deleteCode,
-    clearCode,
-    downloadCode,
   } = useCodeManagement(user?.id);
   const { output, error, isRunning, executeCode, clearOutput } =
     useCodeExecution();
@@ -52,11 +50,6 @@ export const Home: React.FC = () => {
 
   const handleLoadCode = (savedCode: SavedCode) => {
     loadCode(savedCode);
-    clearOutput();
-  };
-
-  const handleClearCode = () => {
-    clearCode();
     clearOutput();
   };
 
@@ -118,8 +111,6 @@ export const Home: React.FC = () => {
             setSaveTitle(currentCodeTitle);
             setShowSaveDialog(true);
           }}
-          onDownload={downloadCode}
-          onClear={handleClearCode}
           onSettings={() => setShowSettings(true)}
           onDocs={handleCloseDocs}
         />
