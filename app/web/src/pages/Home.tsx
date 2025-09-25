@@ -7,23 +7,14 @@ import { Sidebar } from "../components/Sidebar";
 import { CodeEditor } from "../components/CodeEditor";
 import { OutputPanel } from "../components/OutputPanel";
 import { SaveDialog } from "../components/SaveDialog";
-import { SettingsModal } from "../components/SettingsModal";
+import { Settings } from "../components/Settings";
 import type { SavedCode } from "../types/types";
 import { useSettings } from "../hooks/useSettings";
 import { DocsModal } from "../components/DocsModal";
 
 export const Home: React.FC = () => {
   const { user, logout } = useAuth();
-  const {
-    editorSettings,
-    updateSetting,
-    resetSettings,
-    saveSettings,
-    loading,
-    errorSettings,
-    clearError,
-    hasUnsavedChanges,
-  } = useSettings(user?.id);
+  const { editorSettings, updateAllSettings } = useSettings(user?.id);
   const {
     code,
     setCode,
@@ -66,17 +57,13 @@ export const Home: React.FC = () => {
       className={`min-h-screen ${isDarkMode ? "bg-black text-white" : "bg-white text-black"} transition-colors duration-200`}
     >
       {showSettings && (
-        <SettingsModal
-          isDarkMode={isDarkMode}
-          editorSettings={editorSettings}
-          onUpdateSetting={updateSetting}
-          onResetSettings={resetSettings}
+        <Settings
+          isOpen={showSettings}
           onClose={() => setShowSettings(false)}
-          onClearError={clearError}
-          onSaveSettings={saveSettings}
-          error={errorSettings}
-          hasUnsavedChanges={hasUnsavedChanges}
-          loading={loading}
+          editorSettings={editorSettings}
+          onSettingsChange={updateAllSettings}
+          isDarkMode={isDarkMode}
+          onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
         />
       )}
 
@@ -127,7 +114,6 @@ export const Home: React.FC = () => {
             onLoad={handleLoadCode}
             deleteCode={deleteCode}
           />
-
           <OutputPanel isDarkMode={isDarkMode} output={output} error={error} />
         </div>
       </div>

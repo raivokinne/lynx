@@ -199,6 +199,6 @@ func builtinPrint(args ...object.Object) object.Object {
 	for _, arg := range args {
 		out = append(out, arg.Inspect())
 	}
-	fmt.Println(strings.Join(out, " "))
+	fmt.Println(strings.Join(out, ""))
 	return NULL
 }

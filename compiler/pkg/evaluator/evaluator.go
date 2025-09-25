@@ -165,16 +165,12 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 		return evalSwitchStatement(node, env)
 	case *ast.PipeExpression:
 		return evalPipeExpression(node, env)
-	case *ast.Tuple:
-		return evalTuple(node, env)
 	case *ast.ErrorStatement:
 		return evalErrorStatement(node, env)
 	case *ast.CatchStatement:
 		return evalCatchStatement(node, env)
 	case *ast.Null:
 		return &object.Null{}
-	case *ast.Spread:
-		return evalSpread(node, env)
 	default:
 		return newError("unknown node type: %T", node)
 	}
@@ -1151,18 +1147,6 @@ func evalPipeRight(right ast.Node, left object.Object, env *object.Env) object.O
 	}
 }
 
-func evalTuple(node *ast.Tuple, env *object.Env) object.Object {
-	elements := make([]object.Object, len(node.Elements))
-	for i, elem := range node.Elements {
-		elements[i] = Eval(elem, env)
-		if isError(elements[i]) {
-			return elements[i]
-		}
-	}
-	tuple := &object.Tuple{Elements: elements}
-	return tuple
-}
-
 func evalErrorStatement(node *ast.ErrorStatement, env *object.Env) object.Object {
 	val := Eval(node.Value, env)
 	if isError(val) {
@@ -1181,12 +1165,4 @@ func evalCatchStatement(catchStmt *ast.CatchStatement, env *object.Env) object.O
 	}
 
 	return result
-}
-
-func evalSpread(node *ast.Spread, env *object.Env) object.Object {
-	val := Eval(node.Expression, env)
-	if isError(val) {
-		return val
-	}
-	return val
 }

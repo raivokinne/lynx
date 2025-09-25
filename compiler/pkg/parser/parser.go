@@ -223,10 +223,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	case token.IDENT:
-		if p.peekTokenIs(token.ASSIGN) || p.peekTokenIs(token.LBRACKET) {
-			return p.parseAssignmentStatement()
-		}
-		return p.parseExpressionStatement()
+		return p.parseAssignmentOrExpressionStatement()
 	case token.FOR:
 		return p.parseForStatement()
 	case token.WHILE:
@@ -245,6 +242,30 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseCatchStatement()
 	default:
 		return p.parseExpressionStatement()
+	}
+}
+
+func (p *Parser) parseAssignmentOrExpressionStatement() ast.Statement {
+	lhs := p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.ASSIGN) {
+		if !isAssignable(lhs) {
+			p.addError("SyntaxError", "Invalid left-hand side in assignment")
+			return nil
+		}
+
+		p.nextToken()
+		p.nextToken()
+
+		stmt := &ast.Assignment{Token: p.curToken}
+		stmt.Name = lhs
+		stmt.Value = p.parseExpression(LOWEST)
+		return stmt
+	} else {
+		return &ast.ExpressionStatement{
+			Token:      p.curToken,
+			Expression: lhs,
+		}
 	}
 }
 

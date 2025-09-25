@@ -6,9 +6,34 @@ export interface SavedCode {
     updatedAt: string;
 }
 
+export interface CustomTheme {
+    id: string;
+    name: string;
+    css: string;
+    colors: {
+        background?: string;
+        foreground?: string;
+        selection?: string;
+        lineHighlight?: string;
+        cursor?: string;
+        whitespace?: string;
+        [key: string]: string | undefined;
+    };
+    tokenColors: {
+        [tokenType: string]: {
+            foreground?: string;
+            background?: string;
+            fontStyle?: string;
+        };
+    };
+    createdAt: string;
+}
+
 export type EditorSettings = {
     themeDark: string;
     themeLight: string;
+    customThemes: CustomTheme[];
+    activeCustomTheme?: string;
     fontSize: number;
     minimap: { enabled: boolean };
     lineNumbers: string;
