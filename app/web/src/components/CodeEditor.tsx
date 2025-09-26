@@ -55,14 +55,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     setShowSaveDialog(!showSaveDialog);
   };
 
-  // Determine which theme to use
   const getActiveTheme = () => {
-    // If theme is explicitly set, use it
     if (editorSettings.theme) {
       return editorSettings.theme;
     }
 
-    // Fallback to dark/light theme based on isDarkMode
     return isDarkMode
       ? editorSettings.themeDark || "vs-dark"
       : editorSettings.themeLight || "vs";
