@@ -288,35 +288,482 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 	return &object.Integer{Value: -value}
 }
 
+type OperatorHandler func(left, right object.Object) object.Object
+
+type TypePair struct {
+	Left  object.ObjectType
+	Right object.ObjectType
+}
+
+var operatorMap = map[TypePair]map[string]OperatorHandler{
+	{object.INTEGER_OBJ, object.INTEGER_OBJ}: {
+		"+":  evalIntegerAdd,
+		"-":  evalIntegerSub,
+		"*":  evalIntegerMul,
+		"/":  evalIntegerDiv,
+		"^":  evalIntegerPow,
+		"$":  evalIntegerSqrt,
+		"<":  evalIntegerLess,
+		">":  evalIntegerGreater,
+		">=": evalIntegerGreaterEqual,
+		"<=": evalIntegerLessEqual,
+		"==": evalIntegerEqual,
+		"!=": evalIntegerNotEqual,
+	},
+	{object.FLOAT_OBJ, object.FLOAT_OBJ}: {
+		"+":  evalFloatAdd,
+		"-":  evalFloatSub,
+		"*":  evalFloatMul,
+		"/":  evalFloatDiv,
+		"^":  evalFloatPow,
+		"$":  evalFloatSqrt,
+		"<":  evalFloatLess,
+		">":  evalFloatGreater,
+		">=": evalFloatGreaterEqual,
+		"<=": evalFloatLessEqual,
+		"==": evalFloatEqual,
+		"!=": evalFloatNotEqual,
+	},
+	{object.FLOAT_OBJ, object.INTEGER_OBJ}: {
+		"+":  evalFloatIntegerAdd,
+		"-":  evalFloatIntegerSub,
+		"*":  evalFloatIntegerMul,
+		"/":  evalFloatIntegerDiv,
+		"^":  evalFloatIntegerPow,
+		"$":  evalFloatIntegerSqrt,
+		"<":  evalFloatIntegerLess,
+		">":  evalFloatIntegerGreater,
+		">=": evalFloatIntegerGreaterEqual,
+		"<=": evalFloatIntegerLessEqual,
+		"==": evalFloatIntegerEqual,
+		"!=": evalFloatIntegerNotEqual,
+	},
+	{object.INTEGER_OBJ, object.FLOAT_OBJ}: {
+		"+":  evalIntegerFloatAdd,
+		"-":  evalIntegerFloatSub,
+		"*":  evalIntegerFloatMul,
+		"/":  evalIntegerFloatDiv,
+		"^":  evalIntegerFloatPow,
+		"$":  evalIntegerFloatSqrt,
+		"<":  evalIntegerFloatLess,
+		">":  evalIntegerFloatGreater,
+		">=": evalIntegerFloatGreaterEqual,
+		"<=": evalIntegerFloatLessEqual,
+		"==": evalIntegerFloatEqual,
+		"!=": evalIntegerFloatNotEqual,
+	},
+	{object.STRING_OBJ, object.STRING_OBJ}: {
+		"+":  evalStringConcat,
+		"==": evalStringEqual,
+		"!=": evalStringNotEqual,
+		"<":  evalStringLess,
+		">":  evalStringGreater,
+		"<=": evalStringLessEqual,
+		">=": evalStringGreaterEqual,
+	},
+	{object.BOOLEAN_OBJ, object.BOOLEAN_OBJ}: {
+		"and": evalBooleanAnd,
+		"or":  evalBooleanOr,
+		"==":  evalBooleanEqual,
+		"!=":  evalBooleanNotEqual,
+	},
+}
+
 func evalInfixExpression(operator string, left, right object.Object) object.Object {
-	switch {
-	case operator == "++":
+	if operator == "++" {
 		return evalConcatExpression(left, right)
-	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
-		return evalIntegerInfixExpression(operator, left, right)
-	case left.Type() == object.FLOAT_OBJ && right.Type() == object.FLOAT_OBJ:
-		return evalFloatInfixExpression(operator, left, right)
-	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
-		return evalStringInfixExpression(operator, left, right)
-	case operator == "==":
-		return nativeBoolToBooleanObject(left == right)
-	case operator == "and":
-		if left.Type() != object.BOOLEAN_OBJ || right.Type() != object.BOOLEAN_OBJ {
-			return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
-		}
-		return nativeBoolToBooleanObject(left.(*object.Boolean).Value && right.(*object.Boolean).Value)
-	case operator == "or":
-		if left.Type() != object.BOOLEAN_OBJ || right.Type() != object.BOOLEAN_OBJ {
-			return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
-		}
-		return nativeBoolToBooleanObject(left.(*object.Boolean).Value || right.(*object.Boolean).Value)
-	case operator == "!=":
-		return nativeBoolToBooleanObject(left != right)
-	case left.Type() != right.Type():
-		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
-	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
+
+	if operator == "==" {
+		return nativeBoolToBooleanObject(left == right)
+	}
+	if operator == "!=" {
+		return nativeBoolToBooleanObject(left != right)
+	}
+
+	typePair := TypePair{left.Type(), right.Type()}
+	if handlers, exists := operatorMap[typePair]; exists {
+		if handler, exists := handlers[operator]; exists {
+			return handler(left, right)
+		}
+	}
+
+	return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+}
+
+func evalIntegerAdd(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+	return &object.Integer{Value: leftVal + rightVal}
+}
+
+func evalIntegerSub(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+	return &object.Integer{Value: leftVal - rightVal}
+}
+
+func evalIntegerMul(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+	return &object.Integer{Value: leftVal * rightVal}
+}
+
+func evalIntegerDiv(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+	if rightVal == 0 {
+		return newError("division by zero")
+	}
+	return &object.Integer{Value: leftVal / rightVal}
+}
+
+func evalIntegerPow(left, right object.Object) object.Object {
+	leftVal := float64(left.(*object.Integer).Value)
+	rightVal := float64(right.(*object.Integer).Value)
+	result := math.Pow(leftVal, rightVal)
+	return &object.Float{Value: result}
+}
+
+func evalIntegerSqrt(left, right object.Object) object.Object {
+	rightVal := float64(right.(*object.Integer).Value)
+	if rightVal < 0 {
+		return newError("square root of negative number")
+	}
+	return &object.Float{Value: math.Sqrt(rightVal)}
+}
+
+func evalIntegerLess(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+	return nativeBoolToBooleanObject(leftVal < rightVal)
+}
+
+func evalIntegerGreater(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+	return nativeBoolToBooleanObject(leftVal > rightVal)
+}
+
+func evalIntegerGreaterEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+	return nativeBoolToBooleanObject(leftVal >= rightVal)
+}
+
+func evalIntegerLessEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+	return nativeBoolToBooleanObject(leftVal <= rightVal)
+}
+
+func evalIntegerEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+	return nativeBoolToBooleanObject(leftVal == rightVal)
+}
+
+func evalIntegerNotEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+	return nativeBoolToBooleanObject(leftVal != rightVal)
+}
+
+func evalFloatAdd(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+	return &object.Float{Value: leftVal + rightVal}
+}
+
+func evalFloatSub(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+	return &object.Float{Value: leftVal - rightVal}
+}
+
+func evalFloatMul(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+	return &object.Float{Value: leftVal * rightVal}
+}
+
+func evalFloatDiv(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+	if rightVal == 0 {
+		return newError("division by zero")
+	}
+	return &object.Float{Value: leftVal / rightVal}
+}
+
+func evalFloatPow(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+	return &object.Float{Value: math.Pow(leftVal, rightVal)}
+}
+
+func evalFloatSqrt(left, right object.Object) object.Object {
+	rightVal := right.(*object.Float).Value
+	if rightVal < 0 {
+		return newError("square root of negative number")
+	}
+	return &object.Float{Value: math.Sqrt(rightVal)}
+}
+
+func evalFloatLess(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal < rightVal)
+}
+
+func evalFloatGreater(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal > rightVal)
+}
+
+func evalFloatGreaterEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal >= rightVal)
+}
+
+func evalFloatLessEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal <= rightVal)
+}
+
+func evalFloatEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal == rightVal)
+}
+
+func evalFloatNotEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal != rightVal)
+}
+
+func evalFloatIntegerAdd(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := float64(right.(*object.Integer).Value)
+	return &object.Float{Value: leftVal + rightVal}
+}
+
+func evalFloatIntegerSub(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := float64(right.(*object.Integer).Value)
+	return &object.Float{Value: leftVal - rightVal}
+}
+
+func evalFloatIntegerMul(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := float64(right.(*object.Integer).Value)
+	return &object.Float{Value: leftVal * rightVal}
+}
+
+func evalFloatIntegerDiv(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := float64(right.(*object.Integer).Value)
+	if rightVal == 0 {
+		return newError("division by zero")
+	}
+	return &object.Float{Value: leftVal / rightVal}
+}
+
+func evalFloatIntegerPow(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := float64(right.(*object.Integer).Value)
+	return &object.Float{Value: math.Pow(leftVal, rightVal)}
+}
+
+func evalFloatIntegerSqrt(left, right object.Object) object.Object {
+	rightVal := float64(right.(*object.Integer).Value)
+	if rightVal < 0 {
+		return newError("square root of negative number")
+	}
+	return &object.Float{Value: math.Sqrt(rightVal)}
+}
+
+func evalFloatIntegerLess(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := float64(right.(*object.Integer).Value)
+	return nativeBoolToBooleanObject(leftVal < rightVal)
+}
+
+func evalFloatIntegerGreater(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := float64(right.(*object.Integer).Value)
+	return nativeBoolToBooleanObject(leftVal > rightVal)
+}
+
+func evalFloatIntegerGreaterEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := float64(right.(*object.Integer).Value)
+	return nativeBoolToBooleanObject(leftVal >= rightVal)
+}
+
+func evalFloatIntegerLessEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := float64(right.(*object.Integer).Value)
+	return nativeBoolToBooleanObject(leftVal <= rightVal)
+}
+
+func evalFloatIntegerEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := float64(right.(*object.Integer).Value)
+	return nativeBoolToBooleanObject(leftVal == rightVal)
+}
+
+func evalFloatIntegerNotEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := float64(right.(*object.Integer).Value)
+	return nativeBoolToBooleanObject(leftVal != rightVal)
+}
+
+func evalIntegerFloatAdd(left, right object.Object) object.Object {
+	leftVal := float64(left.(*object.Integer).Value)
+	rightVal := right.(*object.Float).Value
+	return &object.Float{Value: leftVal + rightVal}
+}
+
+func evalIntegerFloatSub(left, right object.Object) object.Object {
+	leftVal := float64(left.(*object.Integer).Value)
+	rightVal := right.(*object.Float).Value
+	return &object.Float{Value: leftVal - rightVal}
+}
+
+func evalIntegerFloatMul(left, right object.Object) object.Object {
+	leftVal := float64(left.(*object.Integer).Value)
+	rightVal := right.(*object.Float).Value
+	return &object.Float{Value: leftVal * rightVal}
+}
+
+func evalIntegerFloatDiv(left, right object.Object) object.Object {
+	leftVal := float64(left.(*object.Integer).Value)
+	rightVal := right.(*object.Float).Value
+	if rightVal == 0 {
+		return newError("division by zero")
+	}
+	return &object.Float{Value: leftVal / rightVal}
+}
+
+func evalIntegerFloatPow(left, right object.Object) object.Object {
+	leftVal := float64(left.(*object.Integer).Value)
+	rightVal := right.(*object.Float).Value
+	return &object.Float{Value: math.Pow(leftVal, rightVal)}
+}
+
+func evalIntegerFloatSqrt(left, right object.Object) object.Object {
+	rightVal := right.(*object.Float).Value
+	if rightVal < 0 {
+		return newError("square root of negative number")
+	}
+	return &object.Float{Value: math.Sqrt(rightVal)}
+}
+
+func evalIntegerFloatLess(left, right object.Object) object.Object {
+	leftVal := float64(left.(*object.Integer).Value)
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal < rightVal)
+}
+
+func evalIntegerFloatGreater(left, right object.Object) object.Object {
+	leftVal := float64(left.(*object.Integer).Value)
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal > rightVal)
+}
+
+func evalIntegerFloatGreaterEqual(left, right object.Object) object.Object {
+	leftVal := float64(left.(*object.Integer).Value)
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal >= rightVal)
+}
+
+func evalIntegerFloatLessEqual(left, right object.Object) object.Object {
+	leftVal := float64(left.(*object.Integer).Value)
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal <= rightVal)
+}
+
+func evalIntegerFloatEqual(left, right object.Object) object.Object {
+	leftVal := float64(left.(*object.Integer).Value)
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal == rightVal)
+}
+
+func evalIntegerFloatNotEqual(left, right object.Object) object.Object {
+	leftVal := float64(left.(*object.Integer).Value)
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal != rightVal)
+}
+
+func evalStringConcat(left, right object.Object) object.Object {
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+	return &object.String{Value: leftVal + rightVal}
+}
+
+func evalStringEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+	return nativeBoolToBooleanObject(leftVal == rightVal)
+}
+
+func evalStringNotEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+	return nativeBoolToBooleanObject(leftVal != rightVal)
+}
+
+func evalStringLess(left, right object.Object) object.Object {
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+	return nativeBoolToBooleanObject(leftVal < rightVal)
+}
+
+func evalStringGreater(left, right object.Object) object.Object {
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+	return nativeBoolToBooleanObject(leftVal > rightVal)
+}
+
+func evalStringLessEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+	return nativeBoolToBooleanObject(leftVal <= rightVal)
+}
+
+func evalStringGreaterEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+	return nativeBoolToBooleanObject(leftVal >= rightVal)
+}
+
+func evalBooleanAnd(left, right object.Object) object.Object {
+	leftVal := left.(*object.Boolean).Value
+	rightVal := right.(*object.Boolean).Value
+	return nativeBoolToBooleanObject(leftVal && rightVal)
+}
+
+func evalBooleanOr(left, right object.Object) object.Object {
+	leftVal := left.(*object.Boolean).Value
+	rightVal := right.(*object.Boolean).Value
+	return nativeBoolToBooleanObject(leftVal || rightVal)
+}
+
+func evalBooleanEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Boolean).Value
+	rightVal := right.(*object.Boolean).Value
+	return nativeBoolToBooleanObject(leftVal == rightVal)
+}
+
+func evalBooleanNotEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Boolean).Value
+	rightVal := right.(*object.Boolean).Value
+	return nativeBoolToBooleanObject(leftVal != rightVal)
 }
 
 func evalConcatExpression(left, right object.Object) object.Object {
@@ -327,110 +774,6 @@ func evalConcatExpression(left, right object.Object) object.Object {
 		return &object.Array{Elements: append(left.Elements, right.(*object.Array).Elements...)}
 	default:
 		return newError("cannot concatenate: %s", left.Type())
-	}
-}
-
-func evalFloatInfixExpression(operator string, left, right object.Object) object.Object {
-	leftVal := left.(*object.Float).Value
-	rightVal := right.(*object.Float).Value
-
-	switch operator {
-	case "+":
-		return &object.Float{Value: leftVal + rightVal}
-	case "-":
-		return &object.Float{Value: leftVal - rightVal}
-	case "*":
-		return &object.Float{Value: leftVal * rightVal}
-	case "^":
-		return &object.Float{Value: math.Pow(leftVal, rightVal)}
-	case "$":
-		return &object.Float{Value: math.Sqrt(rightVal)}
-	case "/":
-		if rightVal == 0 {
-			return newError("division by zero")
-		}
-		return &object.Float{Value: leftVal / rightVal}
-	case "<":
-		return nativeBoolToBooleanObject(leftVal < rightVal)
-	case ">":
-		return nativeBoolToBooleanObject(leftVal > rightVal)
-	case ">=":
-		return nativeBoolToBooleanObject(leftVal >= rightVal)
-	case "<=":
-		return nativeBoolToBooleanObject(leftVal <= rightVal)
-	case "==":
-		return nativeBoolToBooleanObject(leftVal == rightVal)
-	case "!=":
-		return nativeBoolToBooleanObject(leftVal != rightVal)
-	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
-	}
-}
-
-func evalIntegerInfixExpression(operator string, left, right object.Object) object.Object {
-	leftVal := left.(*object.Integer).Value
-	rightVal := right.(*object.Integer).Value
-
-	switch operator {
-	case "+":
-		return &object.Integer{Value: leftVal + rightVal}
-	case "-":
-		return &object.Integer{Value: leftVal - rightVal}
-	case "*":
-		return &object.Integer{Value: leftVal * rightVal}
-	case "%":
-		return &object.Integer{Value: leftVal % rightVal}
-	case "^":
-		return &object.Integer{Value: int64(math.Pow(float64(leftVal), float64(rightVal)))}
-	case "$":
-		return &object.Integer{Value: int64(math.Sqrt(float64(rightVal)))}
-	case "/":
-		if rightVal == 0 {
-			return newError("division by zero")
-		}
-		return &object.Integer{Value: leftVal / rightVal}
-	case "<":
-		return nativeBoolToBooleanObject(leftVal < rightVal)
-	case ">":
-		return nativeBoolToBooleanObject(leftVal > rightVal)
-	case ">=":
-		return nativeBoolToBooleanObject(leftVal >= rightVal)
-	case "<=":
-		return nativeBoolToBooleanObject(leftVal <= rightVal)
-	case "==":
-		return nativeBoolToBooleanObject(leftVal == rightVal)
-	case "!=":
-		return nativeBoolToBooleanObject(leftVal != rightVal)
-	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
-	}
-}
-
-func evalStringInfixExpression(operator string, left, right object.Object) object.Object {
-	leftVal := left.(*object.String).Value
-	rightVal := right.(*object.String).Value
-
-	switch operator {
-	case "+":
-		return &object.String{Value: leftVal + rightVal}
-	case "or":
-		return nativeBoolToBooleanObject(leftVal != "" || rightVal != "")
-	case "and":
-		return nativeBoolToBooleanObject(leftVal != "" && rightVal != "")
-	case "==":
-		return nativeBoolToBooleanObject(leftVal == rightVal)
-	case "!=":
-		return nativeBoolToBooleanObject(leftVal != rightVal)
-	case "<":
-		return nativeBoolToBooleanObject(leftVal < rightVal)
-	case ">":
-		return nativeBoolToBooleanObject(leftVal > rightVal)
-	case ">=":
-		return nativeBoolToBooleanObject(leftVal >= rightVal)
-	case "<=":
-		return nativeBoolToBooleanObject(leftVal <= rightVal)
-	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 

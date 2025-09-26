@@ -196,14 +196,6 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
       },
     }));
   };
-
-  const handleCSSChange = (css: string) => {
-    setCurrentTheme((prev) => ({
-      ...prev,
-      css,
-    }));
-  };
-
   const handleSave = () => {
     // Validate theme before saving
     if (!currentTheme.name.trim()) {
@@ -237,61 +229,6 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
     onClose();
   };
 
-  const exportTheme = () => {
-    const dataStr = JSON.stringify(currentTheme, null, 2);
-    const dataUri =
-      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-    const exportFileDefaultName = `${currentTheme.name.replace(/[^a-zA-Z0-9]/g, "-")}.json`;
-
-    const linkElement = document.createElement("a");
-    linkElement.setAttribute("href", dataUri);
-    linkElement.setAttribute("download", exportFileDefaultName);
-    linkElement.click();
-  };
-
-  const importTheme = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const importedTheme = JSON.parse(e.target?.result as string);
-
-        // Validate imported theme structure
-        if (
-          !importedTheme.name ||
-          !importedTheme.colors ||
-          !importedTheme.tokenColors
-        ) {
-          throw new Error("Invalid theme structure");
-        }
-
-        const template = generateThemeTemplate();
-        setCurrentTheme({
-          ...template,
-          ...importedTheme,
-          id: editingTheme ? editingTheme.id : `imported-${Date.now()}`,
-          createdAt: editingTheme
-            ? editingTheme.createdAt
-            : new Date().toISOString(),
-          colors: { ...template.colors, ...importedTheme.colors },
-          tokenColors: {
-            ...template.tokenColors,
-            ...importedTheme.tokenColors,
-          },
-        });
-      } catch (error) {
-        alert("Failed to import theme: Invalid or corrupted theme file");
-        console.error("Theme import error:", error);
-      }
-    };
-    reader.readAsText(file);
-
-    // Clear the input
-    event.target.value = "";
-  };
-
   const resetTheme = () => {
     if (confirm("Are you sure you want to reset all changes?")) {
       if (editingTheme) {
@@ -307,7 +244,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div
-        className={`${isDarkMode ? "bg-gray-900 text-white" : "bg-white text-black"} rounded-lg w-11/12 h-5/6 max-w-6xl flex flex-col`}
+        className={`${isDarkMode ? "bg-black text-white" : "bg-white text-black"} rounded-lg w-11/12 h-5/6 max-w-6xl flex flex-col border border-gray-600`}
       >
         {/* Header */}
         <div

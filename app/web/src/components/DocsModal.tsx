@@ -302,9 +302,7 @@ let safeCalculation = fn(x, y) {
 @arrays(map, filter, reduce)
 @math(sqrt, pow, abs)
 @io(readFile, writeFile)
-
-// Import with aliases
-@arrays(map as transform, filter as select)`}
+`}
               </CodeBlock>
             </div>
 
@@ -361,18 +359,18 @@ let fibonacci = fn(n) {
 // Optimized iterative version
 let fibonacciIter = fn(n) {
     if n <= 1 { return n }
-    
+
     let a = 0
     let b = 1
     let i = 2
-    
+
     while i <= n {
         let temp = a + b
         a = b
         b = temp
         i = i + 1
     }
-    
+
     return b
 }
 
@@ -395,7 +393,7 @@ let processUserData = fn(rawData) {
         |> filter(fn(user) { user.active })              // Active users
         |> map(fn(user) {                                // Normalize names
             return user.name.upper().trim()
-        })                   
+        })
 }
 
 let users = [
