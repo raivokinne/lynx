@@ -15,12 +15,14 @@ interface ThemeManagementProps {
   editorSettings: EditorSettings;
   onSettingsChange: (settings: EditorSettings) => void;
   isDarkMode: boolean;
+  registerCustomTheme: (theme: CustomTheme) => void;
 }
 
 export const ThemeManagement: React.FC<ThemeManagementProps> = ({
   editorSettings,
   onSettingsChange,
   isDarkMode,
+  registerCustomTheme,
 }) => {
   const [showThemeEditor, setShowThemeEditor] = useState(false);
   const [editingTheme, setEditingTheme] = useState<CustomTheme | null>(null);
@@ -34,16 +36,35 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
 
   // Get custom themes from settings
   const customThemes = editorSettings.customThemes || [];
-  const allThemes = [
-    ...builtInThemes,
-    ...customThemes.map((t) => ({ ...t, type: "custom" })),
-  ];
 
   const handleThemeSelect = (themeId: string) => {
+    // Apply theme immediately
     onSettingsChange({
       ...editorSettings,
       theme: themeId,
     });
+
+    // If it's a custom theme, register it with Monaco
+    const customTheme = customThemes.find((t) => t.id === themeId);
+    if (customTheme && (window as any).monaco) {
+      registerCustomTheme(customTheme);
+      setTimeout(() => {
+        try {
+          (window as any).monaco.editor.setTheme(themeId);
+        } catch (error) {
+          console.error("Failed to apply theme:", error);
+        }
+      }, 100);
+    } else if ((window as any).monaco) {
+      // Built-in theme
+      setTimeout(() => {
+        try {
+          (window as any).monaco.editor.setTheme(themeId);
+        } catch (error) {
+          console.error("Failed to apply theme:", error);
+        }
+      }, 100);
+    }
   };
 
   const handleCreateTheme = () => {
@@ -73,14 +94,30 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
     onSettingsChange({
       ...editorSettings,
       customThemes: updatedThemes,
+      // If we're saving the currently selected theme, keep it selected
+      theme:
+        editingTheme && editingTheme.id === editorSettings.theme
+          ? theme.id
+          : editorSettings.theme,
     });
 
-    console.log("Theme saved:", theme);
+    // Register the theme with Monaco
+    if ((window as any).monaco) {
+      registerCustomTheme(theme);
+    }
+
+    console.log("Theme saved:", theme.name);
   };
 
   const handleDeleteTheme = (themeId: string) => {
     if (confirm("Are you sure you want to delete this theme?")) {
       const updatedThemes = customThemes.filter((t) => t.id !== themeId);
+
+      // Remove theme CSS
+      const existingStyle = document.getElementById(`theme-${themeId}`);
+      if (existingStyle) {
+        existingStyle.remove();
+      }
 
       onSettingsChange({
         ...editorSettings,
@@ -158,6 +195,11 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
             customThemes: updatedThemes,
           });
 
+          // Register with Monaco if available
+          if ((window as any).monaco) {
+            registerCustomTheme(newTheme);
+          }
+
           console.log("Theme imported successfully:", newTheme.name);
         } catch (error) {
           console.error("Failed to import theme:", error);
@@ -174,29 +216,33 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
   };
 
   const handlePreviewTheme = (theme: CustomTheme) => {
-    // Temporarily apply the theme for preview
-    onSettingsChange({
-      ...editorSettings,
-      theme: theme.id,
-    });
+    // Register and apply the theme temporarily
+    if ((window as any).monaco) {
+      registerCustomTheme(theme);
+      setTimeout(() => {
+        try {
+          (window as any).monaco.editor.setTheme(theme.id);
+        } catch (error) {
+          console.error("Failed to preview theme:", error);
+        }
+      }, 100);
+    }
   };
+
+  // Register all custom themes when Monaco is available
+  React.useEffect(() => {
+    if ((window as any).monaco && customThemes.length > 0) {
+      customThemes.forEach((theme) => {
+        registerCustomTheme(theme);
+      });
+    }
+  }, [customThemes, registerCustomTheme]);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Theme Management</h3>
         <div className="flex items-center gap-2">
-          <label className="flex items-center gap-1 px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 cursor-pointer transition-colors">
-            <Upload className="w-4 h-4" />
-            Import
-            <input
-              type="file"
-              accept=".json"
-              multiple
-              onChange={handleImportThemes}
-              className="hidden"
-            />
-          </label>
           <button
             onClick={handleCreateTheme}
             className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
@@ -211,7 +257,7 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
       <div className="space-y-2">
         <label className="block text-sm font-medium">Current Theme</label>
         <select
-          value={editorSettings.theme}
+          value={editorSettings.theme || "vs-dark"}
           onChange={(e) => handleThemeSelect(e.target.value)}
           className={`w-full p-2 border rounded transition-colors ${
             isDarkMode
@@ -303,7 +349,7 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
             <h5
               className={`text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
             >
-              Custom Themes
+              Custom Themes ({customThemes.length})
             </h5>
             <div className="grid grid-cols-1 gap-2">
               {customThemes.map((theme) => (
@@ -327,6 +373,14 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
                         className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
                       >
                         Created {new Date(theme.createdAt).toLocaleDateString()}
+                        {theme.updatedAt &&
+                          theme.updatedAt !== theme.createdAt && (
+                            <span>
+                              {" "}
+                              • Updated{" "}
+                              {new Date(theme.updatedAt).toLocaleDateString()}
+                            </span>
+                          )}
                       </div>
                     </div>
                   </div>
@@ -414,6 +468,7 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
           onSaveTheme={handleSaveTheme}
           currentThemes={customThemes}
           isDarkMode={isDarkMode}
+          editingTheme={editingTheme}
         />
       )}
     </div>

@@ -3,6 +3,7 @@ import { Code, Plus, X } from "lucide-react";
 import MonacoEditor from "./MonacoEditor";
 import type { EditorSettings, SavedCode } from "../types/types";
 import { SaveDialog } from "./SaveDialog";
+import { useAuth } from "../hooks/useAuth";
 
 interface CodeEditorProps {
   isDarkMode: boolean;
@@ -28,6 +29,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 }) => {
   const [saveTitle, setSaveTitle] = useState<string>("");
   const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
+  const { user } = useAuth();
 
   const monacoOptions = {
     minimap: editorSettings.minimap ?? { enabled: true },
@@ -53,9 +55,24 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     setShowSaveDialog(!showSaveDialog);
   };
 
+  // Determine which theme to use
+  const getActiveTheme = () => {
+    // If theme is explicitly set, use it
+    if (editorSettings.theme) {
+      return editorSettings.theme;
+    }
+
+    // Fallback to dark/light theme based on isDarkMode
+    return isDarkMode
+      ? editorSettings.themeDark || "vs-dark"
+      : editorSettings.themeLight || "vs";
+  };
+
+  const activeTheme = getActiveTheme();
+
   return (
     <>
-      {showSaveDialog && (
+      {showSaveDialog && user?.id && (
         <SaveDialog
           isDarkMode={isDarkMode}
           saveTitle={saveTitle}
@@ -68,45 +85,47 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         <div
           className={`${isDarkMode ? "bg-black border-gray-700" : "bg-gray-50 border-gray-200"} border-b px-4 py-2 flex items-center justify-between`}
         >
-          {savedCodes.map((code) => (
-            <div
-              key={code.id}
-              className="flex justify-between items-center w-full p-1 px-4"
+          <div className="flex items-center gap-2 overflow-x-auto">
+            {savedCodes.map((code) => (
+              <div
+                key={code.id}
+                className="flex items-center gap-2 px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-md whitespace-nowrap"
+              >
+                <button
+                  onClick={() => onLoad(code)}
+                  className="flex gap-2 items-center text-sm hover:opacity-70"
+                >
+                  <Code className="w-4 h-4" />
+                  <span className="font-medium">{code.title}</span>
+                </button>
+                <button
+                  onClick={() => deleteCode(code.id)}
+                  className="flex items-center text-sm hover:bg-red-500 hover:text-white rounded-sm p-0.5"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+          {user?.id && (
+            <button
+              onClick={handleShow}
+              className="flex gap-2 items-center text-sm hover:opacity-70 px-2 py-1"
             >
-              <button
-                onClick={() => onLoad(code)}
-                className="flex gap-2 items-center text-sm"
-              >
-                <Code className="w-4 h-4" />
-                <span className="font-medium">{code.title}</span>
-              </button>
-              <button
-                onClick={() => deleteCode(code.id)}
-                className="flex gap-2 items-center text-sm"
-              >
-                <X className="w-4 h-4 bg-red-500 text-white rounded-sm" />
-              </button>
-            </div>
-          ))}
-          <button
-            onClick={handleShow}
-            className="flex gap-2 items-center text-sm hover:opacity-70"
-          >
-            <Plus className="w-4 h-4" />
-          </button>
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Save</span>
+            </button>
+          )}
         </div>
         <div className="flex-1">
           <MonacoEditor
             value={code}
             onChange={onChange}
             language="lynx"
-            theme={
-              isDarkMode ? editorSettings.themeDark : editorSettings.themeLight
-            }
+            theme={activeTheme}
             readOnly={editorSettings.readOnly}
             height="100%"
             options={monacoOptions}
-            customThemes={editorSettings.customThemes || []}
           />
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useCodeManagement } from "../hooks/useCodeManagement";
 import { useCodeExecution } from "../hooks/useCodeExecution";
@@ -14,7 +14,8 @@ import { DocsModal } from "../components/DocsModal";
 
 export const Home: React.FC = () => {
   const { user, logout } = useAuth();
-  const { editorSettings, updateAllSettings } = useSettings(user?.id);
+  const { editorSettings, updateAllSettings, registerCustomTheme } =
+    useSettings(user?.id);
   const {
     code,
     setCode,
@@ -27,11 +28,21 @@ export const Home: React.FC = () => {
   const { output, error, isRunning, executeCode, clearOutput } =
     useCodeExecution();
 
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    const local = localStorage.getItem("darkMode");
+    if (local) {
+      return local === "true";
+    }
+    return false;
+  });
   const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showDocs, setShowDocs] = useState<boolean>(false);
   const [saveTitle, setSaveTitle] = useState<string>("");
+
+  useEffect(() => {
+    localStorage.setItem("darkMode", isDarkMode.toString());
+  }, [isDarkMode]);
 
   const handleSaveCode = () => {
     saveCode(saveTitle);
@@ -64,6 +75,7 @@ export const Home: React.FC = () => {
           onSettingsChange={updateAllSettings}
           isDarkMode={isDarkMode}
           onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
+          registerCustomTheme={registerCustomTheme}
         />
       )}
 
