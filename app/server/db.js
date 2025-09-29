@@ -1,41 +1,68 @@
-import sqlite3 from "sqlite3";
-import { open } from "sqlite";
+import pkg from 'pg';
+const { Pool } = pkg;
 
 export let db;
 
 export async function initDb() {
-    db = await open({
-        filename: "./db.sqlite",
-        driver: sqlite3.Database,
-    });
+    try {
+        db = new Pool({
+            host: process.env.DB_HOST || 'localhost',
+            port: process.env.DB_PORT || 5432,
+            database: process.env.DB_NAME || 'compiler_db',
+            user: process.env.DB_USER || 'postgres',
+            password: process.env.DB_PASSWORD || 'password',
+            max: 20,
+            idleTimeoutMillis: 30000,
+            connectionTimeoutMillis: 2000,
+        });
 
-    await db.exec(`
-CREATE TABLE IF NOT EXISTS users (
-id TEXT PRIMARY KEY,
-username TEXT UNIQUE NOT NULL,
-password TEXT NOT NULL,
-created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)
-`);
+        await db.query('SELECT NOW()');
 
-    await db.exec(`
-CREATE TABLE IF NOT EXISTS codes (
-id TEXT PRIMARY KEY,
-user_id TEXT,
-title TEXT,
-code TEXT NOT NULL,
-created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)
-`);
-    await db.exec(`
-  CREATE TABLE IF NOT EXISTS user_settings (
-    id TEXT PRIMARY KEY,
-    user_id TEXT UNIQUE NOT NULL,
-    settings TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-  )
-  `);
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS codes (
+                id TEXT PRIMARY KEY,
+                user_id TEXT,
+                title TEXT,
+                code TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        `);
+
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS user_settings (
+                id TEXT PRIMARY KEY,
+                user_id TEXT UNIQUE NOT NULL,
+                settings TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        `);
+
+        console.log("Database initialized successfully");
+    } catch (error) {
+        console.error("Failed to initialize database:", error);
+        throw error;
+    }
+}
+
+export async function closeDb() {
+    if (db) {
+        try {
+            await db.end();
+            console.log("Database connection closed");
+        } catch (error) {
+            console.warn("Error closing database:", error);
+        }
+    }
 }

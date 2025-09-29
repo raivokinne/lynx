@@ -3,12 +3,12 @@ import { v4 as uuidv4 } from "uuid";
 
 export const getSettings = async (req, res) => {
     try {
-        const settings = await db.get(
-            "SELECT settings FROM user_settings WHERE user_id = ?",
-            [req.user.id],
+        const result = await db.query(
+            "SELECT settings FROM user_settings WHERE user_id = $1",
+            [req.user.id]
         );
 
-        if (!settings) {
+        if (result.rows.length === 0) {
             const defaultSettings = {
                 themeDark: "hc-black",
                 themeLight: "vs",
@@ -20,7 +20,6 @@ export const getSettings = async (req, res) => {
                 fontFamily: 'Consolas, "Courier New", monospace',
                 readOnly: false,
             };
-
             return res.json({
                 success: true,
                 settings: defaultSettings,
@@ -29,7 +28,7 @@ export const getSettings = async (req, res) => {
 
         res.json({
             success: true,
-            settings: JSON.parse(settings.settings),
+            settings: JSON.parse(result.rows[0].settings),
         });
     } catch (error) {
         console.error("Get settings error:", error?.message ?? error);
@@ -39,10 +38,10 @@ export const getSettings = async (req, res) => {
         });
     }
 };
+
 export const saveSettings = async (req, res) => {
     try {
         const { settings } = req.body;
-
         if (!settings || typeof settings !== "object") {
             return res.status(400).json({
                 success: false,
@@ -53,20 +52,14 @@ export const saveSettings = async (req, res) => {
         const settingsJson = JSON.stringify(settings);
         const settingsId = uuidv4();
 
-        await db.run(
-            `
-      INSERT OR REPLACE INTO user_settings (id, user_id, settings, updated_at)
-      VALUES (
-        COALESCE(
-          (SELECT id FROM user_settings WHERE user_id = ?),
-          ?
-        ),
-        ?,
-        ?,
-        CURRENT_TIMESTAMP
-      )
-    `,
-            [req.user.id, settingsId, req.user.id, settingsJson],
+        await db.query(
+            `INSERT INTO user_settings (id, user_id, settings, updated_at)
+             VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
+             ON CONFLICT (user_id)
+             DO UPDATE SET
+                settings = EXCLUDED.settings,
+                updated_at = CURRENT_TIMESTAMP`,
+            [settingsId, req.user.id, settingsJson]
         );
 
         res.json({
@@ -84,7 +77,7 @@ export const saveSettings = async (req, res) => {
 
 export const deleteSettings = async (req, res) => {
     try {
-        await db.run("DELETE FROM user_settings WHERE user_id = ?", [req.user.id]);
+        await db.query("DELETE FROM user_settings WHERE user_id = $1", [req.user.id]);
 
         res.json({
             success: true,

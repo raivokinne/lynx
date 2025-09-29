@@ -33,37 +33,6 @@ export const Settings: React.FC<SettingsProps> = ({
     });
   };
 
-  const handleExportSettings = () => {
-    const dataStr = JSON.stringify(editorSettings, null, 2);
-    const dataBlob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "editor-settings.json";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImportSettings = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const importedSettings = JSON.parse(e.target?.result as string);
-        onSettingsChange(importedSettings);
-        alert("Settings imported successfully!");
-      } catch (error) {
-        alert("Failed to import settings: Invalid file format");
-      }
-    };
-    reader.readAsText(file);
-    event.target.value = "";
-  };
-
   const resetToDefaults = () => {
     if (confirm("Are you sure you want to reset all settings to defaults?")) {
       const defaultSettings: EditorSettings = {

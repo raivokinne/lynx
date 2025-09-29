@@ -18,17 +18,17 @@ export const normalizeEditorSettings = (raw: any): EditorSettings => {
     customThemes: Array.isArray(raw.customThemes)
       ? raw.customThemes
       : defaultSettings.customThemes,
-    activeCustomTheme:
+    theme:
       typeof raw.activeCustomTheme === "string"
         ? raw.activeCustomTheme
-        : defaultSettings.activeCustomTheme,
+        : defaultSettings.theme,
     fontSize:
       typeof raw.fontSize === "number" && Number.isFinite(raw.fontSize)
         ? raw.fontSize
         : defaultSettings.fontSize,
     minimap: {
       enabled: Boolean(
-        raw.minimap?.enabled ?? raw.minimap ?? defaultSettings.minimap.enabled,
+        raw.minimap?.enabled ?? raw.minimap ?? defaultSettings.minimap!.enabled,
       ),
     },
     lineNumbers:

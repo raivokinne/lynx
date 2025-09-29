@@ -11,7 +11,7 @@ import {
     saveSettings,
 } from "./handlers/settings.js";
 import { cleanupTempFiles } from "./utils.js";
-import { initDb } from "./db.js";
+import { initDb, closeDb } from "./db.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -33,14 +33,11 @@ if (!existsSync(CONFIG.TEMP_DIR)) {
 
 app.post("/api/register", register);
 app.post("/api/login", login);
-
 app.post("/api/compile", compiler);
-
 app.post("/api/code/save", authenticate, saveCode);
 app.get("/api/code/list", authenticate, listCode);
 app.get("/api/code/:id", authenticate, getCode);
 app.delete("/api/code/:id", authenticate, deleteCode);
-
 app.get("/api/settings", authenticate, getSettings);
 app.post("/api/settings", authenticate, saveSettings);
 app.delete("/api/settings", authenticate, deleteSettings);
@@ -49,7 +46,7 @@ app.use((_req, res) => {
     res.status(404).json({ success: false, error: "Endpoint not found" });
 });
 
-app.use((err, _req, res, _next) => {
+app.use((err, req, res, next) => {
     console.error("Unhandled error:", err?.message ?? err);
     res.status(500).json({ success: false, error: "Internal server error" });
 });
@@ -61,7 +58,6 @@ initDb()
             console.log(`📁 Temp directory: ${CONFIG.TEMP_DIR}`);
             console.log(`⚡ Compiler path: ${CONFIG.COMPILER_PATH}`);
             console.log(`⏱️  Execution timeout: ${CONFIG.EXECUTION_TIMEOUT}ms`);
-
             cleanupTempFiles();
             setInterval(cleanupTempFiles, 30 * 60 * 1000);
         });
@@ -75,14 +71,7 @@ async function shutdown(signal) {
     try {
         console.log(`\n🛑 Shutting down server... (${signal})`);
         cleanupTempFiles();
-        if (db && typeof db.close === "function") {
-            try {
-                await db.close();
-                console.log("DB connection closed");
-            } catch (closeErr) {
-                console.warn("Error closing DB:", closeErr?.message ?? closeErr);
-            }
-        }
+        await closeDb();
     } finally {
         process.exit(0);
     }
@@ -90,7 +79,6 @@ async function shutdown(signal) {
 
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
-
 process.on("unhandledRejection", (reason) => {
     console.error("Unhandled Rejection:", reason);
 });

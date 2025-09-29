@@ -107,24 +107,20 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
               token: tokenType,
             };
 
-            // Only add foreground if it's a valid color
             if (style?.foreground && style.foreground.trim()) {
               rule.foreground = style.foreground.replace("#", "");
             }
 
-            // Only add background if it's a valid color
             if (style?.background && style.background.trim()) {
               rule.background = style.background.replace("#", "");
             }
 
-            // Only add fontStyle if it's not empty
             if (style?.fontStyle && style.fontStyle.trim()) {
               rule.fontStyle = style.fontStyle;
             }
 
             return rule;
           })
-          // Filter out rules that only have a token property
           .filter((rule) => Object.keys(rule).length > 1),
         colors: {
           "editor.background": currentTheme.colors?.background || "#1e1e1e",
@@ -144,13 +140,11 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
         },
       };
 
-      // Define the theme
       (window as any).monaco.editor.defineTheme(
         `preview-${currentTheme.id}`,
         monacoTheme,
       );
 
-      // Apply custom CSS
       if (currentTheme.css) {
         const existingStyle = document.getElementById(
           `preview-theme-${currentTheme.id}`,
@@ -197,13 +191,11 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
     }));
   };
   const handleSave = () => {
-    // Validate theme before saving
     if (!currentTheme.name.trim()) {
       alert("Please provide a theme name");
       return;
     }
 
-    // Check for duplicate names (excluding current theme if editing)
     const existingTheme = currentThemes.find(
       (t) => t.name === currentTheme.name && t.id !== currentTheme.id,
     );
@@ -215,7 +207,6 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
       return;
     }
 
-    // Ensure proper ID and timestamps
     const finalTheme = {
       ...currentTheme,
       id: editingTheme ? editingTheme.id : `custom-theme-${Date.now()}`,

@@ -4,55 +4,83 @@ import { db } from "../db.js";
 export const saveCode = async (req, res) => {
     try {
         const { title, code } = req.body;
-        if (!code)
-            return res
-                .status(400)
-                .json({ success: false, error: "Code is required" });
+
+        if (!code) {
+            return res.status(400).json({
+                success: false,
+                error: "Code is required"
+            });
+        }
 
         const codeId = uuidv4();
-        await db.run(
-            "INSERT INTO codes (id, user_id, title, code) VALUES (?, ?, ?, ?)",
-            [codeId, req.user.id, title || "Untitled", code],
+        await db.query(
+            "INSERT INTO codes (id, user_id, title, code) VALUES ($1, $2, $3, $4)",
+            [codeId, req.user.id, title || "Untitled", code]
         );
 
-        res.json({ success: true, message: "Code saved successfully", id: codeId });
+        res.json({
+            success: true,
+            message: "Code saved successfully",
+            id: codeId
+        });
     } catch (error) {
         console.error("Save code error:", error?.message ?? error);
-        res.status(500).json({ success: false, error: "Failed to save code" });
+        res.status(500).json({
+            success: false,
+            error: "Failed to save code"
+        });
     }
 };
 
 export const listCode = async (req, res) => {
     try {
-        const codes = await db.all(
-            "SELECT id, title, created_at FROM codes WHERE user_id = ? ORDER BY created_at DESC",
-            [req.user.id],
+        const result = await db.query(
+            `SELECT id, title, created_at
+             FROM codes
+             WHERE user_id = $1
+             ORDER BY created_at DESC`,
+            [req.user.id]
         );
-        res.json({ success: true, codes });
+
+        res.json({ success: true, codes: result.rows });
     } catch (error) {
         console.error("List code error:", error?.message ?? error);
-        res.status(500).json({ success: false, error: "Failed to fetch codes" });
+        res.status(500).json({
+            success: false,
+            error: "Failed to fetch codes"
+        });
     }
 };
 
 export const getCode = async (req, res) => {
     try {
         const { id } = req.params;
-        const code = await db.get(
-            "SELECT id, title, code, created_at FROM codes WHERE id = ? AND user_id = ?",
-            [id, req.user.id],
+
+        const result = await db.query(
+            `SELECT id, title, code, created_at
+             FROM codes
+             WHERE id = $1 AND user_id = $2`,
+            [id, req.user.id]
         );
 
+        const code = result.rows[0];
         if (!code) {
-            return res.status(404).json({ success: false, error: "Code not found" });
+            return res.status(404).json({
+                success: false,
+                error: "Code not found"
+            });
         }
 
         res.json({ success: true, code });
     } catch (error) {
         console.error("Get code error:", error?.message ?? error);
-        res.status(500).json({ success: false, error: "Failed to fetch code" });
+        res.status(500).json({
+            success: false,
+            error: "Failed to fetch code"
+        });
     }
 };
+
 export const deleteCode = async (req, res) => {
     try {
         const { id } = req.params;
@@ -64,29 +92,15 @@ export const deleteCode = async (req, res) => {
             });
         }
 
-        // First, check if the code exists and belongs to the user
-        const existingCode = await db.get(
-            "SELECT id FROM codes WHERE id = ? AND user_id = ?",
-            [id, req.user.id],
+        const result = await db.query(
+            "DELETE FROM codes WHERE id = $1 AND user_id = $2",
+            [id, req.user.id]
         );
 
-        if (!existingCode) {
+        if (result.rowCount === 0) {
             return res.status(404).json({
                 success: false,
                 error: "Code not found or you don't have permission to delete it",
-            });
-        }
-
-        // Delete the code
-        const result = await db.run(
-            "DELETE FROM codes WHERE id = ? AND user_id = ?",
-            [id, req.user.id],
-        );
-
-        if (result.changes === 0) {
-            return res.status(404).json({
-                success: false,
-                error: "Code not found or already deleted",
             });
         }
 
@@ -102,3 +116,4 @@ export const deleteCode = async (req, res) => {
         });
     }
 };
+

@@ -1,13 +1,5 @@
-import React, { useState } from "react";
-import {
-  Palette,
-  Plus,
-  Trash2,
-  Edit,
-  Download,
-  Upload,
-  Eye,
-} from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Palette, Plus, Trash2, Edit, Download, Eye } from "lucide-react";
 import { ThemeEditor } from "./ThemeEditor";
 import type { EditorSettings, CustomTheme } from "../types/types";
 
@@ -27,24 +19,20 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
   const [showThemeEditor, setShowThemeEditor] = useState(false);
   const [editingTheme, setEditingTheme] = useState<CustomTheme | null>(null);
 
-  // Built-in themes
   const builtInThemes = [
     { id: "vs", name: "Visual Studio Light", type: "built-in" },
     { id: "vs-dark", name: "Visual Studio Dark", type: "built-in" },
     { id: "hc-black", name: "High Contrast Dark", type: "built-in" },
   ];
 
-  // Get custom themes from settings
   const customThemes = editorSettings.customThemes || [];
 
   const handleThemeSelect = (themeId: string) => {
-    // Apply theme immediately
     onSettingsChange({
       ...editorSettings,
       theme: themeId,
     });
 
-    // If it's a custom theme, register it with Monaco
     const customTheme = customThemes.find((t) => t.id === themeId);
     if (customTheme && (window as any).monaco) {
       registerCustomTheme(customTheme);
@@ -56,7 +44,6 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
         }
       }, 100);
     } else if ((window as any).monaco) {
-      // Built-in theme
       setTimeout(() => {
         try {
           (window as any).monaco.editor.setTheme(themeId);
@@ -82,26 +69,22 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
     let updatedThemes;
 
     if (editingTheme) {
-      // Update existing theme
       updatedThemes = existingThemes.map((t) =>
         t.id === editingTheme.id ? theme : t,
       );
     } else {
-      // Add new theme
       updatedThemes = [...existingThemes, theme];
     }
 
     onSettingsChange({
       ...editorSettings,
       customThemes: updatedThemes,
-      // If we're saving the currently selected theme, keep it selected
       theme:
         editingTheme && editingTheme.id === editorSettings.theme
           ? theme.id
           : editorSettings.theme,
     });
 
-    // Register the theme with Monaco
     if ((window as any).monaco) {
       registerCustomTheme(theme);
     }
@@ -113,7 +96,6 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
     if (confirm("Are you sure you want to delete this theme?")) {
       const updatedThemes = customThemes.filter((t) => t.id !== themeId);
 
-      // Remove theme CSS
       const existingStyle = document.getElementById(`theme-${themeId}`);
       if (existingStyle) {
         existingStyle.remove();
@@ -122,7 +104,6 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
       onSettingsChange({
         ...editorSettings,
         customThemes: updatedThemes,
-        // If we're deleting the currently selected theme, switch to vs-dark
         theme:
           editorSettings.theme === themeId ? "vs-dark" : editorSettings.theme,
       });
@@ -141,82 +122,7 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
     linkElement.click();
   };
 
-  const handleImportThemes = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files) return;
-
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const importedTheme = JSON.parse(e.target?.result as string);
-
-          // Validate theme structure
-          if (
-            !importedTheme.name ||
-            !importedTheme.colors ||
-            !importedTheme.tokenColors
-          ) {
-            throw new Error("Invalid theme structure");
-          }
-
-          // Generate unique ID and ensure all required fields
-          const newTheme: CustomTheme = {
-            id: `imported-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            name: importedTheme.name,
-            css: importedTheme.css || "",
-            colors: {
-              background: "#1e1e1e",
-              foreground: "#d4d4d4",
-              selection: "#264f78",
-              lineHighlight: "#2d2d30",
-              cursor: "#ffffff",
-              whitespace: "#404040",
-              ...importedTheme.colors,
-            },
-            tokenColors: {
-              comment: { foreground: "#6A9955", fontStyle: "italic" },
-              string: { foreground: "#CE9178" },
-              keyword: { foreground: "#C586C0" },
-              variable: { foreground: "#9CDCFE" },
-              number: { foreground: "#B5CEA8" },
-              operator: { foreground: "#D4D4D4" },
-              function: { foreground: "#DCDCAA" },
-              type: { foreground: "#4EC9B0" },
-              ...importedTheme.tokenColors,
-            },
-            createdAt: new Date().toISOString(),
-          };
-
-          // Add to custom themes
-          const updatedThemes = [...(customThemes || []), newTheme];
-          onSettingsChange({
-            ...editorSettings,
-            customThemes: updatedThemes,
-          });
-
-          // Register with Monaco if available
-          if ((window as any).monaco) {
-            registerCustomTheme(newTheme);
-          }
-
-          console.log("Theme imported successfully:", newTheme.name);
-        } catch (error) {
-          console.error("Failed to import theme:", error);
-          alert(
-            `Failed to import theme from ${file.name}: Invalid or corrupted theme file`,
-          );
-        }
-      };
-      reader.readAsText(file);
-    });
-
-    // Clear the input
-    event.target.value = "";
-  };
-
   const handlePreviewTheme = (theme: CustomTheme) => {
-    // Register and apply the theme temporarily
     if ((window as any).monaco) {
       registerCustomTheme(theme);
       setTimeout(() => {
@@ -229,8 +135,7 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
     }
   };
 
-  // Register all custom themes when Monaco is available
-  React.useEffect(() => {
+  useEffect(() => {
     if ((window as any).monaco && customThemes.length > 0) {
       customThemes.forEach((theme) => {
         registerCustomTheme(theme);
