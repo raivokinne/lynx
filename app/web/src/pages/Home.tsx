@@ -11,6 +11,7 @@ import { Settings } from "../components/Settings";
 import type { SavedCode } from "../types/types";
 import { useSettings } from "../hooks/useSettings";
 import { DocsModal } from "../components/DocsModal";
+import { GitPanel } from "../components/GitPanel";
 
 export const Home: React.FC = () => {
   const { user, logout } = useAuth();
@@ -39,6 +40,7 @@ export const Home: React.FC = () => {
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showDocs, setShowDocs] = useState<boolean>(false);
   const [saveTitle, setSaveTitle] = useState<string>("");
+  const [showGit, setShowGit] = useState<boolean>(false);
 
   useEffect(() => {
     localStorage.setItem("darkMode", isDarkMode.toString());
@@ -61,6 +63,10 @@ export const Home: React.FC = () => {
 
   const handleExecuteCode = () => {
     executeCode(code);
+  };
+
+  const handleCloseGit = () => {
+    setShowGit(!showGit);
   };
 
   return (
@@ -89,6 +95,8 @@ export const Home: React.FC = () => {
         />
       )}
 
+      {showGit && <GitPanel open={showGit} close={handleCloseGit} />}
+
       {showDocs && (
         <DocsModal isDarkMode={isDarkMode} onClose={handleCloseDocs} />
       )}
@@ -112,6 +120,7 @@ export const Home: React.FC = () => {
           }}
           onSettings={() => setShowSettings(true)}
           onDocs={handleCloseDocs}
+          onGit={handleCloseGit}
         />
 
         <div className="flex-1 flex">
