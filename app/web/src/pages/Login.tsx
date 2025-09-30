@@ -34,7 +34,7 @@ export default function Login() {
     setIsLoading(false);
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,

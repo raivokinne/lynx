@@ -17,7 +17,7 @@ export default function Register() {
 
     const { register } = useAuth();
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError("");
@@ -37,7 +37,7 @@ export default function Register() {
         setIsLoading(false);
     };
 
-    const handleInputChange = (e) => {
+    const handleInputChange = (e: any) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,

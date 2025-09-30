@@ -2,7 +2,6 @@ import {
   X,
   Shield,
   Package,
-  Wrench,
   Book,
   Code,
   Search,
@@ -10,7 +9,6 @@ import {
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useTranslation } from "../hooks/useTranslation";
-import { useLanguage } from "../hooks/useLanguage";
 import { LanguageSelector } from "./LanguageSelector";
 import { languageComparisons } from "../data/comparisons";
 
@@ -32,7 +30,6 @@ export const DocsModal = ({ isDarkMode, onClose }: DocsModalProps) => {
   const [selectedComparisonLanguages, setSelectedComparisonLanguages] =
     useState<string[]>(["lynx", "javascript"]);
   const { t } = useTranslation();
-  const { currentLanguage } = useLanguage();
 
   const sections = useMemo(
     () => [
@@ -384,17 +381,6 @@ export const DocsModal = ({ isDarkMode, onClose }: DocsModalProps) => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">{t("search.results")}</h2>
-          <span
-            className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
-          >
-            {hasResults
-              ? String(
-                  t("search.foundInSections", {
-                    count: Object.keys(searchResults).length,
-                  }),
-                )
-              : t("search.noResults")}
-          </span>
         </div>
 
         {!hasResults ? (
@@ -402,7 +388,6 @@ export const DocsModal = ({ isDarkMode, onClose }: DocsModalProps) => {
             className={`text-center py-8 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
           >
             <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>{t("search.noResultsFor", { query: searchQuery })}</p>
             <p className="text-sm mt-2">{t("search.tryDifferent")}</p>
           </div>
         ) : (

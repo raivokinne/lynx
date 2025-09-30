@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { EditorSettings } from "../types/types";
 import { settingsAPI } from "../api/settings";
+import type { CustomTheme } from "../types/types";
 
 const LOCAL_STORAGE_SETTINGS_KEY = "editor_settings";
 

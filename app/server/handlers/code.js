@@ -8,26 +8,65 @@ export const saveCode = async (req, res) => {
         if (!code) {
             return res.status(400).json({
                 success: false,
-                error: "Code is required"
+                error: "Code is required",
             });
         }
 
         const codeId = uuidv4();
         await db.query(
             "INSERT INTO codes (id, user_id, title, code) VALUES ($1, $2, $3, $4)",
-            [codeId, req.user.id, title || "Untitled", code]
+            [codeId, req.user.id, title || "Untitled", code],
         );
 
         res.json({
             success: true,
             message: "Code saved successfully",
-            id: codeId
+            id: codeId,
         });
     } catch (error) {
         console.error("Save code error:", error?.message ?? error);
         res.status(500).json({
             success: false,
-            error: "Failed to save code"
+            error: "Failed to save code",
+        });
+    }
+};
+
+export const updateCode = async (req, res) => {
+    try {
+        const { id, title, code } = req.body;
+
+        if (!id || !code) {
+            return res.status(400).json({
+                success: false,
+                error: "Code and Id are required",
+            });
+        }
+
+        const result = await db.query(
+            "UPDATE codes SET title = $2, code = $1 WHERE id = $3 AND user_id = $4 RETURNING *",
+            [title, code, id, req.user.id],
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: "Code not found or unauthorized",
+            });
+        }
+
+        const codeData = result.rows[0];
+
+        res.json({
+            success: true,
+            message: "Code updated successfully",
+            id: codeData.id,
+        });
+    } catch (error) {
+        console.error("Update code error:", error?.message ?? error);
+        res.status(500).json({
+            success: false,
+            error: "Failed to update code",
         });
     }
 };
@@ -39,7 +78,7 @@ export const listCode = async (req, res) => {
              FROM codes
              WHERE user_id = $1
              ORDER BY created_at DESC`,
-            [req.user.id]
+            [req.user.id],
         );
 
         res.json({ success: true, codes: result.rows });
@@ -47,7 +86,7 @@ export const listCode = async (req, res) => {
         console.error("List code error:", error?.message ?? error);
         res.status(500).json({
             success: false,
-            error: "Failed to fetch codes"
+            error: "Failed to fetch codes",
         });
     }
 };
@@ -60,14 +99,14 @@ export const getCode = async (req, res) => {
             `SELECT id, title, code, created_at
              FROM codes
              WHERE id = $1 AND user_id = $2`,
-            [id, req.user.id]
+            [id, req.user.id],
         );
 
         const code = result.rows[0];
         if (!code) {
             return res.status(404).json({
                 success: false,
-                error: "Code not found"
+                error: "Code not found",
             });
         }
 
@@ -76,7 +115,7 @@ export const getCode = async (req, res) => {
         console.error("Get code error:", error?.message ?? error);
         res.status(500).json({
             success: false,
-            error: "Failed to fetch code"
+            error: "Failed to fetch code",
         });
     }
 };
@@ -94,7 +133,7 @@ export const deleteCode = async (req, res) => {
 
         const result = await db.query(
             "DELETE FROM codes WHERE id = $1 AND user_id = $2",
-            [id, req.user.id]
+            [id, req.user.id],
         );
 
         if (result.rowCount === 0) {
@@ -116,4 +155,3 @@ export const deleteCode = async (req, res) => {
         });
     }
 };
-

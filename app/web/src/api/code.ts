@@ -54,13 +54,35 @@ export const codeApi = {
         return await response.json();
     },
 
-    async deleteCode(id: string): Promise<{ success: boolean; error?: string }> {
+    async deleteCode(
+        id: string,
+    ): Promise<{ success: boolean; error?: string }> {
         const token = getAuthToken();
         if (!token) throw new Error("No authentication token");
 
         const response = await fetch(`${API_BASE}/code/${id}`, {
             method: "DELETE",
             headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        return await response.json();
+    },
+
+    async updateCode(
+        id: string,
+        title: string,
+        code: string,
+    ): Promise<{ success: boolean; error?: string }> {
+        const token = getAuthToken();
+        if (!token) throw new Error("No authentication token");
+
+        const response = await fetch(`${API_BASE}/code/${id}/update`, {
+            method: "PUT",
+            body: JSON.stringify({ id, title, code }),
+            headers: {
+                "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
         });
