@@ -48,9 +48,7 @@ export default function Login() {
       <div className="max-w-md w-full">
         <div className="bg-black border-2 p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Laipni lūdzam atpakaļ
-            </h1>
+            <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
           </div>
 
           <div className="space-y-6">
@@ -66,7 +64,7 @@ export default function Login() {
                 htmlFor="username"
                 className="block text-sm font-medium text-white"
               >
-                Lietotājvārds
+                Username
               </label>
               <input
                 id="username"
@@ -85,7 +83,7 @@ export default function Login() {
                 htmlFor="password"
                 className="block text-sm font-medium text-white"
               >
-                Parole
+                Password
               </label>
               <div className="relative">
                 <input
@@ -120,12 +118,12 @@ export default function Login() {
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
-                  Pieteicos...
+                  Loading...
                 </>
               ) : (
                 <>
                   <LogIn className="w-4 h-4" />
-                  Pieteikties
+                  Login
                 </>
               )}
             </button>
@@ -133,12 +131,12 @@ export default function Login() {
 
           <div className="mt-8 text-center">
             <p className="text-gray-300">
-              Nav konta?{" "}
+              Don't have an account?{" "}
               <Link
                 to="/register"
                 className="text-white hover:text-gray-300 font-medium transition-colors underline cursor-pointer"
               >
-                Reģistrēties
+                Register
               </Link>
             </p>
           </div>

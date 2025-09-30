@@ -36,7 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
               className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg ${isDarkMode ? "border-gray-700 hover:bg-gray-800" : "border-gray-300 hover:bg-gray-50"}`}
             >
               <LogOut className="w-4 h-4" />
-              <span className="text-sm">Iziet</span>
+              <span className="text-sm">Log out</span>
             </button>
           </div>
         </div>
@@ -47,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={onLogin}
               className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg ${isDarkMode ? "border-gray-700 hover:bg-gray-800" : "border-gray-300 hover:bg-gray-50"}`}
             >
-              <span className="text-sm">Pieslēgties</span>
+              <span className="text-sm">Register</span>
             </button>
           </div>
         </div>
