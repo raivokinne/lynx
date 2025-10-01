@@ -137,11 +137,7 @@ export const Home: React.FC = () => {
                         onLoad={handleLoadCode}
                         deleteCode={deleteCode}
                     />
-                    <OutputPanel
-                        isDarkMode={isDarkMode}
-                        output={output}
-                        error={error}
-                    />
+                    <OutputPanel isDarkMode={isDarkMode} output={output} error={error} />
                 </div>
             </div>
         </div>

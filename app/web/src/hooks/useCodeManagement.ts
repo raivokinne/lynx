@@ -5,8 +5,7 @@ import { codeApi } from "../api/code";
 export const useCodeManagement = (userId?: string) => {
     const [savedCodes, setSavedCodes] = useState<SavedCode[]>([]);
     const [code, setCode] = useState<string>("");
-    const [currentCodeTitle, setCurrentCodeTitle] =
-        useState<string>("Untitled");
+    const [currentCodeTitle, setCurrentCodeTitle] = useState<string>("Untitled");
     const [currentCodeId, setCurrentCodeId] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -20,24 +19,20 @@ export const useCodeManagement = (userId?: string) => {
             const result = await codeApi.loadCodes();
 
             if (result.success && result.codes) {
-                const transformedCodes: SavedCode[] = result.codes.map(
-                    (code) => ({
-                        id: code.id,
-                        title: code.title,
-                        code: "",
-                        createdAt: code.createdAt || new Date().toISOString(),
-                        updatedAt: code.createdAt || new Date().toISOString(),
-                    }),
-                );
+                const transformedCodes: SavedCode[] = result.codes.map((code: SavedCode) => ({
+                    id: code.id,
+                    title: code.title,
+                    code: "",
+                    createdAt: code.createdAt || new Date().toISOString(),
+                    updatedAt: code.createdAt || new Date().toISOString(),
+                }));
                 setSavedCodes(transformedCodes);
             } else {
                 setError(result.error || "Failed to load codes");
             }
         } catch (error) {
             console.error("Error loading saved codes:", error);
-            setError(
-                error instanceof Error ? error.message : "Failed to load codes",
-            );
+            setError(error instanceof Error ? error.message : "Failed to load codes");
         } finally {
             setLoading(false);
         }
@@ -88,9 +83,7 @@ export const useCodeManagement = (userId?: string) => {
             }
         } catch (error) {
             console.error("Error saving code:", error);
-            setError(
-                error instanceof Error ? error.message : "Failed to save code",
-            );
+            setError(error instanceof Error ? error.message : "Failed to save code");
             return false;
         } finally {
             setLoading(false);
@@ -102,7 +95,6 @@ export const useCodeManagement = (userId?: string) => {
             setLoading(true);
             setError(null);
 
-            // If we already have the code content, use it
             if (savedCode.code) {
                 setCode(savedCode.code);
                 setCurrentCodeTitle(savedCode.title);
@@ -121,9 +113,7 @@ export const useCodeManagement = (userId?: string) => {
             }
         } catch (error) {
             console.error("Error loading code:", error);
-            setError(
-                error instanceof Error ? error.message : "Failed to load code",
-            );
+            setError(error instanceof Error ? error.message : "Failed to load code");
         } finally {
             setLoading(false);
         }
@@ -153,9 +143,7 @@ export const useCodeManagement = (userId?: string) => {
         } catch (error) {
             console.error("Error deleting code:", error);
             setError(
-                error instanceof Error
-                    ? error.message
-                    : "Failed to delete code",
+                error instanceof Error ? error.message : "Failed to delete code",
             );
             return false;
         } finally {
@@ -180,11 +168,11 @@ export const useCodeManagement = (userId?: string) => {
                     prev.map((c) =>
                         c.id === codeId
                             ? {
-                                  ...c,
-                                  title: title,
-                                  code: code,
-                                  updatedAt: new Date().toISOString(),
-                              }
+                                ...c,
+                                title: title,
+                                code: code,
+                                updatedAt: new Date().toISOString(),
+                            }
                             : c,
                     ),
                 );
@@ -201,9 +189,7 @@ export const useCodeManagement = (userId?: string) => {
         } catch (error) {
             console.error("Error updating code:", error);
             setError(
-                error instanceof Error
-                    ? error.message
-                    : "Failed to update code",
+                error instanceof Error ? error.message : "Failed to update code",
             );
             return false;
         } finally {

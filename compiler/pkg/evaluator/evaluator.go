@@ -121,7 +121,6 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 				return obj
 			}
 			return val
-
 		case *ast.IndexExpression:
 			left := Eval(target.Left, env)
 			if isError(left) {
@@ -199,7 +198,7 @@ func evalIndexAssignment(left, index, value object.Object) object.Object {
 			return newError("key not found: %s", index.Type())
 		}
 		pair.Value = value
-		return value
+		return pair.Value
 	default:
 		return newError("cannot assign to: %s", left.Type())
 	}
@@ -374,18 +373,19 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 		return evalConcatExpression(left, right)
 	}
 
-	if operator == "==" {
-		return nativeBoolToBooleanObject(left == right)
-	}
-	if operator == "!=" {
-		return nativeBoolToBooleanObject(left != right)
-	}
-
 	typePair := TypePair{left.Type(), right.Type()}
 	if handlers, exists := operatorMap[typePair]; exists {
 		if handler, exists := handlers[operator]; exists {
 			return handler(left, right)
 		}
+	}
+
+	if operator == "==" {
+		return nativeBoolToBooleanObject(left == right)
+	}
+
+	if operator == "!=" {
+		return nativeBoolToBooleanObject(left != right)
 	}
 
 	return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())

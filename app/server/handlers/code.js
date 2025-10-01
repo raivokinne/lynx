@@ -1,12 +1,13 @@
 import { v4 as uuidv4 } from "uuid";
 import { db } from "../db.js";
+import { createVersion } from "./version.js";
 
 export const saveCode = async (req, res) => {
     try {
         const { title, code } = req.body;
 
         if (!code) {
-            return res.status(400).json({
+            return res.status(422).json({
                 success: false,
                 error: "Code is required",
             });
@@ -15,8 +16,15 @@ export const saveCode = async (req, res) => {
         const codeId = uuidv4();
         await db.query(
             "INSERT INTO codes (id, user_id, title, code) VALUES ($1, $2, $3, $4)",
-            [codeId, req.user.id, title || "Untitled", code],
+            [
+                codeId,
+                req.user.id,
+                title || "Untitled",
+                code,
+            ],
         );
+
+        await createVersion(codeId, code, title || "Untitled");
 
         res.json({
             success: true,
@@ -34,29 +42,47 @@ export const saveCode = async (req, res) => {
 
 export const updateCode = async (req, res) => {
     try {
-        const { id, title, code } = req.body;
+        const { id, title, code, language, description } = req.body;
 
         if (!id || !code) {
-            return res.status(400).json({
+            return res.status(422).json({
                 success: false,
                 error: "Code and Id are required",
             });
         }
 
-        const result = await db.query(
-            "UPDATE codes SET title = $2, code = $1 WHERE id = $3 AND user_id = $4 RETURNING *",
-            [title, code, id, req.user.id],
+        const currentResult = await db.query(
+            "SELECT code, title FROM codes WHERE id = $1 AND user_id = $2",
+            [id, req.user.id],
         );
 
-        if (result.rows.length === 0) {
+        if (currentResult.rows.length === 0) {
             return res.status(404).json({
                 success: false,
                 error: "Code not found or unauthorized",
             });
         }
 
-        const codeData = result.rows[0];
+        // Only create version if code has changed
+        const currentCode = currentResult.rows[0];
+        if (currentCode.code !== code) {
+            await createVersion(id, currentCode.code, currentCode.title);
+        }
 
+        // Update the code
+        const result = await db.query(
+            `UPDATE codes
+             SET title = COALESCE($1, title),
+                 code = $2,
+                 language = COALESCE($3, language),
+                 description = COALESCE($4, description),
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE id = $5 AND user_id = $6
+             RETURNING *`,
+            [title, code, language, description, id, req.user.id],
+        );
+
+        const codeData = result.rows[0];
         res.json({
             success: true,
             message: "Code updated successfully",
@@ -73,15 +99,22 @@ export const updateCode = async (req, res) => {
 
 export const listCode = async (req, res) => {
     try {
-        const result = await db.query(
-            `SELECT id, title, created_at
-             FROM codes
-             WHERE user_id = $1
-             ORDER BY created_at DESC`,
-            [req.user.id],
-        );
+        const { } = req.query;
 
-        res.json({ success: true, codes: result.rows });
+        let query = `
+            SELECT id, title, created_at
+            FROM codes
+            WHERE user_id = $1
+        `;
+
+        const params = [req.user.id];
+
+        const result = await db.query(query, params);
+
+        res.json({
+            success: true,
+            codes: result.rows,
+        });
     } catch (error) {
         console.error("List code error:", error?.message ?? error);
         res.status(500).json({
@@ -103,6 +136,7 @@ export const getCode = async (req, res) => {
         );
 
         const code = result.rows[0];
+
         if (!code) {
             return res.status(404).json({
                 success: false,
@@ -123,18 +157,30 @@ export const getCode = async (req, res) => {
 export const deleteCode = async (req, res) => {
     try {
         const { id } = req.params;
+        const { permanent = false } = req.query;
 
         if (!id) {
-            return res.status(400).json({
+            return res.status(422).json({
                 success: false,
                 error: "Code ID is required",
             });
         }
 
-        const result = await db.query(
-            "DELETE FROM codes WHERE id = $1 AND user_id = $2",
-            [id, req.user.id],
-        );
+        let result;
+
+        if (permanent === "true") {
+            // Permanently delete
+            result = await db.query(
+                "DELETE FROM codes WHERE id = $1 AND user_id = $2",
+                [id, req.user.id],
+            );
+        } else {
+            // Soft delete
+            result = await db.query(
+                "UPDATE codes SET is_deleted = true WHERE id = $1 AND user_id = $2",
+                [id, req.user.id],
+            );
+        }
 
         if (result.rowCount === 0) {
             return res.status(404).json({
@@ -145,13 +191,68 @@ export const deleteCode = async (req, res) => {
 
         res.json({
             success: true,
-            message: "Code deleted successfully",
+            message:
+                permanent === "true"
+                    ? "Code permanently deleted"
+                    : "Code deleted successfully",
         });
     } catch (error) {
         console.error("Delete code error:", error?.message ?? error);
         res.status(500).json({
             success: false,
             error: "Failed to delete code",
+        });
+    }
+};
+
+export const restoreCode = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const result = await db.query(
+            "UPDATE codes SET is_deleted = false WHERE id = $1 AND user_id = $2 AND is_deleted = true",
+            [id, req.user.id],
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                success: false,
+                error: "Code not found or already restored",
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Code restored successfully",
+        });
+    } catch (error) {
+        console.error("Restore code error:", error?.message ?? error);
+        res.status(500).json({
+            success: false,
+            error: "Failed to restore code",
+        });
+    }
+};
+
+export const getDeletedCodes = async (req, res) => {
+    try {
+        const result = await db.query(
+            `SELECT id, title, language, description, created_at, updated_at
+             FROM codes
+             WHERE user_id = $1 AND is_deleted = true
+             ORDER BY updated_at DESC`,
+            [req.user.id],
+        );
+
+        res.json({
+            success: true,
+            codes: result.rows,
+        });
+    } catch (error) {
+        console.error("Get deleted codes error:", error?.message ?? error);
+        res.status(500).json({
+            success: false,
+            error: "Failed to fetch deleted codes",
         });
     }
 };

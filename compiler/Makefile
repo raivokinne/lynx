@@ -16,7 +16,7 @@ install:
 	go install $(MAIN_PACKAGE)
 
 test:
-	go test -v ./...
+	go test -v ./test...
 
 build-all:
 	GOOS=linux GOARCH=amd64 go build -o build/lynx-linux main.go
