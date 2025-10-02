@@ -296,69 +296,79 @@ type TypePair struct {
 
 var operatorMap = map[TypePair]map[string]OperatorHandler{
 	{object.INTEGER_OBJ, object.INTEGER_OBJ}: {
-		"+":  evalIntegerAdd,
-		"-":  evalIntegerSub,
-		"*":  evalIntegerMul,
-		"/":  evalIntegerDiv,
-		"^":  evalIntegerPow,
-		"$":  evalIntegerSqrt,
-		"<":  evalIntegerLess,
-		">":  evalIntegerGreater,
-		">=": evalIntegerGreaterEqual,
-		"<=": evalIntegerLessEqual,
-		"==": evalIntegerEqual,
-		"!=": evalIntegerNotEqual,
+		"+":   evalIntegerAdd,
+		"-":   evalIntegerSub,
+		"*":   evalIntegerMul,
+		"/":   evalIntegerDiv,
+		"^":   evalIntegerPow,
+		"$":   evalIntegerSqrt,
+		"<":   evalIntegerLess,
+		">":   evalIntegerGreater,
+		">=":  evalIntegerGreaterEqual,
+		"<=":  evalIntegerLessEqual,
+		"==":  evalIntegerEqual,
+		"!=":  evalIntegerNotEqual,
+		"and": evalIntegerAnd,
+		"or":  evalIntegerOr,
 	},
 	{object.FLOAT_OBJ, object.FLOAT_OBJ}: {
-		"+":  evalFloatAdd,
-		"-":  evalFloatSub,
-		"*":  evalFloatMul,
-		"/":  evalFloatDiv,
-		"^":  evalFloatPow,
-		"$":  evalFloatSqrt,
-		"<":  evalFloatLess,
-		">":  evalFloatGreater,
-		">=": evalFloatGreaterEqual,
-		"<=": evalFloatLessEqual,
-		"==": evalFloatEqual,
-		"!=": evalFloatNotEqual,
+		"+":   evalFloatAdd,
+		"-":   evalFloatSub,
+		"*":   evalFloatMul,
+		"/":   evalFloatDiv,
+		"^":   evalFloatPow,
+		"$":   evalFloatSqrt,
+		"<":   evalFloatLess,
+		">":   evalFloatGreater,
+		">=":  evalFloatGreaterEqual,
+		"<=":  evalFloatLessEqual,
+		"==":  evalFloatEqual,
+		"!=":  evalFloatNotEqual,
+		"and": evalFloatAnd,
+		"or":  evalFloatOr,
 	},
 	{object.FLOAT_OBJ, object.INTEGER_OBJ}: {
-		"+":  evalFloatIntegerAdd,
-		"-":  evalFloatIntegerSub,
-		"*":  evalFloatIntegerMul,
-		"/":  evalFloatIntegerDiv,
-		"^":  evalFloatIntegerPow,
-		"$":  evalFloatIntegerSqrt,
-		"<":  evalFloatIntegerLess,
-		">":  evalFloatIntegerGreater,
-		">=": evalFloatIntegerGreaterEqual,
-		"<=": evalFloatIntegerLessEqual,
-		"==": evalFloatIntegerEqual,
-		"!=": evalFloatIntegerNotEqual,
+		"+":   evalFloatIntegerAdd,
+		"-":   evalFloatIntegerSub,
+		"*":   evalFloatIntegerMul,
+		"/":   evalFloatIntegerDiv,
+		"^":   evalFloatIntegerPow,
+		"$":   evalFloatIntegerSqrt,
+		"<":   evalFloatIntegerLess,
+		">":   evalFloatIntegerGreater,
+		">=":  evalFloatIntegerGreaterEqual,
+		"<=":  evalFloatIntegerLessEqual,
+		"==":  evalFloatIntegerEqual,
+		"!=":  evalFloatIntegerNotEqual,
+		"and": evalFloatIntegerAnd,
+		"or":  evalFloatIntegerOr,
 	},
 	{object.INTEGER_OBJ, object.FLOAT_OBJ}: {
-		"+":  evalIntegerFloatAdd,
-		"-":  evalIntegerFloatSub,
-		"*":  evalIntegerFloatMul,
-		"/":  evalIntegerFloatDiv,
-		"^":  evalIntegerFloatPow,
-		"$":  evalIntegerFloatSqrt,
-		"<":  evalIntegerFloatLess,
-		">":  evalIntegerFloatGreater,
-		">=": evalIntegerFloatGreaterEqual,
-		"<=": evalIntegerFloatLessEqual,
-		"==": evalIntegerFloatEqual,
-		"!=": evalIntegerFloatNotEqual,
+		"+":   evalIntegerFloatAdd,
+		"-":   evalIntegerFloatSub,
+		"*":   evalIntegerFloatMul,
+		"/":   evalIntegerFloatDiv,
+		"^":   evalIntegerFloatPow,
+		"$":   evalIntegerFloatSqrt,
+		"<":   evalIntegerFloatLess,
+		">":   evalIntegerFloatGreater,
+		">=":  evalIntegerFloatGreaterEqual,
+		"<=":  evalIntegerFloatLessEqual,
+		"==":  evalIntegerFloatEqual,
+		"!=":  evalIntegerFloatNotEqual,
+		"and": evalIntegerFloatAnd,
+		"or":  evalIntegerFloatOr,
 	},
 	{object.STRING_OBJ, object.STRING_OBJ}: {
-		"+":  evalStringConcat,
-		"==": evalStringEqual,
-		"!=": evalStringNotEqual,
-		"<":  evalStringLess,
-		">":  evalStringGreater,
-		"<=": evalStringLessEqual,
-		">=": evalStringGreaterEqual,
+		"+":   evalStringConcat,
+		"==":  evalStringEqual,
+		"!=":  evalStringNotEqual,
+		"<":   evalStringLess,
+		">":   evalStringGreater,
+		"<=":  evalStringLessEqual,
+		">=":  evalStringGreaterEqual,
+		"and": evalStringAnd,
+		"or":  evalStringOr,
 	},
 	{object.BOOLEAN_OBJ, object.BOOLEAN_OBJ}: {
 		"and": evalBooleanAnd,
@@ -467,6 +477,18 @@ func evalIntegerNotEqual(left, right object.Object) object.Object {
 	leftVal := left.(*object.Integer).Value
 	rightVal := right.(*object.Integer).Value
 	return nativeBoolToBooleanObject(leftVal != rightVal)
+}
+
+func evalIntegerAnd(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+	return nativeBoolToBooleanObject(leftVal != 0 && rightVal != 0)
+}
+
+func evalIntegerOr(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+	return nativeBoolToBooleanObject(leftVal != 0 || rightVal != 0)
 }
 
 func evalFloatAdd(left, right object.Object) object.Object {
@@ -611,6 +633,18 @@ func evalFloatIntegerLessEqual(left, right object.Object) object.Object {
 	return nativeBoolToBooleanObject(leftVal <= rightVal)
 }
 
+func evalFloatIntegerAnd(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := float64(right.(*object.Integer).Value)
+	return nativeBoolToBooleanObject(leftVal != 0.0 && rightVal != 0.0)
+}
+
+func evalFloatIntegerOr(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := float64(right.(*object.Integer).Value)
+	return nativeBoolToBooleanObject(leftVal != 0.0 || rightVal != 0.0)
+}
+
 func evalFloatIntegerEqual(left, right object.Object) object.Object {
 	leftVal := left.(*object.Float).Value
 	rightVal := float64(right.(*object.Integer).Value)
@@ -621,6 +655,18 @@ func evalFloatIntegerNotEqual(left, right object.Object) object.Object {
 	leftVal := left.(*object.Float).Value
 	rightVal := float64(right.(*object.Integer).Value)
 	return nativeBoolToBooleanObject(leftVal != rightVal)
+}
+
+func evalFloatAnd(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal != 0.0 && rightVal != 0.0)
+}
+
+func evalFloatOr(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal != 0.0 || rightVal != 0.0)
 }
 
 func evalIntegerFloatAdd(left, right object.Object) object.Object {
@@ -700,6 +746,18 @@ func evalIntegerFloatNotEqual(left, right object.Object) object.Object {
 	return nativeBoolToBooleanObject(leftVal != rightVal)
 }
 
+func evalIntegerFloatAnd(left, right object.Object) object.Object {
+	leftVal := float64(left.(*object.Integer).Value)
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal != 0.0 && rightVal != 0.0)
+}
+
+func evalIntegerFloatOr(left, right object.Object) object.Object {
+	leftVal := float64(left.(*object.Integer).Value)
+	rightVal := right.(*object.Float).Value
+	return nativeBoolToBooleanObject(leftVal != 0.0 || rightVal != 0.0)
+}
+
 func evalStringConcat(left, right object.Object) object.Object {
 	leftVal := left.(*object.String).Value
 	rightVal := right.(*object.String).Value
@@ -740,6 +798,18 @@ func evalStringGreaterEqual(left, right object.Object) object.Object {
 	leftVal := left.(*object.String).Value
 	rightVal := right.(*object.String).Value
 	return nativeBoolToBooleanObject(leftVal >= rightVal)
+}
+
+func evalStringAnd(left, right object.Object) object.Object {
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+	return nativeBoolToBooleanObject(leftVal != "" && rightVal != "")
+}
+
+func evalStringOr(left, right object.Object) object.Object {
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+	return nativeBoolToBooleanObject(leftVal != "" || rightVal != "")
 }
 
 func evalBooleanAnd(left, right object.Object) object.Object {
@@ -1386,82 +1456,90 @@ func loadModuleSource(name string, env *object.Env) ([]byte, error) {
 	return nil, fmt.Errorf("could not find module %s: %v", name, lastErr)
 }
 
-func evalSwitchInteger(node *ast.SwitchStatement, switchVal *object.Integer, env *object.Env) object.Object {
-	var defaultCase *ast.Case
-
-	for _, caseNode := range node.Cases {
-		if caseNode.Value == nil {
-			defaultCase = caseNode
-			continue
-		}
-
-		caseVal := Eval(caseNode.Value, env)
-		if isError(caseVal) {
-			return caseVal
-		}
-
-		if intVal, ok := caseVal.(*object.Integer); ok {
-			if intVal.Value == switchVal.Value {
-				return Eval(caseNode.Body, env)
-			}
-		}
-	}
-
-	if defaultCase != nil {
-		return Eval(defaultCase.Body, env)
-	}
-
-	return NULL
-}
-
-func evalSwitchString(node *ast.SwitchStatement, switchVal *object.String, env *object.Env) object.Object {
-	var defaultCase *ast.Case
-
-	for _, caseNode := range node.Cases {
-		if caseNode.Value == nil {
-			defaultCase = caseNode
-			continue
-		}
-
-		caseVal := Eval(caseNode.Value, env)
-		if isError(caseVal) {
-			return caseVal
-		}
-
-		if strVal, ok := caseVal.(*object.String); ok {
-			if strVal.Value == switchVal.Value {
-				return Eval(caseNode.Body, env)
-			}
-		}
-	}
-
-	if defaultCase != nil {
-		return Eval(defaultCase.Body, env)
-	}
-
-	return NULL
-}
-
 func evalSwitchStatement(node *ast.SwitchStatement, env *object.Env) object.Object {
 	val := Eval(node.Expression, env)
 	if isError(val) {
 		return val
 	}
-	switch val := val.(type) {
+	for _, caseStmt := range node.Cases {
+		if caseStmt.Value == nil {
+			return Eval(caseStmt.Body, env)
+		}
+		if ident, ok := caseStmt.Value.(*ast.Identifier); ok {
+			caseEnv := env.NewEnclosedEnv()
+			caseEnv.Set(ident.Value, val, false)
+			if caseStmt.Guard != nil {
+				guardResult := Eval(caseStmt.Guard, caseEnv)
+				if isError(guardResult) {
+					return guardResult
+				}
+				if !isTruthy(guardResult) {
+					continue
+				}
+			}
+			return Eval(caseStmt.Body, caseEnv)
+		}
+		caseValue := Eval(caseStmt.Value, env)
+		if isError(caseValue) {
+			return caseValue
+		}
+		if objectsEqual(val, caseValue) {
+			if caseStmt.Guard != nil {
+				guardResult := Eval(caseStmt.Guard, env)
+				if isError(guardResult) {
+					return guardResult
+				}
+				if !isTruthy(guardResult) {
+					continue
+				}
+			}
+			return Eval(caseStmt.Body, env)
+		}
+	}
+	return NULL
+}
+
+func objectsEqual(a, b object.Object) bool {
+	if a.Type() != b.Type() {
+		return false
+	}
+	switch a := a.(type) {
 	case *object.Integer:
-		return evalSwitchInteger(node, val, env)
+		return a.Value == b.(*object.Integer).Value
 	case *object.String:
-		return evalSwitchString(node, val, env)
+		return a.Value == b.(*object.String).Value
 	case *object.Boolean:
-		if val.Value {
-			return Eval(node.Cases[0].Body, env)
+		return a.Value == b.(*object.Boolean).Value
+	case *object.Float:
+		return a.Value == b.(*object.Float).Value
+	case *object.Array:
+		bArray := b.(*object.Array)
+		if len(a.Elements) != len(bArray.Elements) {
+			return false
 		}
-		if len(node.Cases) > 1 {
-			return Eval(node.Cases[1].Body, env)
+		for i, elem := range a.Elements {
+			if !objectsEqual(elem, bArray.Elements[i]) {
+				return false
+			}
 		}
-		return NULL
+		return true
+	case *object.Hash:
+		bHash := b.(*object.Hash)
+		if len(a.Pairs) != len(bHash.Pairs) {
+			return false
+		}
+		for key, valA := range a.Pairs {
+			valB, ok := bHash.Pairs[key]
+			if !ok {
+				return false
+			}
+			if !objectsEqual(valA.Value, valB.Value) {
+				return false
+			}
+		}
+		return true
 	default:
-		return newError("switch statement not supported on: %s", val.Type())
+		return a == b
 	}
 }
 

@@ -377,6 +377,20 @@ func (p *Parser) parseCase() *ast.Case {
 		return nil
 	}
 
+	var guardCondition ast.Expression
+	if p.peekTokenIs(token.IF) {
+		p.nextToken()
+		p.nextToken()
+		guardCondition = p.parseExpression(LOWEST)
+		if guardCondition == nil {
+			p.addError(
+				"SyntaxError",
+				"Expected guard condition after 'if'",
+			)
+			return nil
+		}
+	}
+
 	if !p.expectPeek(token.COLON) {
 		p.addError(
 			"SyntaxError",
@@ -404,6 +418,7 @@ func (p *Parser) parseCase() *ast.Case {
 	return &ast.Case{
 		Token: caseToken,
 		Value: caseValue,
+		Guard: guardCondition,
 		Body:  caseBody,
 	}
 }

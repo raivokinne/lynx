@@ -518,6 +518,7 @@ func (ss *SwitchStatement) String() string {
 type Case struct {
 	Token token.Token
 	Value Expression
+	Guard Expression
 	Body  *BlockStatement
 }
 
@@ -525,8 +526,17 @@ func (c *Case) statementNode()       {}
 func (c *Case) TokenLiteral() string { return c.Token.Literal }
 func (c *Case) String() string {
 	var out bytes.Buffer
-	out.WriteString("case ")
-	out.WriteString(c.Value.String())
+	if c.Value == nil {
+		out.WriteString("default")
+	} else {
+		out.WriteString("case ")
+		out.WriteString(c.Value.String())
+		if c.Guard != nil {
+			out.WriteString(" if ")
+			out.WriteString(c.Guard.String())
+		}
+	}
+
 	out.WriteString(":\n")
 	for _, s := range c.Body.Statements {
 		out.WriteString(s.String())

@@ -38,6 +38,10 @@ func builtinStr(args ...object.Object) object.Object {
 	switch arg := args[0].(type) {
 	case *object.String:
 		return &object.String{Value: arg.Value}
+	case *object.Integer:
+		return &object.String{Value: strconv.Itoa(int(arg.Value))}
+	case *object.Float:
+		return &object.String{Value: strconv.Itoa(int(arg.Value))}
 	default:
 		return newError("argument to `str` must be a string")
 	}
