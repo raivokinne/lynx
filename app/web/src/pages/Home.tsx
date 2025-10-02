@@ -43,10 +43,6 @@ export const Home: React.FC = () => {
     const [saveTitle, setSaveTitle] = useState<string>("");
     const [showGit, setShowGit] = useState<boolean>(false);
 
-    useEffect(() => {
-        localStorage.setItem("darkMode", isDarkMode.toString());
-    }, [isDarkMode]);
-
     const handleSaveCode = () => {
         saveCode(saveTitle);
         setSaveTitle("");

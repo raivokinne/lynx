@@ -44,12 +44,6 @@ export const useCodeManagement = (userId?: string) => {
         }
     }, [userId, loadSavedCodes]);
 
-    useEffect(() => {
-        if (userId && code) {
-            // For now, we'll just keep it in memory during the session
-        }
-    }, [code, currentCodeTitle, userId]);
-
     const saveCode = async (title: string): Promise<boolean> => {
         if (!userId || !title.trim()) return false;
 
