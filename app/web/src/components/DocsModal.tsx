@@ -182,4 +182,3 @@ export const DocsModal = ({ isDarkMode, onClose }: DocsModalProps) => {
 };
 
 export default DocsModal;
-

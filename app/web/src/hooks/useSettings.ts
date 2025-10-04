@@ -6,7 +6,7 @@ import type { CustomTheme } from "../types/types";
 const LOCAL_STORAGE_SETTINGS_KEY = "editor_settings";
 
 const defaultSettings: EditorSettings = {
-    theme: "vs-dark", // Set default theme
+    theme: "vs-dark",
     themeDark: "vs-dark",
     themeLight: "vs",
     customThemes: [],

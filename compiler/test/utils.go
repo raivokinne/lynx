@@ -8,19 +8,6 @@ import (
 	"testing"
 )
 
-func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
-	result, ok := obj.(*object.Integer)
-	if !ok {
-		t.Errorf("Object is not Integer. got=%T (%+v)", obj, obj)
-		return false
-	}
-	if result.Value != expected {
-		t.Errorf("Object has wrong value. got=%d, want=%d", result.Value, expected)
-		return false
-	}
-	return true
-}
-
 func testFloatObject(t *testing.T, obj object.Object, expected float64) bool {
 	result, ok := obj.(*object.Float)
 	if !ok {
