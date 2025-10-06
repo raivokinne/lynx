@@ -637,19 +637,3 @@ func (n *Null) String() string {
 func (n *Null) TokenLiteral() string {
 	return n.Token.Literal
 }
-
-type Spread struct {
-	Token      token.Token
-	Expression Expression
-}
-
-func (s *Spread) expressionNode() {}
-func (s *Spread) String() string {
-	var out bytes.Buffer
-	out.WriteString("...")
-	out.WriteString(s.Expression.String())
-	return out.String()
-}
-func (s *Spread) TokenLiteral() string {
-	return s.Token.Literal
-}

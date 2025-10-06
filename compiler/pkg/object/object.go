@@ -74,9 +74,9 @@ func (r *Return) Type() ObjectType { return RETURN_OBJ }
 func (r *Return) Inspect() string  { return r.Value.Inspect() }
 
 type Function struct {
-	Parameters []*ast.Identifier
-	Body       *ast.BlockStatement
-	Env        *Env
+	Parameters 	[]*ast.Identifier
+	Body		*ast.BlockStatement
+	Env 		*Env
 }
 
 func (f *Function) Type() ObjectType { return FUNCTION_OBJ }

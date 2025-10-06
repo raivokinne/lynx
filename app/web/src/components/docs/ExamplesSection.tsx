@@ -2,22 +2,22 @@ import { useTranslation } from "../../hooks/useTranslation";
 import { CodeBlock } from "./CodeBlock";
 
 interface ExamplesSectionProps {
-    isDarkMode: boolean;
+  isDarkMode: boolean;
 }
 
 export const ExamplesSection = ({ isDarkMode }: ExamplesSectionProps) => {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
 
-    return (
-        <div className="space-y-6">
-            <h2 className="text-2xl font-bold mb-4">{t("examples.title")}</h2>
+  return (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold mb-4">{t("examples.title")}</h2>
 
-            <div>
-                <h3 className="text-lg font-semibold mb-3">
-                    1. {t("examples.fibonacci")}
-                </h3>
-                <CodeBlock isDarkMode={isDarkMode}>
-                    {`@arrays(map)
+      <div>
+        <h3 className="text-lg font-semibold mb-3">
+          1. {t("examples.fibonacci")}
+        </h3>
+        <CodeBlock isDarkMode={isDarkMode}>
+          {`@arrays(map)
 
 // Recursive implementation
 let fibonacci = fn(n) {
@@ -47,15 +47,15 @@ let fibonacciIter = fn(n) {
 
 let sequence = map(range(0, 10), fibonacciIter)
 println("Fibonacci sequence:", sequence)`}
-                </CodeBlock>
-            </div>
+        </CodeBlock>
+      </div>
 
-            <div>
-                <h3 className="text-lg font-semibold mb-3">
-                    2. {t("examples.dataProcessing")}
-                </h3>
-                <CodeBlock isDarkMode={isDarkMode}>
-                    {`@arrays(filter, map, reduce, sort)
+      <div>
+        <h3 className="text-lg font-semibold mb-3">
+          2. {t("examples.dataProcessing")}
+        </h3>
+        <CodeBlock isDarkMode={isDarkMode}>
+          {`@arrays(filter, map, reduce, sort)
 
 let processUserData = fn(rawData) {
     return rawData
@@ -75,9 +75,8 @@ let users = [
 
 let processedNames = processUserData(users)
 println("Processed users:", processedNames)`}
-                </CodeBlock>
-            </div>
-        </div>
-    );
+        </CodeBlock>
+      </div>
+    </div>
+  );
 };
-

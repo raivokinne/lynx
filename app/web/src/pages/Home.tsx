@@ -49,8 +49,8 @@ export const Home: React.FC = () => {
   };
 
   const handleLoadCode = (savedCode: SavedCode) => {
-    loadCode(savedCode)
-    clearOutput()
+    loadCode(savedCode);
+    clearOutput();
   };
 
   const handleCloseDocs = () => {
