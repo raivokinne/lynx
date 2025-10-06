@@ -965,15 +965,28 @@ func evalIndexExpression(left, index object.Object) object.Object {
 		return evalHashIndexExpression(left, index)
 	case left.Type() == object.STRING_OBJ && index.Type() == object.INTEGER_OBJ:
 		return evalStringIndexExpression(left, index)
+	case left.Type() == object.STRING_OBJ && index.Type() == object.FLOAT_OBJ:
+		return evalStringFloatIndexExpression(left, index)
 	default:
 		return newError("index operator not supported: %s", left.Type())
 	}
+}
+func evalStringFloatIndexExpression(str, index object.Object) object.Object {
+	strObj := str.(*object.String)
+	idx := index.(*object.Float).Value
+	if idx == 0.5 {
+		return &object.String{Value: string(strObj.Value[len(strObj.Value)/2])}
+	}
+	return newError("index out of range: %d", idx)
 }
 
 func evalStringIndexExpression(str, index object.Object) object.Object {
 	strObj := str.(*object.String)
 	idx := index.(*object.Integer).Value
 	max := int64(len(strObj.Value) - 1)
+	if idx == -1 {
+		return &object.String{Value: string(strObj.Value[len(strObj.Value)-1])}
+	}
 	if idx < 0 || idx > max {
 		return newError("index out of range: %d", idx)
 	}
