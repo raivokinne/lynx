@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useCodeManagement } from "../hooks/useCodeManagement";
 import { useCodeExecution } from "../hooks/useCodeExecution";
@@ -42,6 +42,11 @@ export const Home: React.FC = () => {
   const [saveTitle, setSaveTitle] = useState<string>("");
   const [showGit, setShowGit] = useState<boolean>(false);
 
+  // Persist dark mode to localStorage
+  useEffect(() => {
+    localStorage.setItem("darkMode", isDarkMode.toString());
+  }, [isDarkMode]);
+
   const handleSaveCode = () => {
     saveCode(saveTitle);
     setSaveTitle("");
@@ -65,6 +70,10 @@ export const Home: React.FC = () => {
     setShowGit(!showGit);
   };
 
+  const handleToggleDarkMode = () => {
+    setIsDarkMode((prev) => !prev);
+  };
+
   return (
     <div
       className={`min-h-screen ${isDarkMode ? "bg-black text-white" : "bg-white text-black"} transition-colors duration-200`}
@@ -76,7 +85,7 @@ export const Home: React.FC = () => {
           editorSettings={editorSettings}
           onSettingsChange={updateAllSettings}
           isDarkMode={isDarkMode}
-          onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
+          onToggleDarkMode={handleToggleDarkMode}
           registerCustomTheme={registerCustomTheme}
         />
       )}
@@ -98,7 +107,7 @@ export const Home: React.FC = () => {
       <Header
         isDarkMode={isDarkMode}
         username={user?.username}
-        onToggleTheme={() => setIsDarkMode((prev) => !prev)}
+        onToggleTheme={handleToggleDarkMode}
         onLogout={logout}
       />
 

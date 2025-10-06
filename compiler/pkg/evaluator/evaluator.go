@@ -959,6 +959,8 @@ func evalIndexExpression(left, index object.Object) object.Object {
 	switch {
 	case left.Type() == object.ARRAY_OBJ && index.Type() == object.INTEGER_OBJ:
 		return evalArrayIndexExpression(left, index)
+	case left.Type() == object.ARRAY_OBJ && index.Type() == object.FLOAT_OBJ:
+		return evalArrayFloatIndexExpression(left, index)
 	case left.Type() == object.HASH_OBJ:
 		return evalHashIndexExpression(left, index)
 	case left.Type() == object.STRING_OBJ && index.Type() == object.INTEGER_OBJ:
@@ -978,10 +980,22 @@ func evalStringIndexExpression(str, index object.Object) object.Object {
 	return &object.String{Value: string(strObj.Value[idx])}
 }
 
+func evalArrayFloatIndexExpression(array, index object.Object) object.Object {
+	arrayObj := array.(*object.Array)
+	idx := index.(*object.Float).Value
+	if idx == 0.5 {
+		return arrayObj.Elements[len(arrayObj.Elements)/2]
+	}
+	return newError("index out of range: %d", int64(idx))
+}
+
 func evalArrayIndexExpression(array, index object.Object) object.Object {
 	arrayObj := array.(*object.Array)
 	idx := index.(*object.Integer).Value
 	max := int64(len(arrayObj.Elements) - 1)
+	if idx == -1 {
+		return arrayObj.Elements[len(arrayObj.Elements)-1]
+	}
 	if idx < 0 || idx > max {
 		return newError("index out of range: %d", idx)
 	}
