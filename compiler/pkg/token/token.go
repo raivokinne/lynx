@@ -81,6 +81,8 @@ const (
 	ON       = "ON"
 	CATCH    = "CATCH"
 	ERROR    = "ERROR"
+	CLASS    = "CLASS"
+	SELF     = "SELF"
 )
 
 var keywords = map[string]TokenType{
@@ -106,6 +108,8 @@ var keywords = map[string]TokenType{
 	"catch":    CATCH,
 	"error":    ERROR,
 	"null":     NULL,
+	"class":    CLASS,
+	"self":     SELF,
 }
 
 func LookupIdent(ident string) TokenType {

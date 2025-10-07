@@ -1,6 +1,7 @@
 package evaluator
 
 import (
+	"maps"
 	"fmt"
 	"lynx/pkg/ast"
 	"lynx/pkg/lexer"
@@ -170,6 +171,10 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 		return evalCatchStatement(node, env)
 	case *ast.Null:
 		return &object.Null{}
+	case *ast.Class:
+		return evalClassStatement(node, env)
+	case *ast.Self:
+		return evalSelf(env)
 	default:
 		return newError("unknown node type: %T", node)
 	}
@@ -205,14 +210,17 @@ func evalIndexAssignment(left, index, value object.Object) object.Object {
 }
 
 func evalPropertyAssignment(obj object.Object, prop string, val object.Object) object.Object {
-	hash, ok := obj.(*object.Hash)
-	if !ok {
-		return newError("property assignment only supported on objects, got %T", obj)
+	switch obj := obj.(type) {
+	case *object.Hash:
+		key := &object.String{Value: prop}
+		obj.Pairs[key.HashKey()] = object.HashPair{Key: key, Value: val}
+		return val
+	case *object.Instance:
+		obj.Attributes[prop] = val
+		return val
+	default:
+		return newError("property assignment only supported on objects and instances, got %T", obj)
 	}
-
-	key := &object.String{Value: prop}
-	hash.Pairs[key.HashKey()] = object.HashPair{Key: key, Value: val}
-	return val
 }
 
 func nativeBoolToBooleanObject(input bool) *object.Boolean {
@@ -935,9 +943,30 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 		return unwrapReturnValue(evaluated)
 	case *object.Builtin:
 		return fn.Fn(args...)
+	case *object.Class:
+		return evalClassCall(fn, args)
 	default:
 		return newError("not a function: %T", fn)
 	}
+}
+
+func evalClassCall(class *object.Class, args []object.Object) object.Object {
+	instance := &object.Instance{
+		Class:      class,
+		Attributes: make(map[string]object.Object),
+	}
+
+	if initMethod, ok := class.Methods["init"]; ok {
+		methodEnv := extendFunctionEnv(initMethod, args)
+		methodEnv.Set("self", instance, false)
+
+		result := Eval(initMethod.Body, methodEnv)
+		if isError(result) {
+			return result
+		}
+	}
+
+	return instance
 }
 
 func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Env {
@@ -977,7 +1006,7 @@ func evalStringFloatIndexExpression(str, index object.Object) object.Object {
 	if idx == 0.5 {
 		return &object.String{Value: string(strObj.Value[len(strObj.Value)/2])}
 	}
-	return newError("index out of range: %d", idx)
+	return newError("index out of range: %f", idx)
 }
 
 func evalStringIndexExpression(str, index object.Object) object.Object {
@@ -999,7 +1028,7 @@ func evalArrayFloatIndexExpression(array, index object.Object) object.Object {
 	if idx == 0.5 {
 		return arrayObj.Elements[len(arrayObj.Elements)/2]
 	}
-	return newError("index out of range: %d", int64(idx))
+	return newError("index out of range: %f", idx)
 }
 
 func evalArrayIndexExpression(array, index object.Object) object.Object {
@@ -1068,6 +1097,15 @@ func applyMethod(obj object.Object, method string, args []object.Object) object.
 		return evalHashMethod(obj, method, args)
 	case *object.Module:
 		return evalModuleMethod(obj, method, args)
+	case *object.Instance:
+		if methodFn, ok := obj.Class.Methods[method]; ok {
+			methodEnv := extendFunctionEnv(methodFn, args)
+			methodEnv.Set("self", obj, false)
+
+			evaluated := Eval(methodFn.Body, methodEnv)
+			return unwrapReturnValue(evaluated)
+		}
+		return newError("undefined method: %s", method)
 	default:
 		return newError("method calls not supported on: %s", obj.Type())
 	}
@@ -1236,6 +1274,14 @@ func evalPropertyAccess(obj object.Object, property string) object.Object {
 		return evalHashPropertyAccess(obj, property)
 	case *object.Module:
 		return evalModulePropertyAccess(obj, property)
+	case *object.Instance:
+		if attr, ok := obj.Attributes[property]; ok {
+			return attr
+		}
+		if method, ok := obj.Class.Methods[property]; ok {
+			return method
+		}
+		return newError("undefined property: %s", property)
 	default:
 		return newError("property access not supported on: %s", obj.Type())
 	}
@@ -1613,4 +1659,53 @@ func evalCatchStatement(catchStmt *ast.CatchStatement, env *object.Env) object.O
 	}
 
 	return result
+}
+
+func evalClassStatement(node *ast.Class, env *object.Env) object.Object {
+	class := &object.Class{
+		Name:    node.Name.Value,
+		Methods: make(map[string]*object.Function),
+		Env:     env,
+	}
+
+	if node.SuperClass != nil {
+		superClassObj, ok := env.Get(node.SuperClass.Value)
+		if !ok {
+			return newError("Undefined class: %s", node.SuperClass.Value)
+		}
+		superClass, ok := superClassObj.(*object.Class)
+		if !ok {
+			return newError("%s is not a class", node.SuperClass.Value)
+		}
+		class.SuperClass = superClass
+
+		maps.Copy(class.Methods, superClass.Methods)
+	}
+
+	if node.Body != nil {
+		for _, stmt := range node.Body.Statements {
+			if letStmt, ok := stmt.(*ast.VarStatement); ok {
+				if fnLit, ok := letStmt.Value.(*ast.FunctionLiteral); ok {
+					method := &object.Function{
+						Parameters: fnLit.Parameters,
+						Body:       fnLit.Body,
+						Env:        env,
+					}
+					class.Methods[letStmt.Name.Value] = method
+				}
+			}
+		}
+	}
+
+	env.Set(node.Name.Value, class, false)
+
+	return class
+}
+
+func evalSelf(env *object.Env) object.Object {
+	self, ok := env.Get("self")
+	if !ok {
+		return newError("'self' can only be used inside a class method")
+	}
+	return self
 }

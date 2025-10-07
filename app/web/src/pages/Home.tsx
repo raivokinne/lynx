@@ -42,7 +42,6 @@ export const Home: React.FC = () => {
   const [saveTitle, setSaveTitle] = useState<string>("");
   const [showGit, setShowGit] = useState<boolean>(false);
 
-  // Persist dark mode to localStorage
   useEffect(() => {
     localStorage.setItem("darkMode", isDarkMode.toString());
   }, [isDarkMode]);

@@ -31,6 +31,8 @@ const (
 	MODULE_OBJ    = "MODULE"
 	TUPLE_OBJ     = "TUPLE"
 	EXCEPTION_OBJ = "EXCEPTION"
+	CLASS_OBJ     = "CLASS"
+	INSTANCE_OBJ  = "INSTANCE"
 )
 
 type Float struct {
@@ -217,4 +219,26 @@ type Exception struct {
 func (e *Exception) Type() ObjectType { return EXCEPTION_OBJ }
 func (e *Exception) Inspect() string {
 	return e.Value.Inspect()
+}
+
+type Class struct {
+	Name       string
+	SuperClass *Class
+	Methods    map[string]*Function
+	Env        *Env
+}
+
+func (c *Class) Type() ObjectType { return CLASS_OBJ }
+func (c *Class) Inspect() string {
+	return fmt.Sprintf("<class %s>", c.Name)
+}
+
+type Instance struct {
+	Class      *Class
+	Attributes map[string]Object
+}
+
+func (i *Instance) Type() ObjectType { return INSTANCE_OBJ }
+func (i *Instance) Inspect() string {
+	return fmt.Sprintf("<instance of %s>", i.Class.Name)
 }

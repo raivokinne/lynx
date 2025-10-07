@@ -637,3 +637,46 @@ func (n *Null) String() string {
 func (n *Null) TokenLiteral() string {
 	return n.Token.Literal
 }
+
+type Class struct {
+	Token      token.Token
+	Name       *Identifier
+	SuperClass *Identifier
+	Body       *BlockStatement
+}
+
+func (c *Class) statementNode()       {}
+func (c *Class) TokenLiteral() string { return c.Token.Literal }
+func (c *Class) String() string {
+	var out bytes.Buffer
+	out.WriteString("class ")
+	out.WriteString(c.Name.String())
+
+	if c.SuperClass != nil {
+		out.WriteString("(")
+		out.WriteString(c.SuperClass.String())
+		out.WriteString(")")
+	}
+
+	out.WriteString(":\n")
+
+	if c.Body != nil {
+		for _, s := range c.Body.Statements {
+			out.WriteString("    ")
+			out.WriteString(s.String())
+			out.WriteString("\n")
+		}
+	} else {
+		out.WriteString("    pass\n")
+	}
+
+	return out.String()
+}
+
+type Self struct {
+	Token token.Token
+}
+
+func (s *Self) expressionNode()      {}
+func (s *Self) TokenLiteral() string { return s.Token.Literal }
+func (s *Self) String() string       { return "self" }

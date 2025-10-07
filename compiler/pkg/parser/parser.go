@@ -114,6 +114,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
 	p.registerPrefix(token.NULL, p.parseNull)
+	p.registerPrefix(token.SELF, p.parseSelf)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -221,7 +222,7 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseVarStatement()
 	case token.RETURN:
 		return p.parseReturnStatement()
-	case token.IDENT:
+	case token.IDENT, token.SELF:
 		return p.parseAssignmentOrExpressionStatement()
 	case token.FOR:
 		return p.parseForStatement()
@@ -239,9 +240,53 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseErrorStatement()
 	case token.CATCH:
 		return p.parseCatchStatement()
+	case token.CLASS:
+		return p.parseClassStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
+}
+
+func (p *Parser) parseClassStatement() ast.Statement {
+	stmt := &ast.Class{Token: p.curToken}
+
+	if !p.expectPeek(token.IDENT) {
+		p.addError("SyntaxError", "Expected class name after 'class'")
+		return nil
+	}
+
+	stmt.Name = &ast.Identifier{
+		Token: p.curToken,
+		Value: p.curToken.Literal,
+	}
+
+	if p.peekTokenIs(token.LPAREN) {
+		p.nextToken()
+
+		if !p.expectPeek(token.IDENT) {
+			p.addError("SyntaxError", "Expected superclass name")
+			return nil
+		}
+
+		stmt.SuperClass = &ast.Identifier{
+			Token: p.curToken,
+			Value: p.curToken.Literal,
+		}
+
+		if !p.expectPeek(token.RPAREN) {
+			p.addError("SyntaxError", "Expected ')' after superclass name")
+			return nil
+		}
+	}
+
+	if !p.expectPeek(token.LBRACE) {
+		p.addError("SyntaxError", "Expected '{' to start class body")
+		return nil
+	}
+
+	stmt.Body = p.parseBlockStatement()
+
+	return stmt
 }
 
 func (p *Parser) parseAssignmentOrExpressionStatement() ast.Statement {
@@ -590,28 +635,6 @@ func (p *Parser) parseWhileStatement() ast.Statement {
 	return stmt
 }
 
-func (p *Parser) parseAssignmentStatement() *ast.Assignment {
-	stmt := &ast.Assignment{Token: p.curToken}
-
-	lhs := p.parseExpression(LOWEST)
-
-	if !isAssignable(lhs) {
-		p.addError("SyntaxError", "Invalid left-hand side in assignment")
-		return nil
-	}
-
-	if !p.expectPeek(token.ASSIGN) {
-		p.addError("SyntaxError", "Missing assignment operator")
-		return nil
-	}
-
-	p.nextToken()
-	stmt.Name = lhs
-	stmt.Value = p.parseExpression(LOWEST)
-
-	return stmt
-}
-
 func (p *Parser) parseVarStatement() *ast.VarStatement {
 	stmt := &ast.VarStatement{Token: p.curToken}
 
@@ -639,12 +662,6 @@ func (p *Parser) parseVarStatement() *ast.VarStatement {
 }
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
-	if p.functionDepth == 0 {
-		p.addError(
-			"ScopeError",
-			"'return' statement outside of function",
-		)
-	}
 	stmt := &ast.ReturnStatement{Token: p.curToken}
 	p.nextToken()
 	stmt.Value = p.parseExpression(LOWEST)
@@ -988,6 +1005,10 @@ func (p *Parser) parseNull() ast.Expression {
 	return &ast.Null{Token: p.curToken}
 }
 
+func (p *Parser) parseSelf() ast.Expression {
+	return &ast.Self{Token: p.curToken}
+}
+
 func (p *Parser) curTokenIs(t token.TokenType) bool {
 	return p.curToken.Type == t
 }
@@ -1022,7 +1043,7 @@ func (p *Parser) curPrecedence() int {
 
 func isAssignable(expr ast.Expression) bool {
 	switch expr.(type) {
-	case *ast.Identifier, *ast.IndexExpression, *ast.PropertyAccess:
+	case *ast.Identifier, *ast.IndexExpression, *ast.PropertyAccess, *ast.MethodCall:
 		return true
 	default:
 		return false

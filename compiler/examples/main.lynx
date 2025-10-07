@@ -1,1 +1,27 @@
-0
+class Animal {
+    let init = fn(name) {
+        self.name = name
+    }
+    let speak = fn() {
+        return "Some sound"
+    }
+}
+
+class Dog(Animal) {
+    let init = fn(name, breed) {
+        self.name = name
+        self.breed = breed
+    }
+    let speak = fn() {
+        return "Woof!"
+    }
+    let wagTail = fn() {
+        return self.name ++ " is wagging tail"
+    }
+}
+
+let dog = Dog("Buddy", "Golden Retriever")
+println(dog.name)
+println(dog.breed)
+println(dog.speak())
+println(dog.wagTail())
