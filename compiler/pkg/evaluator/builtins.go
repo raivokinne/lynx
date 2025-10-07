@@ -29,21 +29,92 @@ func RegisterBuiltins() {
 	builtins["int"] = &object.Builtin{Fn: builtinInt}
 	builtins["float"] = &object.Builtin{Fn: builtinFloat}
 	builtins["str"] = &object.Builtin{Fn: builtinStr}
+	builtins["type"] = &object.Builtin{Fn: builtinType}
+	builtins["copy"] = &object.Builtin{Fn: builtinCopy}
+}
+
+func builtinCopy(args ...object.Object) object.Object {
+	if len(args) != 2 {
+		return newError("wrong number of arguments. got=%d, want=2", len(args))
+	}
+
+	destArr, ok := args[0].(*object.Array)
+	if !ok {
+		return newError("first argument must be an array, got %s", args[0].Type())
+	}
+
+	srcArr, ok := args[1].(*object.Array)
+	if !ok {
+		return newError("second argument must be an array, got %s", args[1].Type())
+	}
+
+	copyCount := min(len(srcArr.Elements), len(destArr.Elements))
+
+	for i := range copyCount {
+		destArr.Elements[i] = srcArr.Elements[i]
+	}
+
+	return &object.Integer{Value: int64(copyCount)}
+}
+
+func builtinType(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("wrong number of arguments. got=%d, want=1", len(args))
+	}
+
+	obj := args[0]
+
+	switch obj.(type) {
+	case *object.Integer:
+		return &object.String{Value: "int"}
+	case *object.Float:
+		return &object.String{Value: "float"}
+	case *object.String:
+		return &object.String{Value: "str"}
+	case *object.Boolean:
+		return &object.String{Value: "bool"}
+	case *object.Array:
+		return &object.String{Value: "array"}
+	case *object.Hash:
+		return &object.String{Value: "hash"}
+	case *object.Function:
+		return &object.String{Value: "function"}
+	case *object.Builtin:
+		return &object.String{Value: "builtin"}
+	case *object.Null:
+		return &object.String{Value: "null"}
+	case *object.Class:
+		return &object.String{Value: "class"}
+	case *object.Instance:
+		return &object.String{Value: obj.(*object.Instance).Class.Name}
+	case *object.Module:
+		return &object.String{Value: "module"}
+	case *object.Error:
+		return &object.String{Value: "error"}
+	default:
+		return &object.String{Value: "unknown"}
+	}
 }
 
 func builtinStr(args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return newError("wrong number of arguments. got=%d, want=1", len(args))
 	}
+
 	switch arg := args[0].(type) {
 	case *object.String:
-		return &object.String{Value: arg.Value}
+		return arg
 	case *object.Integer:
-		return &object.String{Value: strconv.Itoa(int(arg.Value))}
+		return &object.String{Value: strconv.FormatInt(arg.Value, 10)}
 	case *object.Float:
-		return &object.String{Value: strconv.Itoa(int(arg.Value))}
+		return &object.String{Value: strconv.FormatFloat(arg.Value, 'f', -1, 64)}
+	case *object.Boolean:
+		if arg.Value {
+			return &object.String{Value: "true"}
+		}
+		return &object.String{Value: "false"}
 	default:
-		return newError("argument to `str` must be a string")
+		return newError("argument to `str` must be STRING, INTEGER, FLOAT, or BOOLEAN. got=%s", arg.Type())
 	}
 }
 
@@ -51,15 +122,29 @@ func builtinInt(args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return newError("wrong number of arguments. got=%d, want=1", len(args))
 	}
+
 	switch arg := args[0].(type) {
 	case *object.String:
-		i, err := strconv.Atoi(arg.Value)
+		i, err := strconv.ParseInt(arg.Value, 10, 64)
 		if err != nil {
-			return newError("%s", err.Error())
+			return newError("cannot convert string to int: %s", err.Error())
 		}
-		return &object.Integer{Value: int64(i)}
+		return &object.Integer{Value: i}
+
+	case *object.Float:
+		return &object.Integer{Value: int64(arg.Value)}
+
+	case *object.Boolean:
+		if arg.Value {
+			return &object.Integer{Value: 1}
+		}
+		return &object.Integer{Value: 0}
+
+	case *object.Integer:
+		return arg
+
 	default:
-		return newError("argument to `int` must be a string")
+		return newError("argument to `int` must be STRING, FLOAT, BOOLEAN, or INTEGER. got=%s", arg.Type())
 	}
 }
 
@@ -67,15 +152,29 @@ func builtinFloat(args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return newError("wrong number of arguments. got=%d, want=1", len(args))
 	}
+
 	switch arg := args[0].(type) {
 	case *object.String:
 		f, err := strconv.ParseFloat(arg.Value, 64)
 		if err != nil {
-			return newError("%s", err.Error())
+			return newError("cannot convert string to float: %s", err.Error())
 		}
 		return &object.Float{Value: f}
+
+	case *object.Integer:
+		return &object.Float{Value: float64(arg.Value)}
+
+	case *object.Boolean:
+		if arg.Value {
+			return &object.Float{Value: 1.0}
+		}
+		return &object.Float{Value: 0.0}
+
+	case *object.Float:
+		return arg
+
 	default:
-		return newError("argument to `float` must be a string")
+		return newError("argument to `float` must be STRING, INTEGER, FLOAT, or BOOLEAN. got=%s", arg.Type())
 	}
 }
 
@@ -141,6 +240,8 @@ func builtinLen(args ...object.Object) object.Object {
 		return &object.Integer{Value: int64(len(arg.Elements))}
 	case *object.String:
 		return &object.Integer{Value: int64(len(arg.Value))}
+	case *object.Hash:
+		return &object.Integer{Value: int64(len(arg.Pairs))}
 	default:
 		return newError("argument to `len` not supported, got %T", arg)
 	}

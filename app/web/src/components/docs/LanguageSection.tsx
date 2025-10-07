@@ -2,22 +2,22 @@ import { useTranslation } from "../../hooks/useTranslation";
 import { CodeBlock } from "./CodeBlock";
 
 interface LanguageSectionProps {
-  isDarkMode: boolean;
+    isDarkMode: boolean;
 }
 
 export const LanguageSection = ({ isDarkMode }: LanguageSectionProps) => {
-  const { t } = useTranslation();
+    const { t } = useTranslation();
 
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold mb-4">{t("language.title")}</h2>
+    return (
+        <div className="space-y-6">
+            <h2 className="text-2xl font-bold mb-4">{t("language.title")}</h2>
 
-      <div>
-        <h3 className="text-lg font-semibold mb-3">
-          {t("language.variables")}
-        </h3>
-        <CodeBlock isDarkMode={isDarkMode}>
-          {`// Mutable variables
+            <div>
+                <h3 className="text-lg font-semibold mb-3">
+                    {t("language.variables")}
+                </h3>
+                <CodeBlock isDarkMode={isDarkMode}>
+                    {`// Mutable variables
 let name = "Lynx"
 let version = 1.0
 
@@ -28,15 +28,15 @@ const MAX_USERS = 100
 // Type inference works automatically
 let numbers = [1, 2, 3, 4, 5]
 let user = {"name": "Alice", "age": 30}`}
-        </CodeBlock>
-      </div>
+                </CodeBlock>
+            </div>
 
-      <div>
-        <h3 className="text-lg font-semibold mb-3">
-          {t("language.functions")}
-        </h3>
-        <CodeBlock isDarkMode={isDarkMode}>
-          {`// Basic function
+            <div>
+                <h3 className="text-lg font-semibold mb-3">
+                    {t("language.functions")}
+                </h3>
+                <CodeBlock isDarkMode={isDarkMode}>
+                    {`// Basic function
 let greet = fn(name) {
     return "Hello, " ++ name ++ "!"
 }
@@ -55,15 +55,64 @@ let applyTwice = fn(f, x) {
 let result = greet("World")
 let sum = add(5, 3)
 let doubled = applyTwice(fn(x) { x * 2 }, 4) // Returns 16`}
-        </CodeBlock>
-      </div>
+                </CodeBlock>
+            </div>
 
-      <div>
-        <h3 className="text-lg font-semibold mb-3">
-          {t("language.controlFlow")}
-        </h3>
-        <CodeBlock isDarkMode={isDarkMode}>
-          {`// If-else statements (no parentheses required)
+            <div>
+                <h3 className="text-lg font-semibold mb-3">
+                    {t("language.classes")}
+                </h3>
+                <CodeBlock isDarkMode={isDarkMode}>
+                    {`// Define a class
+class Animal {
+    let init = fn(name, age) {
+        self.name = name
+        self.age = age
+    }
+
+    let speak = fn() {
+        return self.name ++ " makes a sound"
+    }
+
+    let birthday = fn() {
+        self.age = self.age + 1
+        return "Happy birthday " ++ self.name
+    }
+}
+
+// Inheritance
+class Dog(Animal) {
+    let init = fn(name, age, breed) {
+        self.name = name
+        self.age = age
+        self.breed = breed
+    }
+
+    let speak = fn() {
+        return self.name ++ " says: Woof!"
+    }
+
+    let wagTail = fn() {
+        return self.name ++ " is wagging tail!"
+    }
+}
+
+// Create instances
+let dog = Dog("Buddy", 3, "Golden Retriever")
+println(dog.name)          // Buddy
+println(dog.speak())       // Buddy says: Woof!
+println(dog.wagTail())     // Buddy is wagging tail!
+println(dog.birthday())    // Happy birthday Buddy
+println(dog.age)           // 4`}
+                </CodeBlock>
+            </div>
+
+            <div>
+                <h3 className="text-lg font-semibold mb-3">
+                    {t("language.controlFlow")}
+                </h3>
+                <CodeBlock isDarkMode={isDarkMode}>
+                    {`// If-else statements (no parentheses required)
 let x = 0
 if x > 0 {
     println("Positive")
@@ -87,17 +136,17 @@ for item in [1, 2, 3, 4, 5] {
 for item, index in ["a", "b", "c"] {
     println("Item", index, ":", item)
 }`}
-        </CodeBlock>
-      </div>
+                </CodeBlock>
+            </div>
 
-      <div>
-        <h3 className="text-lg font-semibold mb-3">
-          {t("language.dataStructures")}
-        </h3>
+            <div>
+                <h3 className="text-lg font-semibold mb-3">
+                    {t("language.dataStructures")}
+                </h3>
 
-        <h4 className="font-medium mb-2">{t("language.arrays")}:</h4>
-        <CodeBlock isDarkMode={isDarkMode}>
-          {`let numbers = [1, 2, 3, 4, 5]
+                <h4 className="font-medium mb-2">{t("language.arrays")}:</h4>
+                <CodeBlock isDarkMode={isDarkMode}>
+                    {`let numbers = [1, 2, 3, 4, 5]
 let mixed = [1, "hello", true, 3.14]
 
 // Array operations return new arrays
@@ -105,12 +154,16 @@ let extended = numbers.push(6)        // [1, 2, 3, 4, 5, 6]
 let length = numbers.len()         // 5
 
 // Accessing elements
-let first = numbers[0]`}
-        </CodeBlock>
+let first = numbers[0]
+let last = numbers[-1]
+let middle = numbers[0.5]`}
+                </CodeBlock>
 
-        <h4 className="font-medium mb-2 mt-4">{t("language.objects")}:</h4>
-        <CodeBlock isDarkMode={isDarkMode}>
-          {`let person = {
+                <h4 className="font-medium mb-2 mt-4">
+                    {t("language.objects")}:
+                </h4>
+                <CodeBlock isDarkMode={isDarkMode}>
+                    {`let person = {
     "name": "Alice",
     "age": 30,
     "city": "New York"
@@ -120,17 +173,17 @@ let first = numbers[0]`}
 let name = person["name"]
 let age = person.age
 
-// Adding/updating (returns new object)
-let updated = person.set("age", 31)`}
-        </CodeBlock>
-      </div>
+// Update fields
+person.age = 90`}
+                </CodeBlock>
+            </div>
 
-      <div>
-        <h3 className="text-lg font-semibold mb-3">
-          {t("language.pipelines")}
-        </h3>
-        <CodeBlock isDarkMode={isDarkMode}>
-          {`let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            <div>
+                <h3 className="text-lg font-semibold mb-3">
+                    {t("language.pipelines")}
+                </h3>
+                <CodeBlock isDarkMode={isDarkMode}>
+                    {`let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 // Traditional nested calls (harder to read)
 let result1 = filter(map(numbers, fn(x) { x * 2 }), fn(x) { x % 4 == 0 })
@@ -153,13 +206,15 @@ let activeAdultNames = users
     |> filter(fn(u) { u.age >= 18 })
     |> map(fn(u) { u.name })
     |> sort()`}
-        </CodeBlock>
-      </div>
+                </CodeBlock>
+            </div>
 
-      <div>
-        <h3 className="text-lg font-semibold mb-3">{t("language.errors")}</h3>
-        <CodeBlock isDarkMode={isDarkMode}>
-          {`// Function that might fail
+            <div>
+                <h3 className="text-lg font-semibold mb-3">
+                    {t("language.errors")}
+                </h3>
+                <CodeBlock isDarkMode={isDarkMode}>
+                    {`// Function that might fail
 let divide = fn(a, b) {
     if b == 0 {
         error "Division by zero"
@@ -178,13 +233,15 @@ let safeCalculation = fn(x, y) {
         return 0
     }
 }`}
-        </CodeBlock>
-      </div>
+                </CodeBlock>
+            </div>
 
-      <div>
-        <h3 className="text-lg font-semibold mb-3">{t("language.switch")}</h3>
-        <CodeBlock isDarkMode={isDarkMode}>
-          {`let processGrade = fn(grade) {
+            <div>
+                <h3 className="text-lg font-semibold mb-3">
+                    {t("language.switch")}
+                </h3>
+                <CodeBlock isDarkMode={isDarkMode}>
+                    {`let processGrade = fn(grade) {
     switch grade {
         case "A": {
             println("Excellent!")
@@ -204,8 +261,8 @@ let safeCalculation = fn(x, y) {
         }
     }
 }`}
-        </CodeBlock>
-      </div>
-    </div>
-  );
+                </CodeBlock>
+            </div>
+        </div>
+    );
 };

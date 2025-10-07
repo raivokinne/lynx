@@ -1,12 +1,12 @@
 package evaluator
 
 import (
-	"maps"
 	"fmt"
 	"lynx/pkg/ast"
 	"lynx/pkg/lexer"
 	"lynx/pkg/object"
 	"lynx/pkg/parser"
+	"maps"
 	"math"
 	"os"
 	"strconv"
