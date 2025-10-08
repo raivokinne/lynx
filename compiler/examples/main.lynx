@@ -1,0 +1,8 @@
+let name = "Lynx"
+let version = 1.0
+
+const PI = 3.14159
+const MAX_USERS = 100
+
+let numbers = [1, 2, 3, 4, 5]
+let user = {"name": "Alice", "age": 30}
