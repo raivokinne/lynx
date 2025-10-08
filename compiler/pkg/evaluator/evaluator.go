@@ -384,11 +384,35 @@ var operatorMap = map[TypePair]map[string]OperatorHandler{
 		"==":  evalBooleanEqual,
 		"!=":  evalBooleanNotEqual,
 	},
+	{object.BOOLEAN_OBJ, object.INTEGER_OBJ}: {
+		"and": evalBooleanIntegerAnd,
+		"or":  evalBooleanIntegerOr,
+		"==":  evalBooleanIntegerEqual,
+		"!=":  evalBooleanIntegerNotEqual,
+		">":   evalBooleanIntegerGreater,
+		"<":   evalBooleanIntegerLess,
+		">=":  evalBooleanIntegerGreaterEqual,
+		"<=":  evalBooleanIntegerLessEqual,
+	},
+	{object.INTEGER_OBJ, object.BOOLEAN_OBJ}: {
+		"and": evalIntegerBooleanAnd,
+		"or":  evalIntegerBooleanOr,
+		"==":  evalIntegerBooleanEqual,
+		"!=":  evalIntegerBooleanNotEqual,
+		">":   evalIntegerBooleanGreater,
+		"<":   evalIntegerBooleanLess,
+		">=":  evalIntegerBooleanGreaterEqual,
+		"<=":  evalIntegerBooleanLessEqual,
+	},
 }
 
 func evalInfixExpression(operator string, left, right object.Object) object.Object {
 	if operator == "++" {
 		return evalConcatExpression(left, right)
+	}
+
+	if operator == "in" {
+		return evalInOperator(left, right)
 	}
 
 	typePair := TypePair{left.Type(), right.Type()}
@@ -407,6 +431,140 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 	}
 
 	return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+}
+
+func evalInOperator(left, right object.Object) object.Object {
+	switch container := right.(type) {
+	case *object.Array:
+		for _, element := range container.Elements {
+			result := evalInfixExpression("==", left, element)
+			if result.Type() == object.BOOLEAN_OBJ && result.(*object.Boolean).Value {
+				return TRUE
+			}
+		}
+		return FALSE
+
+	case *object.Hash:
+		hashKey, ok := left.(object.Hashable)
+		if !ok {
+			return newError("unusable as hash key: %s", left.Type())
+		}
+
+		_, exists := container.Pairs[hashKey.HashKey()]
+		return nativeBoolToBooleanObject(exists)
+
+	case *object.String:
+		if leftStr, ok := left.(*object.String); ok {
+			return nativeBoolToBooleanObject(strings.Contains(container.Value, leftStr.Value))
+		}
+		return newError("left operand of 'in' must be STRING when right is STRING, got %s", left.Type())
+
+	default:
+		return newError("right operand of 'in' must be ARRAY, HASH, or STRING, got %s", right.Type())
+	}
+}
+
+func evalBooleanIntegerAnd(left, right object.Object) object.Object {
+	leftVal := left.(*object.Boolean).Value
+	rightVal := right.(*object.Integer).Value
+	return nativeBoolToBooleanObject(leftVal && rightVal != 0)
+}
+
+func evalBooleanIntegerOr(left, right object.Object) object.Object {
+	leftVal := left.(*object.Boolean).Value
+	rightVal := right.(*object.Integer).Value
+	return nativeBoolToBooleanObject(leftVal || rightVal != 0)
+}
+
+func evalIntegerBooleanAnd(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Boolean).Value
+	return nativeBoolToBooleanObject(leftVal != 0 && rightVal)
+}
+
+func evalIntegerBooleanOr(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Boolean).Value
+	return nativeBoolToBooleanObject(leftVal != 0 || rightVal)
+}
+
+func evalBooleanIntegerEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Boolean).Value
+	rightVal := right.(*object.Integer).Value != 0
+	return nativeBoolToBooleanObject(leftVal == rightVal)
+}
+
+func evalBooleanIntegerNotEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Boolean).Value
+	rightVal := right.(*object.Integer).Value != 0
+	return nativeBoolToBooleanObject(leftVal != rightVal)
+}
+
+func evalBooleanIntegerGreater(left, right object.Object) object.Object {
+	leftVal := boolToInt(left.(*object.Boolean).Value)
+	rightVal := right.(*object.Integer).Value
+	return nativeBoolToBooleanObject(leftVal > rightVal)
+}
+
+func evalBooleanIntegerLess(left, right object.Object) object.Object {
+	leftVal := boolToInt(left.(*object.Boolean).Value)
+	rightVal := right.(*object.Integer).Value
+	return nativeBoolToBooleanObject(leftVal < rightVal)
+}
+
+func evalBooleanIntegerGreaterEqual(left, right object.Object) object.Object {
+	leftVal := boolToInt(left.(*object.Boolean).Value)
+	rightVal := right.(*object.Integer).Value
+	return nativeBoolToBooleanObject(leftVal >= rightVal)
+}
+
+func evalBooleanIntegerLessEqual(left, right object.Object) object.Object {
+	leftVal := boolToInt(left.(*object.Boolean).Value)
+	rightVal := right.(*object.Integer).Value
+	return nativeBoolToBooleanObject(leftVal <= rightVal)
+}
+
+func evalIntegerBooleanEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value != 0
+	rightVal := right.(*object.Boolean).Value
+	return nativeBoolToBooleanObject(leftVal == rightVal)
+}
+
+func evalIntegerBooleanNotEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value != 0
+	rightVal := right.(*object.Boolean).Value
+	return nativeBoolToBooleanObject(leftVal != rightVal)
+}
+
+func evalIntegerBooleanGreater(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := boolToInt(right.(*object.Boolean).Value)
+	return nativeBoolToBooleanObject(leftVal > rightVal)
+}
+
+func evalIntegerBooleanLess(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := boolToInt(right.(*object.Boolean).Value)
+	return nativeBoolToBooleanObject(leftVal < rightVal)
+}
+
+func evalIntegerBooleanGreaterEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := boolToInt(right.(*object.Boolean).Value)
+	return nativeBoolToBooleanObject(leftVal >= rightVal)
+}
+
+func evalIntegerBooleanLessEqual(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := boolToInt(right.(*object.Boolean).Value)
+	return nativeBoolToBooleanObject(leftVal <= rightVal)
+}
+
+func boolToInt(b bool) int64 {
+	if b {
+		return 1
+	}
+	return 0
 }
 
 func evalIntegerAdd(left, right object.Object) object.Object {
@@ -1259,6 +1417,30 @@ func evalArrayMethod(obj *object.Array, method string, args []object.Object) obj
 			parts = append(parts, elem.Inspect())
 		}
 		return &object.String{Value: strings.Join(parts, delimiter)}
+	case "filter":
+		if len(args) != 1 {
+			return newError("wrong number of arguments. got=%d, want=1", len(args))
+		}
+		if args[0].Type() != object.FUNCTION_OBJ {
+			return newError("argument to array.filter must be FUNCTION, got %s", args[0].Type())
+		}
+
+		fn := args[0].(*object.Function)
+		var filtered []object.Object
+
+		for _, elem := range obj.Elements {
+			result := applyFunction(fn, []object.Object{elem})
+
+			if isError(result) {
+				return result
+			}
+
+			if isTruthy(result) {
+				filtered = append(filtered, elem)
+			}
+		}
+
+		return &object.Array{Elements: filtered}
 	default:
 		return newError("unknown method: %s", method)
 	}

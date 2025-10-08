@@ -393,6 +393,14 @@ export const translations: TranslatedContent = {
     zh: "数据处理管道",
     ja: "データ処理パイプライン",
   },
+  "examples.rpg": {
+    en: "RPG Battle Game",
+    es: "Juego de Batalla RPG",
+    fr: "Jeu de Combat RPG",
+    de: "RPG-Kampfspiel",
+    zh: "RPG战斗游戏",
+    ja: "RPGバトルゲーム",
+  },
 
   // Performance
   "performance.title": {

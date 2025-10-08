@@ -36,15 +36,7 @@ export const CodeBlock = ({
         prismScript.onload = resolve;
       });
 
-      const languages = [
-        "javascript",
-        "typescript",
-        "jsx",
-        "tsx",
-        "python",
-        "css",
-        "json",
-      ];
+      const languages = ["javascript"];
 
       for (const lang of languages) {
         const script = document.createElement("script");
@@ -55,7 +47,6 @@ export const CodeBlock = ({
         });
       }
 
-      // Define custom language after Prism is loaded
       if (window.Prism) {
         window.Prism.languages.custom = {
           comment: [
