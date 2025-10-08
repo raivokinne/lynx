@@ -33,30 +33,6 @@ func RegisterBuiltins() {
 	builtins["copy"] = &object.Builtin{Fn: builtinCopy}
 }
 
-func builtinCopy(args ...object.Object) object.Object {
-	if len(args) != 2 {
-		return newError("wrong number of arguments. got=%d, want=2", len(args))
-	}
-
-	destArr, ok := args[0].(*object.Array)
-	if !ok {
-		return newError("first argument must be an array, got %s", args[0].Type())
-	}
-
-	srcArr, ok := args[1].(*object.Array)
-	if !ok {
-		return newError("second argument must be an array, got %s", args[1].Type())
-	}
-
-	copyCount := min(len(srcArr.Elements), len(destArr.Elements))
-
-	for i := range copyCount {
-		destArr.Elements[i] = srcArr.Elements[i]
-	}
-
-	return &object.Integer{Value: int64(copyCount)}
-}
-
 func builtinType(args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return newError("wrong number of arguments. got=%d, want=1", len(args))
@@ -94,6 +70,30 @@ func builtinType(args ...object.Object) object.Object {
 	default:
 		return &object.String{Value: "unknown"}
 	}
+}
+
+func builtinCopy(args ...object.Object) object.Object {
+	if len(args) != 2 {
+		return newError("wrong number of arguments. got=%d, want=2", len(args))
+	}
+
+	destArr, ok := args[0].(*object.Array)
+	if !ok {
+		return newError("first argument must be an array, got %s", args[0].Type())
+	}
+
+	srcArr, ok := args[1].(*object.Array)
+	if !ok {
+		return newError("second argument must be an array, got %s", args[1].Type())
+	}
+
+	copyCount := min(len(srcArr.Elements), len(destArr.Elements))
+
+	for i := range copyCount {
+		destArr.Elements[i] = srcArr.Elements[i]
+	}
+
+	return &object.Integer{Value: int64(copyCount)}
 }
 
 func builtinStr(args ...object.Object) object.Object {

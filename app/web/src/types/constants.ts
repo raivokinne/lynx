@@ -13,4 +13,4 @@ export const defaultSettings: EditorSettings = {
     readOnly: false,
 };
 
-export const API_BASE = "/api";
+export const API_BASE = "http://localhost:3001/api";

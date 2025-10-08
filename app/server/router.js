@@ -55,18 +55,15 @@ import {
 
 const router = express.Router();
 
-// ============ AUTH ROUTES ============
 router.post("/auth/register", register);
 router.post("/auth/login", login);
 router.post("/auth/logout", authenticateToken, logout);
 router.get("/auth/profile", authenticateToken, getProfile);
 
-// ============ SESSION ROUTES ============
 router.get("/sessions", authenticateToken, getUserSessions);
 router.delete("/sessions/:sessionId", authenticateToken, revokeSession);
 router.delete("/sessions", authenticateToken, revokeAllSessions);
 
-// ============ CODE ROUTES ============
 router.post("/codes", authenticateToken, saveCode);
 router.put("/codes", authenticateToken, updateCode);
 router.get("/codes", authenticateToken, listCode);
@@ -75,7 +72,6 @@ router.delete("/codes/:id", authenticateToken, deleteCode);
 router.post("/codes/:id/restore", authenticateToken, restoreCode);
 router.get("/codes/deleted/list", authenticateToken, getDeletedCodes);
 
-// ============ SHARING ROUTES ============
 router.post("/share", authenticateToken, shareCode);
 router.get("/share/:token", getSharedCode); // Public route
 router.get("/share/code/:codeId", authenticateToken, getCodeShares);
@@ -83,7 +79,6 @@ router.put("/share/:token", authenticateToken, updateShare);
 router.delete("/share/:token", authenticateToken, revokeShare);
 router.get("/public/shares", getPublicShares); // Public route
 
-// ============ VERSION ROUTES ============
 router.get("/versions/:codeId", authenticateToken, getVersions);
 router.get("/versions/:codeId/:versionNumber", authenticateToken, getVersion);
 router.post(
@@ -98,7 +93,6 @@ router.delete(
   cleanupOldVersions,
 );
 
-// ============ EXECUTION HISTORY ROUTES ============
 router.get("/history/code/:codeId", authenticateToken, getCodeExecutionHistory);
 router.get("/history/user", authenticateToken, getUserExecutionHistory);
 router.get(
@@ -114,10 +108,8 @@ router.delete(
   deleteCodeExecutionHistory,
 );
 
-// ============ COMPILER ROUTE ============
-router.post("/compiler", authenticateToken, compiler);
+router.post("/compile", authenticateToken, compiler);
 
-// ============ SETTINGS ROUTES ============
 router.get("/settings", authenticateToken, getSettings);
 router.post("/settings", authenticateToken, saveSettings);
 router.delete("/settings", authenticateToken, deleteSettings);

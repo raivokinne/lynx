@@ -20,8 +20,7 @@ const defaultSettings: EditorSettings = {
 };
 
 export const useSettings = (userId?: string) => {
-  const [editorSettings, setEditorSettings] =
-    useState<EditorSettings>(defaultSettings);
+  const [editorSettings, setEditorSettings] = useState<EditorSettings>(defaultSettings);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
@@ -41,10 +40,7 @@ export const useSettings = (userId?: string) => {
 
   const saveToLocalStorage = (settings: EditorSettings) => {
     try {
-      localStorage.setItem(
-        LOCAL_STORAGE_SETTINGS_KEY,
-        JSON.stringify(settings),
-      );
+      localStorage.setItem(LOCAL_STORAGE_SETTINGS_KEY, JSON.stringify(settings));
     } catch (error) {
       console.error("Error saving settings to localStorage:", error);
     }
@@ -118,8 +114,7 @@ export const useSettings = (userId?: string) => {
           "editor.background": theme.colors?.background || "#1e1e1e",
           "editor.foreground": theme.colors?.foreground || "#d4d4d4",
           "editor.selectionBackground": theme.colors?.selection || "#264f78",
-          "editor.lineHighlightBackground":
-            theme.colors?.lineHighlight || "#2d2d30",
+          "editor.lineHighlightBackground": theme.colors?.lineHighlight || "#2d2d30",
           "editorCursor.foreground": theme.colors?.cursor || "#ffffff",
           "editorWhitespace.foreground": theme.colors?.whitespace || "#404040",
           "editorLineNumber.foreground": "#858585",
@@ -153,10 +148,7 @@ export const useSettings = (userId?: string) => {
     if (!userId) {
       const localSettings = loadFromLocalStorage();
 
-      if (
-        localSettings.customThemes &&
-        localSettings.customThemes.length === 0
-      ) {
+      if (localSettings.customThemes && localSettings.customThemes.length === 0) {
         localSettings.customThemes = [createDemoTheme()];
       }
 
@@ -189,9 +181,7 @@ export const useSettings = (userId?: string) => {
       }
     } catch (error) {
       console.error("Error loading settings:", error);
-      setError(
-        error instanceof Error ? error.message : "Failed to load settings",
-      );
+      setError(error instanceof Error ? error.message : "Failed to load settings");
       setEditorSettings(defaultSettings);
     } finally {
       setLoading(false);
@@ -263,9 +253,7 @@ export const useSettings = (userId?: string) => {
       }
     } catch (error) {
       console.error("Error saving settings:", error);
-      setError(
-        error instanceof Error ? error.message : "Failed to save settings",
-      );
+      setError(error instanceof Error ? error.message : "Failed to save settings");
       return false;
     } finally {
       setLoading(false);
@@ -327,9 +315,7 @@ export const useSettings = (userId?: string) => {
       }
     } catch (error) {
       console.error("Error resetting settings:", error);
-      setError(
-        error instanceof Error ? error.message : "Failed to reset settings",
-      );
+      setError(error instanceof Error ? error.message : "Failed to reset settings");
       return false;
     } finally {
       setLoading(false);

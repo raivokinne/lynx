@@ -12,7 +12,7 @@ export const useCodeExecution = () => {
     setError("");
 
     try {
-      const response = await fetch(`${API_BASE}/compiler`, {
+      const response = await fetch(`${API_BASE}/compile`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

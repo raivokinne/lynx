@@ -18,6 +18,9 @@ export const Header: React.FC<HeaderProps> = ({
   const onLogin = () => {
     navigate("/login");
   };
+  const onRegister = () => {
+    navigate("/register");
+  };
   return (
     <header
       className={`${isDarkMode ? "bg-black border-gray-700" : "bg-white border-gray-200"} border-b`}
@@ -45,6 +48,12 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={onLogin}
+              className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg ${isDarkMode ? "border-gray-700 hover:bg-gray-800" : "border-gray-300 hover:bg-gray-50"}`}
+            >
+              <span className="text-sm">Login</span>
+            </button>
+            <button
+              onClick={onRegister}
               className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg ${isDarkMode ? "border-gray-700 hover:bg-gray-800" : "border-gray-300 hover:bg-gray-50"}`}
             >
               <span className="text-sm">Register</span>
