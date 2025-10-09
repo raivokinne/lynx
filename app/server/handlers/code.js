@@ -149,7 +149,6 @@ export const getCode = async (req, res) => {
 export const deleteCode = async (req, res) => {
     try {
         const { id } = req.params;
-        const { permanent = false } = req.query;
 
         if (!id) {
             return res.status(422).json({
@@ -158,21 +157,10 @@ export const deleteCode = async (req, res) => {
             });
         }
 
-        let result;
-
-        if (permanent === "true") {
-            // Permanently delete
-            result = await db.query(
-                "DELETE FROM codes WHERE id = $1 AND user_id = $2",
-                [id, req.user.id],
-            );
-        } else {
-            // Soft delete
-            result = await db.query(
-                "UPDATE codes SET is_deleted = true WHERE id = $1 AND user_id = $2",
-                [id, req.user.id],
-            );
-        }
+        let result = await db.query(
+            "DELETE FROM codes WHERE id = $1 AND user_id = $2",
+            [id, req.user.id],
+        );
 
         if (result.rowCount === 0) {
             return res.status(404).json({
@@ -183,10 +171,7 @@ export const deleteCode = async (req, res) => {
 
         res.json({
             success: true,
-            message:
-                permanent === "true"
-                    ? "Code permanently deleted"
-                    : "Code deleted successfully",
+            message: "Code deleted successfully",
         });
     } catch (error) {
         console.error("Delete code error:", error?.message ?? error);
