@@ -268,7 +268,7 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
 
 func evalSquarePrefixOperatorExpression(right object.Object) object.Object {
 	if right.Type() != object.INTEGER_OBJ {
-		return newError("unknown operator: -%s", right.Type())
+		return newError("unknown operator: $%s", right.Type())
 	}
 	value := right.(*object.Integer).Value
 	return &object.Float{Value: math.Sqrt(float64(value))}
@@ -308,6 +308,7 @@ var operatorMap = map[TypePair]map[string]OperatorHandler{
 		"-":   evalIntegerSub,
 		"*":   evalIntegerMul,
 		"/":   evalIntegerDiv,
+		"%":   evalIntegerMod,
 		"^":   evalIntegerPow,
 		"$":   evalIntegerSqrt,
 		"<":   evalIntegerLess,
@@ -324,6 +325,7 @@ var operatorMap = map[TypePair]map[string]OperatorHandler{
 		"-":   evalFloatSub,
 		"*":   evalFloatMul,
 		"/":   evalFloatDiv,
+		"%":   evalFloatMod,
 		"^":   evalFloatPow,
 		"$":   evalFloatSqrt,
 		"<":   evalFloatLess,
@@ -340,6 +342,7 @@ var operatorMap = map[TypePair]map[string]OperatorHandler{
 		"-":   evalFloatIntegerSub,
 		"*":   evalFloatIntegerMul,
 		"/":   evalFloatIntegerDiv,
+		"%":   evalFloatIntegerMod,
 		"^":   evalFloatIntegerPow,
 		"$":   evalFloatIntegerSqrt,
 		"<":   evalFloatIntegerLess,
@@ -356,6 +359,7 @@ var operatorMap = map[TypePair]map[string]OperatorHandler{
 		"-":   evalIntegerFloatSub,
 		"*":   evalIntegerFloatMul,
 		"/":   evalIntegerFloatDiv,
+		"%":   evalIntegerFloatMod,
 		"^":   evalIntegerFloatPow,
 		"$":   evalIntegerFloatSqrt,
 		"<":   evalIntegerFloatLess,
@@ -462,6 +466,42 @@ func evalInOperator(left, right object.Object) object.Object {
 	default:
 		return newError("right operand of 'in' must be ARRAY, HASH, or STRING, got %s", right.Type())
 	}
+}
+
+func evalIntegerMod(left, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+	if rightVal == 0 {
+		return newError("modulo by zero")
+	}
+	return &object.Integer{Value: leftVal % rightVal}
+}
+
+func evalFloatMod(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+	if rightVal == 0 {
+		return newError("modulo by zero")
+	}
+	return &object.Float{Value: math.Mod(leftVal, rightVal)}
+}
+
+func evalFloatIntegerMod(left, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := float64(right.(*object.Integer).Value)
+	if rightVal == 0 {
+		return newError("modulo by zero")
+	}
+	return &object.Float{Value: math.Mod(leftVal, rightVal)}
+}
+
+func evalIntegerFloatMod(left, right object.Object) object.Object {
+	leftVal := float64(left.(*object.Integer).Value)
+	rightVal := right.(*object.Float).Value
+	if rightVal == 0 {
+		return newError("modulo by zero")
+	}
+	return &object.Float{Value: math.Mod(leftVal, rightVal)}
 }
 
 func evalBooleanIntegerAnd(left, right object.Object) object.Object {
