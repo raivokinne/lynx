@@ -223,8 +223,8 @@ func evalPropertyAssignment(obj object.Object, prop string, val object.Object) o
 	}
 }
 
-func nativeBoolToBooleanObject(input bool) *object.Boolean {
-	if input {
+func nativeBoolToBooleanObject(value bool) *object.Boolean {
+	if value {
 		return TRUE
 	}
 	return FALSE
@@ -1387,16 +1387,6 @@ func evalArrayMethod(obj *object.Array, method string, args []object.Object) obj
 		return &object.Array{Elements: newElements}
 	case "len":
 		return &object.Integer{Value: int64(len(obj.Elements))}
-	case "first":
-		if len(obj.Elements) == 0 {
-			return NULL
-		}
-		return obj.Elements[0]
-	case "last":
-		if len(obj.Elements) == 0 {
-			return NULL
-		}
-		return obj.Elements[len(obj.Elements)-1]
 	case "rest":
 		if len(obj.Elements) == 0 {
 			return &object.Array{Elements: []object.Object{}}

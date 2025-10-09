@@ -34,19 +34,6 @@ func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 	return true
 }
 
-func testStringObject(t *testing.T, obj object.Object, expected string) bool {
-	result, ok := obj.(*object.String)
-	if !ok {
-		t.Errorf("Object is not String. got=%T (%+v)", obj, obj)
-		return false
-	}
-	if result.Value != expected {
-		t.Errorf("Object has wrong value. got=%q, want=%q", result.Value, expected)
-		return false
-	}
-	return true
-}
-
 func testNullObject(t *testing.T, obj object.Object) bool {
 	if obj != evaluator.NULL {
 		t.Errorf("Object is not NULL. got=%T (%+v)", obj, obj)
