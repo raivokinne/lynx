@@ -9,6 +9,7 @@ import (
 	"maps"
 	"math"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -1666,23 +1667,12 @@ func evalWhile(node *ast.While, env *object.Env) object.Object {
 
 func evalModuleLoad(node *ast.ModuleLoad, env *object.Env) object.Object {
 	name := node.Name.String()
-	modEnv := env.NewEnclosedEnv()
 
 	if mod, ok := moduleCache[name]; ok {
-		if node.Members == nil {
-			env.Set(name, mod, true)
-		} else {
-			for _, member := range node.Members {
-				val, ok := modEnv.Get(member.Value)
-				if !ok {
-					return newError("module %s does not have member: %s", name, member.Value)
-				}
-				env.Set(member.Value, val, true)
-			}
-		}
-		return mod
+		return setModuleInEnv(mod, name, node.Members, env)
 	}
 
+	modEnv := env.NewEnclosedEnv()
 	if err := loadModule(name, modEnv); err != nil {
 		return newError("%s", err.Error())
 	}
@@ -1690,19 +1680,29 @@ func evalModuleLoad(node *ast.ModuleLoad, env *object.Env) object.Object {
 	modObj := &object.Module{Name: name, Env: modEnv}
 	moduleCache[name] = modObj
 
-	if node.Members == nil {
-		env.Set(name, modObj, true)
-	} else {
-		for _, member := range node.Members {
-			val, ok := modObj.Env.Get(member.Value)
-			if !ok {
-				return newError("module %s does not have member: %s", name, member.Value)
-			}
-			env.Set(member.Value, val, true)
-		}
+	return setModuleInEnv(modObj, name, node.Members, env)
+}
+
+func setModuleInEnv(mod object.Object, name string, members []*ast.Identifier, env *object.Env) object.Object {
+	if members == nil {
+		env.Set(name, mod, true)
+		return mod
 	}
 
-	return modObj
+	module, ok := mod.(*object.Module)
+	if !ok {
+		return newError("expected module object, got %T", mod)
+	}
+
+	for _, member := range members {
+		val, ok := module.Env.Get(member.Value)
+		if !ok {
+			return newError("module %s does not have member: %s", name, member.Value)
+		}
+		env.Set(member.Value, val, true)
+	}
+
+	return mod
 }
 
 func loadModule(name string, env *object.Env) error {
@@ -1725,20 +1725,37 @@ func loadModule(name string, env *object.Env) error {
 
 func loadModuleSource(name string, env *object.Env) ([]byte, error) {
 	possiblePaths := []string{
-		fmt.Sprintf("/usr/local/lib/lynx/std/%s.lynx", name),
-		fmt.Sprintf("%s/%s.lynx", env.Dir, name),
+		filepath.Join("/usr/local/lib/lynx/std", name+".lynx"),
+		filepath.Join(env.Dir, name+".lynx"),
+		filepath.Join("./modules", name+".lynx"),
+		filepath.Join(os.Getenv("HOME"), "modules", name+".lynx"),
 	}
 
+	var existingPaths []string
+	var triedPaths []string
 	var lastErr error
 	for _, path := range possiblePaths {
-		source, err := os.ReadFile(path)
+		_, err := os.ReadFile(path)
 		if err == nil {
-			return source, nil
+			existingPaths = append(existingPaths, path)
+		} else {
+			triedPaths = append(triedPaths, path)
+			lastErr = err
 		}
-		lastErr = err
 	}
 
-	return nil, fmt.Errorf("could not find module %s: %v", name, lastErr)
+	if len(existingPaths) > 1 {
+		return nil, fmt.Errorf("module %q conflicts: found in multiple paths: %v", name, existingPaths)
+	}
+	if len(existingPaths) == 1 {
+		data, err := os.ReadFile(existingPaths[0])
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
+	}
+
+	return nil, fmt.Errorf("could not find module %q in the following paths: %v (last error: %v)", name, triedPaths, lastErr)
 }
 
 func evalSwitchStatement(node *ast.SwitchStatement, env *object.Env) object.Object {

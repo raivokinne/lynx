@@ -1,20 +1,3 @@
-let processGrade = fn(grade) {
-    switch grade {
-        case "A": {
-            println("Excellent!")
-            return 4.0
-        }
-        case "B": {
-            println("Good job!")
-            return 3.0
-        }
-        case "C": {
-            println("Satisfactory")
-            return 2.0
-        }
-        default: {
-            println("Needs improvement")
-            return 0.0
-        }
-    }
-}
+@test(test)
+
+println(test())
