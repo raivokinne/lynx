@@ -29,6 +29,16 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="max-w-full px-2 py-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
+              className={`flex items-center gap-2 px-3 py-1.5 ${isDarkMode ? "bg-black" : "bg-gray-100"} rounded-lg`}
+            >
+              <img
+                src="/logo.png"
+                className="w-8 h-8 rounded-full"
+                alt="logo"
+              />
+              <span>Lynx IDE</span>
+            </div>
+            <div
               className={`flex items-center gap-2 px-3 py-1.5 ${isDarkMode ? "bg-gray-900" : "bg-gray-100"} rounded-lg`}
             >
               <User className="w-4 h-4" />
@@ -46,6 +56,16 @@ export const Header: React.FC<HeaderProps> = ({
       ) : (
         <div className="max-w-full px-2 py-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <div
+              className={`flex items-center gap-2 px-3 py-1.5 ${isDarkMode ? "bg-black" : "bg-gray-100"} rounded-lg`}
+            >
+              <img
+                src="/logo.png"
+                className="w-8 h-8 rounded-full"
+                alt="logo"
+              />
+              <span>Lynx IDE</span>
+            </div>
             <button
               onClick={onLogin}
               className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg ${isDarkMode ? "border-gray-700 hover:bg-gray-800" : "border-gray-300 hover:bg-gray-50"}`}
