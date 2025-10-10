@@ -638,7 +638,7 @@ func evalIntegerPow(left, right object.Object) object.Object {
 	leftVal := float64(left.(*object.Integer).Value)
 	rightVal := float64(right.(*object.Integer).Value)
 	result := math.Pow(leftVal, rightVal)
-	return &object.Float{Value: result}
+	return &object.Integer{Value: int64(result)}
 }
 
 func evalIntegerSqrt(left, right object.Object) object.Object {
