@@ -4,7 +4,6 @@ import { db } from "../db.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
-// Create a new session
 export const createSession = async (userId, ip, userAgent) => {
   const sessionId = uuidv4();
   const token = jwt.sign({ id: userId, sessionId }, JWT_SECRET, {
@@ -22,7 +21,6 @@ export const createSession = async (userId, ip, userAgent) => {
   return { sessionId, token };
 };
 
-// Validate and update session activity
 export const validateSession = async (token) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -39,7 +37,6 @@ export const validateSession = async (token) => {
       return null;
     }
 
-    // Update last activity
     await db.query(`UPDATE sessions SET last_activity = NOW() WHERE id = $1`, [
       decoded.sessionId,
     ]);
@@ -50,7 +47,6 @@ export const validateSession = async (token) => {
   }
 };
 
-// Get all active sessions for a user
 export const getUserSessions = async (req, res) => {
   try {
     const result = await db.query(
@@ -74,7 +70,6 @@ export const getUserSessions = async (req, res) => {
   }
 };
 
-// Revoke a specific session
 export const revokeSession = async (req, res) => {
   try {
     const { sessionId } = req.params;
@@ -104,10 +99,9 @@ export const revokeSession = async (req, res) => {
   }
 };
 
-// Revoke all sessions except current
 export const revokeAllSessions = async (req, res) => {
   try {
-    const currentSessionId = req.user.sessionId; // You'll need to add this to your auth middleware
+    const currentSessionId = req.user.sessionId;
 
     await db.query(`DELETE FROM sessions WHERE user_id = $1 AND id != $2`, [
       req.user.id,
@@ -127,7 +121,6 @@ export const revokeAllSessions = async (req, res) => {
   }
 };
 
-// Cleanup expired sessions (run this periodically)
 export const cleanupExpiredSessions = async () => {
   try {
     const result = await db.query(

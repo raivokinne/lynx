@@ -1,10 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 import { db } from "../db.js";
 
-// Create a new version when code is updated
 export const createVersion = async (codeId, code, title) => {
     try {
-        // Get the current version number
         const versionResult = await db.query(
             `SELECT COALESCE(MAX(version_number), 0) as max_version
              FROM code_versions
@@ -28,12 +26,10 @@ export const createVersion = async (codeId, code, title) => {
     }
 };
 
-// Get all versions for a code
 export const getVersions = async (req, res) => {
     try {
         const { codeId } = req.params;
 
-        // Verify user owns this code
         const codeResult = await db.query(
             `SELECT id FROM codes WHERE id = $1 AND user_id = $2`,
             [codeId, req.user.id],
@@ -68,12 +64,10 @@ export const getVersions = async (req, res) => {
     }
 };
 
-// Get a specific version
 export const getVersion = async (req, res) => {
     try {
         const { codeId, versionNumber } = req.params;
 
-        // Verify user owns this code
         const codeResult = await db.query(
             `SELECT id FROM codes WHERE id = $1 AND user_id = $2`,
             [codeId, req.user.id],
@@ -113,12 +107,10 @@ export const getVersion = async (req, res) => {
     }
 };
 
-// Restore a specific version
 export const restoreVersion = async (req, res) => {
     try {
         const { codeId, versionNumber } = req.params;
 
-        // Verify user owns this code
         const codeResult = await db.query(
             `SELECT id FROM codes WHERE id = $1 AND user_id = $2`,
             [codeId, req.user.id],
@@ -131,7 +123,6 @@ export const restoreVersion = async (req, res) => {
             });
         }
 
-        // Get the version to restore
         const versionResult = await db.query(
             `SELECT code, title FROM code_versions
              WHERE code_id = $1 AND version_number = $2`,
@@ -147,7 +138,6 @@ export const restoreVersion = async (req, res) => {
 
         const { code, title } = versionResult.rows[0];
 
-        // Save current code as new version before restoring
         const currentCode = await db.query(
             `SELECT code, title FROM codes WHERE id = $1`,
             [codeId],
@@ -161,7 +151,6 @@ export const restoreVersion = async (req, res) => {
             );
         }
 
-        // Update the code with the old version
         await db.query(
             `UPDATE codes
              SET code = $1, title = $2, updated_at = CURRENT_TIMESTAMP
@@ -182,7 +171,6 @@ export const restoreVersion = async (req, res) => {
     }
 };
 
-// Compare two versions
 export const compareVersions = async (req, res) => {
     try {
         const { codeId } = req.params;
@@ -195,7 +183,6 @@ export const compareVersions = async (req, res) => {
             });
         }
 
-        // Verify user owns this code
         const codeResult = await db.query(
             `SELECT id FROM codes WHERE id = $1 AND user_id = $2`,
             [codeId, req.user.id],
@@ -236,13 +223,11 @@ export const compareVersions = async (req, res) => {
     }
 };
 
-// Delete old versions (keep only N recent versions)
 export const cleanupOldVersions = async (req, res) => {
     try {
         const { codeId } = req.params;
         const { keepCount = 10 } = req.body;
 
-        // Verify user owns this code
         const codeResult = await db.query(
             `SELECT id FROM codes WHERE id = $1 AND user_id = $2`,
             [codeId, req.user.id],

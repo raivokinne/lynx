@@ -15,7 +15,7 @@ import { DocsModal } from "../components/DocsModal";
 export const Home: React.FC = () => {
     const { user, logout } = useAuth();
     const { editorSettings, updateAllSettings, registerCustomTheme } =
-    useSettings(user?.id);
+        useSettings(user?.id);
     const {
         code,
         setCode,
@@ -27,7 +27,7 @@ export const Home: React.FC = () => {
         updateCode,
     } = useCodeManagement(user?.id);
     const { output, error, isRunning, executeCode, clearOutput } =
-    useCodeExecution();
+        useCodeExecution();
 
     const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
         const local = localStorage.getItem("darkMode");

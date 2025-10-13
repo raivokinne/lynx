@@ -1,3 +1,15 @@
-@test(test)
+let bubbleSort = fn(arr) {
+    let n = len(arr)
+    for i in range(0, n) {
+        for j in range(0, n - i - 1) {
+            if arr[j] > arr[j+1] {
+                let tmp = arr[j]
+                arr[j] = arr[j+1]
+                arr[j+1] = tmp
+            }
+        }
+    }
+    return arr
+}
 
-println(test())
+println(bubbleSort([5,3,8,1]))

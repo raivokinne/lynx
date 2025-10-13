@@ -5,14 +5,10 @@ import (
 	"testing"
 )
 
-// TestEvaluatorIntegerArithmetic pārbauda, vai interpretators/evaluators
-// pareizi aprēķina veselo skaitļu aritmētiku (saskaitīšanu, atņemšanu,
-// reizināšanu, dalīšanu un iekavas).
 func TestEvaluatorIntegerArithmetic(t *testing.T) {
-	// Testa gadījumi ar ievades izteiksmi un gaidāmo rezultātu.
 	tests := []struct {
-		input    string // Izteiksme kā string
-		expected int64  // Gaidāmais rezultāts
+		input    string
+		expected int64
 	}{
 		{"5", 5},
 		{"10", 10},
@@ -31,31 +27,22 @@ func TestEvaluatorIntegerArithmetic(t *testing.T) {
 		{"(5 + 10 * 2 + 15 / 3) * 2 + -10", 50},
 	}
 
-	// Izpildām katru testu.
 	for _, tt := range tests {
-		// Izsaucam funkciju, kas izpilda (evaluē) ievades izteiksmi
 		evaluated := testEval(tt.input)
-		// Pārbaudām, vai rezultāts ir Integer un vai tas sakrīt ar gaidīto vērtību
 		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
 
-// testIntegerObject pārbauda, vai rezultāts ir vesels skaitlis (object.Integer)
-// un vai tā vērtība atbilst gaidītajai.
 func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
-	// Mēģinām pārveidot object.Object uz *object.Integer
 	result, ok := obj.(*object.Integer)
 	if !ok {
-		// Ja nav Integer, tad testam jākrīt ar kļūdu
 		t.Errorf("Object is not Integer. got=%T (%+v)", obj, obj)
 		return false
 	}
-	// Ja Integer, tad pārbaudām, vai vērtība atbilst gaidītajai
 	if result.Value != expected {
 		t.Errorf("Object has wrong value. got=%d, want=%d", result.Value, expected)
 		return false
 	}
-	// Viss kārtībā
 	return true
 }
 

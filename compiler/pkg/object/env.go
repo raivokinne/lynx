@@ -29,7 +29,9 @@ func (e *Env) Set(name string, val Object, isConst bool) Object {
 
 func (e *Env) Assign(name string, val Object) Object {
 	if isConst, ok := e.consts[name]; ok && isConst {
-		return &Error{Message: fmt.Sprintf("cannot assign to constant: %s", name)}
+		return &Error{
+			Message: fmt.Sprintf("cannot assign to constant: %s", name),
+		}
 	}
 
 	if _, ok := e.store[name]; ok {

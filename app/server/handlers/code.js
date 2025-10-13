@@ -37,7 +37,7 @@ export const saveCode = async (req, res) => {
 
 export const updateCode = async (req, res) => {
     try {
-        const { id, title, code, language, description } = req.body;
+        const { id, title, code } = req.body;
 
         if (!id || !code) {
             return res.status(422).json({
@@ -58,13 +58,11 @@ export const updateCode = async (req, res) => {
             });
         }
 
-        // Only create version if code has changed
         const currentCode = currentResult.rows[0];
         if (currentCode.code !== code) {
             await createVersion(id, currentCode.code, currentCode.title);
         }
 
-        // Update the code
         const result = await db.query(
             `UPDATE codes
              SET title = COALESCE($1, title),

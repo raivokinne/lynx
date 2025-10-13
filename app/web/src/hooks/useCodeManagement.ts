@@ -67,7 +67,6 @@ export const useCodeManagement = (userId?: string) => {
                 setSavedCodes((prev) => [newCode, ...prev]);
                 setCurrentCodeTitle(title.trim());
                 setCurrentCodeId(result.id);
-
                 await loadSavedCodes();
 
                 return true;

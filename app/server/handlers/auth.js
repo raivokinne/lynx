@@ -7,7 +7,6 @@ export const register = async (req, res) => {
   try {
     const { username, password, confirmPassword } = req.body;
 
-    // Input validation
     if (!username || !password || !confirmPassword) {
       return res.status(400).json({
         success: false,
@@ -22,7 +21,6 @@ export const register = async (req, res) => {
       });
     }
 
-    // Password strength validation
     const passw =
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,20}$/;
     if (!password.match(passw)) {
@@ -33,7 +31,6 @@ export const register = async (req, res) => {
       });
     }
 
-    // Check if username already exists
     const existingUser = await db.query(
       "SELECT id FROM users WHERE username = $1",
       [username],
@@ -46,21 +43,18 @@ export const register = async (req, res) => {
       });
     }
 
-    // Hash password
     const hashed = await bcrypt.hash(password, 10);
     const userId = uuidv4();
 
-    // Insert user (no email)
     await db.query(
       "INSERT INTO users (id, username, password) VALUES ($1, $2, $3)",
       [userId, username, hashed],
     );
 
-    // Create session
     const ip =
       req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress;
     const userAgent = req.headers["user-agent"];
-    const { sessionId, token } = await createSession(userId, ip, userAgent);
+    const { token } = await createSession(userId, ip, userAgent);
 
     res.json({
       success: true,
@@ -71,7 +65,6 @@ export const register = async (req, res) => {
   } catch (error) {
     console.error("Register error:", error);
 
-    // Detailed error logging for debugging
     if (error.code) {
       console.error("PostgreSQL Error Code:", error.code);
     }
@@ -79,21 +72,16 @@ export const register = async (req, res) => {
       console.error("Error Detail:", error.detail);
     }
 
-    // Handle specific database errors
     let message = "Registration failed";
 
     if (error.code === "23505") {
-      // Unique violation
       message = "Username already taken";
     } else if (error.code === "23502") {
-      // NOT NULL violation
       message = "Missing required field";
     } else if (error.code === "42P01") {
-      // Table does not exist
       message = "Database configuration error";
       console.error("CRITICAL: users table does not exist!");
     } else if (error.code === "23503") {
-      // Foreign key violation (likely session creation issue)
       message = "Failed to create session";
       console.error("Session creation failed - check sessions table");
     }
@@ -135,11 +123,10 @@ export const login = async (req, res) => {
       });
     }
 
-    // Create session
     const ip =
       req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress;
     const userAgent = req.headers["user-agent"];
-    const { sessionId, token } = await createSession(user.id, ip, userAgent);
+    const { token } = await createSession(user.id, ip, userAgent);
 
     res.json({
       success: true,

@@ -434,6 +434,7 @@ type While struct {
 	Token     token.Token
 	Condition Expression
 	Body      *BlockStatement
+
 }
 
 func (w *While) statementNode()       {}

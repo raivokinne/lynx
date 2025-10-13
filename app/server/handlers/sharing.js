@@ -2,12 +2,10 @@ import { v4 as uuidv4 } from "uuid";
 import crypto from "crypto";
 import { db } from "../db.js";
 
-// Generate a unique share token
 const generateShareToken = () => {
   return crypto.randomBytes(16).toString("hex");
 };
 
-// Create a share link for code
 export const shareCode = async (req, res) => {
   try {
     const { codeId, isPublic, expiresInDays } = req.body;
@@ -19,7 +17,6 @@ export const shareCode = async (req, res) => {
       });
     }
 
-    // Verify user owns this code
     const codeResult = await db.query(
       `SELECT id FROM codes WHERE id = $1 AND user_id = $2`,
       [codeId, req.user.id],
@@ -32,7 +29,6 @@ export const shareCode = async (req, res) => {
       });
     }
 
-    // Check if already shared
     const existingShare = await db.query(
       `SELECT share_token FROM shared_codes WHERE code_id = $1`,
       [codeId],
@@ -72,7 +68,6 @@ export const shareCode = async (req, res) => {
   }
 };
 
-// Get shared code by token
 export const getSharedCode = async (req, res) => {
   try {
     const { token } = req.params;
@@ -95,7 +90,6 @@ export const getSharedCode = async (req, res) => {
       });
     }
 
-    // Increment view count
     await db.query(
       `UPDATE shared_codes SET view_count = view_count + 1 WHERE share_token = $1`,
       [token],
@@ -114,12 +108,10 @@ export const getSharedCode = async (req, res) => {
   }
 };
 
-// Get all shares for a code
 export const getCodeShares = async (req, res) => {
   try {
     const { codeId } = req.params;
 
-    // Verify ownership
     const codeResult = await db.query(
       `SELECT id FROM codes WHERE id = $1 AND user_id = $2`,
       [codeId, req.user.id],
@@ -152,13 +144,11 @@ export const getCodeShares = async (req, res) => {
   }
 };
 
-// Update share settings
 export const updateShare = async (req, res) => {
   try {
     const { token } = req.params;
     const { isPublic, expiresInDays } = req.body;
 
-    // Verify user owns the code
     const result = await db.query(
       `SELECT sc.id, c.user_id
              FROM shared_codes sc
@@ -206,12 +196,10 @@ export const updateShare = async (req, res) => {
   }
 };
 
-// Revoke share
 export const revokeShare = async (req, res) => {
   try {
     const { token } = req.params;
 
-    // Verify user owns the code
     const result = await db.query(
       `DELETE FROM shared_codes sc
              USING codes c
@@ -241,7 +229,6 @@ export const revokeShare = async (req, res) => {
   }
 };
 
-// Get all public shared codes (for discovery)
 export const getPublicShares = async (req, res) => {
   try {
     const { limit = 20, offset = 0 } = req.query;
