@@ -42,7 +42,6 @@ export const codeApi = {
         },
         body: JSON.stringify({ id, title, code, language, description }),
       });
-
       const data = await response.json();
       return data;
     } catch (error) {

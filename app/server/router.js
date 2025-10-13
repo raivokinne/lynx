@@ -4,53 +4,53 @@ import { authenticateToken } from "./middleware.js";
 import { register, login, logout, getProfile } from "./handlers/auth.js";
 
 import {
-    getUserSessions,
-    revokeSession,
-    revokeAllSessions,
+  getUserSessions,
+  revokeSession,
+  revokeAllSessions,
 } from "./handlers/session.js";
 
 import {
-    saveCode,
-    updateCode,
-    listCode,
-    getCode,
-    deleteCode,
-    restoreCode,
-    getDeletedCodes,
+  saveCode,
+  updateCode,
+  listCode,
+  getCode,
+  deleteCode,
+  restoreCode,
+  getDeletedCodes,
 } from "./handlers/code.js";
 
 import {
-    shareCode,
-    getSharedCode,
-    getCodeShares,
-    updateShare,
-    revokeShare,
-    getPublicShares,
+  shareCode,
+  getSharedCode,
+  getCodeShares,
+  updateShare,
+  revokeShare,
+  getPublicShares,
 } from "./handlers/sharing.js";
 
 import {
-    getVersions,
-    getVersion,
-    restoreVersion,
-    compareVersions,
-    cleanupOldVersions,
+  getVersions,
+  getVersion,
+  restoreVersion,
+  compareVersions,
+  cleanupOldVersions,
 } from "./handlers/version.js";
 
 import {
-    getCodeExecutionHistory,
-    getUserExecutionHistory,
-    getCodeExecutionStats,
-    getUserExecutionStats,
-    getExecution,
-    deleteCodeExecutionHistory,
+  getCodeExecutionHistory,
+  getUserExecutionHistory,
+  getCodeExecutionStats,
+  getUserExecutionStats,
+  getExecution,
+  deleteCodeExecutionHistory,
 } from "./handlers/executionHistory.js";
 
 import { compiler } from "./handlers/compiler.js";
 
 import {
-    getSettings,
-    saveSettings,
-    deleteSettings,
+  getSettings,
+  saveSettings,
+  deleteSettings,
 } from "./handlers/settings.js";
 
 const router = express.Router();
@@ -82,30 +82,30 @@ router.get("/public/shares", getPublicShares); // Public route
 router.get("/versions/:codeId", authenticateToken, getVersions);
 router.get("/versions/:codeId/:versionNumber", authenticateToken, getVersion);
 router.post(
-    "/versions/:codeId/:versionNumber/restore",
-    authenticateToken,
-    restoreVersion,
+  "/versions/:codeId/:versionNumber/restore",
+  authenticateToken,
+  restoreVersion,
 );
 router.get("/versions/:codeId/compare", authenticateToken, compareVersions);
 router.delete(
-    "/versions/:codeId/cleanup",
-    authenticateToken,
-    cleanupOldVersions,
+  "/versions/:codeId/cleanup",
+  authenticateToken,
+  cleanupOldVersions,
 );
 
 router.get("/history/code/:codeId", authenticateToken, getCodeExecutionHistory);
 router.get("/history/user", authenticateToken, getUserExecutionHistory);
 router.get(
-    "/history/code/:codeId/stats",
-    authenticateToken,
-    getCodeExecutionStats,
+  "/history/code/:codeId/stats",
+  authenticateToken,
+  getCodeExecutionStats,
 );
 router.get("/history/user/stats", authenticateToken, getUserExecutionStats);
 router.get("/history/:executionId", authenticateToken, getExecution);
 router.delete(
-    "/history/code/:codeId",
-    authenticateToken,
-    deleteCodeExecutionHistory,
+  "/history/code/:codeId",
+  authenticateToken,
+  deleteCodeExecutionHistory,
 );
 
 router.post("/compile", compiler);
