@@ -90,17 +90,13 @@ export const updateCode = async (req, res) => {
 export const listCode = async (req, res) => {
   try {
     const {} = req.query;
-
     let query = `
             SELECT id, title, created_at
             FROM codes
             WHERE user_id = $1
         `;
-
     const params = [req.user.id];
-
     const result = await db.query(query, params);
-
     res.json({
       success: true,
       codes: result.rows,

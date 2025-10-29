@@ -22,6 +22,13 @@ export async function initDb() {
     try {
       console.log("Initializing database connection...");
 
+      const sslConfig = process.env.NODE_ENV === 'production' ? {
+        rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false',
+        ca: process.env.DB_CA_CERT,
+        key: process.env.DB_CLIENT_KEY,
+        cert: process.env.DB_CLIENT_CERT
+      } : false;
+
       dbInstance = new Pool({
         host: process.env.DB_HOST,
         port: process.env.DB_PORT,
@@ -29,11 +36,11 @@ export async function initDb() {
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD,
         max: 20,
-        //      ssl: {
-        //   rejectUnauthorized: false,
-        // },
+        ssl: sslConfig,
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 2000,
+        statement_timeout: 30000,
+        query_timeout: 30000,
       });
 
       // Set the exported db variable

@@ -257,7 +257,8 @@ export const cleanupOldExecutionHistory = async (days = 30) => {
   try {
     const result = await db.query(
       `DELETE FROM execution_history
-             WHERE executed_at < NOW() - INTERVAL '${days} days'`,
+             WHERE executed_at < NOW() - INTERVAL $1 days`,
+      [days],
     );
     console.log(`Cleaned up ${result.rowCount} old execution records`);
     return result.rowCount;

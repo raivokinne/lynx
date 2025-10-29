@@ -2,7 +2,12 @@ import { v4 as uuidv4 } from "uuid";
 import jwt from "jsonwebtoken";
 import { db } from "../db.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  console.error("FATAL: JWT_SECRET environment variable is required");
+  process.exit(1);
+}
 
 export const createSession = async (userId, ip, userAgent) => {
   const sessionId = uuidv4();
@@ -62,7 +67,9 @@ export const getUserSessions = async (req, res) => {
       sessions: result.rows,
     });
   } catch (error) {
-    console.error("Get sessions error:", error?.message ?? error);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error("Get sessions error:", error?.message ?? error);
+    }
     res.status(500).json({
       success: false,
       error: "Failed to fetch sessions",
@@ -91,7 +98,9 @@ export const revokeSession = async (req, res) => {
       message: "Session revoked successfully",
     });
   } catch (error) {
-    console.error("Revoke session error:", error?.message ?? error);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error("Revoke session error:", error?.message ?? error);
+    }
     res.status(500).json({
       success: false,
       error: "Failed to revoke session",
@@ -113,7 +122,9 @@ export const revokeAllSessions = async (req, res) => {
       message: "All other sessions revoked successfully",
     });
   } catch (error) {
-    console.error("Revoke all sessions error:", error?.message ?? error);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error("Revoke all sessions error:", error?.message ?? error);
+    }
     res.status(500).json({
       success: false,
       error: "Failed to revoke sessions",
@@ -128,6 +139,8 @@ export const cleanupExpiredSessions = async () => {
     );
     console.log(`Cleaned up ${result.rowCount} expired sessions`);
   } catch (error) {
-    console.error("Cleanup sessions error:", error?.message ?? error);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error("Cleanup sessions error:", error?.message ?? error);
+    }
   }
 };

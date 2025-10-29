@@ -1,6 +1,7 @@
-import { existsSync, unlinkSync, writeFileSync } from "fs";
-import { join, basename } from "path";
+import { existsSync, unlinkSync, writeFileSync, mkdirSync } from "fs";
+import { join, basename, dirname } from "path";
 import { v4 as uuidv4 } from "uuid";
+import { randomBytes } from "crypto";
 import { validateCode } from "../utils.js";
 import { CONFIG } from "../index.js";
 import { executeCompiler } from "../utils.js";
@@ -22,10 +23,19 @@ export const compiler = async (req, res) => {
       return res.status(400).json({ success: false, error: validation.error });
     }
 
-    const filename = `code_${uuidv4()}${CONFIG.FILE_EXTENSION}`;
-    tempFilePath = join(CONFIG.TEMP_DIR, filename);
-    writeFileSync(tempFilePath, code, "utf8");
-    console.log(`Created temp file: ${filename}`);
+    const sessionId = req.user ? req.user.sessionId : 'anonymous';
+    const timestamp = Date.now();
+    const randomSuffix = randomBytes(8).toString('hex');
+    const filename = `code_${sessionId}_${timestamp}_${randomSuffix}${CONFIG.FILE_EXTENSION}`;
+    
+    const userTempDir = join(CONFIG.TEMP_DIR, sessionId);
+    if (!existsSync(userTempDir)) {
+      mkdirSync(userTempDir, { recursive: true, mode: 0o700 });
+    }
+    
+    tempFilePath = join(userTempDir, filename);
+    writeFileSync(tempFilePath, code, "utf8", { mode: 0o600 });
+    console.log(`Created temp file: ${basename(tempFilePath)}`);
 
     output = await executeCompiler(tempFilePath);
     success = true;

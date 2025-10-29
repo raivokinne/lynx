@@ -1892,9 +1892,9 @@ func evalCatchStatement(catchStmt *ast.CatchStatement, env *object.Env) object.O
 
 func evalClassStatement(node *ast.Class, env *object.Env) object.Object {
 	class := &object.Class{
-		Name:    node.Name.Value,
+		Name: node.Name.Value,
 		Methods: make(map[string]*object.Function),
-		Env:     env,
+		Env: env,
 	}
 
 	if node.SuperClass != nil {

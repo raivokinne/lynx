@@ -1,7 +1,12 @@
 import jwt from "jsonwebtoken";
 import { db } from "./db.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  console.error("FATAL: JWT_SECRET environment variable is required");
+  process.exit(1);
+}
 
 export const authenticateToken = async (req, res, next) => {
   try {
@@ -54,7 +59,9 @@ export const authenticateToken = async (req, res, next) => {
         error: "Token expired",
       });
     }
+    if (process.env.NODE_ENV !== 'production') {
     console.error("Auth middleware error:", error?.message ?? error);
+  }
     return res.status(500).json({
       success: false,
       error: "Authentication failed",
