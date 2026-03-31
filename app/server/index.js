@@ -15,7 +15,7 @@ function validateCorsOrigins(origins) {
 	if (!origins) {
 		return ['http://localhost:3000', 'http://localhost:5173'];
 	}
-	
+
 	const allowedOrigins = Array.isArray(origins) ? origins : origins.split(',').map(o => o.trim());
 	const validOrigins = allowedOrigins.filter(origin => {
 		try {
@@ -26,7 +26,7 @@ function validateCorsOrigins(origins) {
 			return false;
 		}
 	});
-	
+
 	return validOrigins.length > 0 ? validOrigins : ['http://localhost:3000'];
 }
 
@@ -71,38 +71,38 @@ app.use((req, res, next) => {
 	res.setHeader('X-XSS-Protection', '1; mode=block');
 	res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 	res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-	
+
 	if (process.env.NODE_ENV === 'production') {
 		res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
 		res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-ancestors 'none';");
 	}
-	
+
 	next();
 });
 
 app.use(json({ limit: "10mb" }));
 
 export const CONFIG = {
-  COMPILER_PATH: "./build/lynx",
-  FILE_EXTENSION: ".lynx",
-  EXECUTION_TIMEOUT: 100_000,
-  MAX_FILE_SIZE: 1024 * 1024,
-  TEMP_DIR: "./temp",
+	COMPILER_PATH: "./build/lynx",
+	FILE_EXTENSION: ".lynx",
+	EXECUTION_TIMEOUT: 100_000,
+	MAX_FILE_SIZE: 1024 * 1024,
+	TEMP_DIR: "./temp",
 };
 
 if (!existsSync(CONFIG.TEMP_DIR)) {
-  mkdirSync(CONFIG.TEMP_DIR, { recursive: true });
+	mkdirSync(CONFIG.TEMP_DIR, { recursive: true });
 }
 
 app.use("/api", router);
 
 app.use((_req, res) => {
-  res.status(404).json({ success: false, error: "Endpoint not found" });
+	res.status(404).json({ success: false, error: "Endpoint not found" });
 });
 
 function sanitizeError(error) {
 	const errorMessage = error?.message ?? String(error);
-	
+
 	if (process.env.NODE_ENV === 'production') {
 		const sanitized = errorMessage
 			.replace(/\/[^\s]+/g, '[PATH]')
@@ -111,54 +111,54 @@ function sanitizeError(error) {
 			.replace(/password[=:]\s*[^\s,}]+/gi, 'password=[REDACTED]')
 			.replace(/token[=:]\s*[^\s,}]+/gi, 'token=[REDACTED]')
 			.replace(/secret[=:]\s*[^\s,}]+/gi, 'secret=[REDACTED]');
-		
+
 		return sanitized.length > 200 ? sanitized.substring(0, 200) + '...' : sanitized;
 	}
-	
+
 	return errorMessage;
 }
 
 app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err?.message ?? err);
-  
-  const sanitizedError = sanitizeError(err);
-  const isDevelopment = process.env.NODE_ENV !== 'production';
-  
-  res.status(500).json({ 
-    success: false, 
-    error: isDevelopment ? sanitizedError : "Internal server error",
-    ...(isDevelopment && { stack: err?.stack })
-  });
+	console.error("Unhandled error:", err?.message ?? err);
+
+	const sanitizedError = sanitizeError(err);
+	const isDevelopment = process.env.NODE_ENV !== 'production';
+
+	res.status(500).json({
+		success: false,
+		error: isDevelopment ? sanitizedError : "Internal server error",
+		...(isDevelopment && { stack: err?.stack })
+	});
 });
 
 initDb()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`🚀 Compiler server running on port ${PORT}`);
-      console.log(`📁 Temp directory: ${CONFIG.TEMP_DIR}`);
-      console.log(`⚡ Compiler path: ${CONFIG.COMPILER_PATH}`);
-      console.log(`⏱️  Execution timeout: ${CONFIG.EXECUTION_TIMEOUT}ms`);
-      cleanupTempFiles();
-      setInterval(cleanupTempFiles, 30 * 60 * 1000);
-    });
-  })
-  .catch((err) => {
-    console.error("Failed to initialize database:", err);
-    process.exit(1);
-  });
+	.then(() => {
+		app.listen(PORT, () => {
+			console.log(`🚀 Compiler server running on port ${PORT}`);
+			console.log(`📁 Temp directory: ${CONFIG.TEMP_DIR}`);
+			console.log(`⚡ Compiler path: ${CONFIG.COMPILER_PATH}`);
+			console.log(`⏱️  Execution timeout: ${CONFIG.EXECUTION_TIMEOUT}ms`);
+			cleanupTempFiles();
+			setInterval(cleanupTempFiles, 30 * 60 * 1000);
+		});
+	})
+	.catch((err) => {
+		console.error("Failed to initialize database:", err);
+		process.exit(1);
+	});
 
 async function shutdown(signal) {
-  try {
-    console.log(`\n🛑 Shutting down server... (${signal})`);
-    cleanupTempFiles();
-    await closeDb();
-  } finally {
-    process.exit(0);
-  }
+	try {
+		console.log(`\n🛑 Shutting down server... (${signal})`);
+		cleanupTempFiles();
+		await closeDb();
+	} finally {
+		process.exit(0);
+	}
 }
 
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("unhandledRejection", (reason) => {
-  console.error("Unhandled Rejection:", reason);
+	console.error("Unhandled Rejection:", reason);
 });

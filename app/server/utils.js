@@ -25,7 +25,7 @@ export function cleanupTempFiles() {
 								console.log(`Cleaned up old temp file: ${join(file, subFile)}`);
 							}
 						});
-						
+
 						const remainingFiles = readdirSync(filePath);
 						if (remainingFiles.length === 0) {
 							files.rmdirSync(filePath);
@@ -163,7 +163,7 @@ export function executeCompiler(filePath) {
 		const child = spawn(CONFIG.COMPILER_PATH, [filePath], {
 			stdio: ["ignore", "pipe", "pipe"],
 			cwd: CONFIG.TEMP_DIR,
-			env: { 
+			env: {
 				PATH: process.env.PATH,
 				NODE_ENV: 'production'
 			},
