@@ -13,6 +13,8 @@ import router from "./router.js";
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+app.set("trust proxy", 1);
+
 function validateCorsOrigins(origins) {
     if (!origins) {
         return ["https://lynxlang.site"];
@@ -86,16 +88,12 @@ app.use((req, res, next) => {
             "Strict-Transport-Security",
             "max-age=31536000; includeSubDomains; preload",
         );
-        res.setHeader(
-            "Content-Security-Policy",
-            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-ancestors 'none';",
-        );
     }
 
     next();
 });
 
-app.use(json({ limit: "10mb" }));
+app.use(json({ limit: "1mb" }));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -103,7 +101,7 @@ const __dirname = dirname(__filename);
 export const CONFIG = {
     COMPILER_PATH: "./build/lynx",
     FILE_EXTENSION: ".lynx",
-    EXECUTION_TIMEOUT: 100_000,
+    EXECUTION_TIMEOUT: 10_000,
     MAX_FILE_SIZE: 1024 * 1024,
     TEMP_DIR: "./temp",
 };

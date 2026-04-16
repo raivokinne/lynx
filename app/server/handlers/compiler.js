@@ -8,6 +8,15 @@ import { logExecution } from "./executionHistory.js";
 
 const executionCounts = new Map();
 const MAX_EXECUTIONS_PER_MINUTE = 10;
+const MAX_LOG_OUTPUT = 10_000;
+
+setInterval(() => {
+    const now = Date.now();
+    for (const [key] of executionCounts) {
+        const keyTime = parseInt(key.split("::")[1]);
+        if (now - keyTime * 60000 > 120_000) executionCounts.delete(key);
+    }
+}, 60_000);
 
 export const compiler = async (req, res) => {
     let tempFilePath = null;
@@ -19,7 +28,7 @@ export const compiler = async (req, res) => {
     try {
         const userId = req.user?.id || req.ip;
         const now = Date.now();
-        const userKey = `${userId}-${Math.floor(now / 60000)}`;
+        const userKey = `${userId}::${Math.floor(now / 60000)}`;
         const count = executionCounts.get(userKey) || 0;
 
         if (count >= MAX_EXECUTIONS_PER_MINUTE) {
@@ -31,21 +40,9 @@ export const compiler = async (req, res) => {
 
         executionCounts.set(userKey, count + 1);
 
-        if (Math.random() < 0.1) {
-            for (const [key] of executionCounts) {
-                const keyTime = parseInt(key.split("-")[1]);
-                if (now - keyTime * 60000 > 120000) {
-                    executionCounts.delete(key);
-                }
-            }
-        }
-
         const { code } = req.body;
 
-        console.log("Code to execute:", JSON.stringify(code));
-        console.log("Code length:", code?.length);
-
-        const validation = validateCode(code, { checkSecurity: false });
+        const validation = validateCode(code, { checkSecurity: true });
 
         if (!validation.valid) {
             error = validation.error;
@@ -74,12 +71,8 @@ export const compiler = async (req, res) => {
         }
 
         writeFileSync(tempFilePath, code, { encoding: "utf8", mode: 0o600 });
-        console.log(`Created temp file: ${filename}`);
 
         output = await executeCompiler(tempFilePath);
-
-        console.log("Raw compiler output:", JSON.stringify(output));
-        console.log("Output length:", output?.length);
 
         const trimmedOutput = output?.trim() || "";
 
@@ -90,12 +83,23 @@ export const compiler = async (req, res) => {
                 trimmedOutput || "Program executed successfully (no output)",
         });
     } catch (err) {
-        console.error("Compilation error:", err?.message ?? err);
-        error = err?.message ?? String(err);
-        res.json({
-            success: false,
-            error: error,
-        });
+        const message = err?.message ?? String(err);
+        error = message;
+
+        const isUserError =
+            message.startsWith("Compiler exited") ||
+            message === "Execution timed out" ||
+            message === "Output too large";
+
+        if (isUserError) {
+            res.status(400).json({ success: false, error: message });
+        } else {
+            const clientMessage =
+                process.env.NODE_ENV === "production"
+                    ? "Compilation failed"
+                    : message;
+            res.status(500).json({ success: false, error: clientMessage });
+        }
     } finally {
         const executionTime = Date.now() - startTime;
 
@@ -104,8 +108,8 @@ export const compiler = async (req, res) => {
                 req.user.id,
                 req.body.codeId || null,
                 success,
-                output,
-                error,
+                output?.slice(0, MAX_LOG_OUTPUT),
+                error?.slice(0, MAX_LOG_OUTPUT),
                 executionTime,
             );
         }
@@ -113,7 +117,6 @@ export const compiler = async (req, res) => {
         if (tempFilePath && existsSync(tempFilePath)) {
             try {
                 unlinkSync(tempFilePath);
-                console.log(`Cleaned up temp file: ${basename(tempFilePath)}`);
             } catch (cleanupError) {
                 console.error(
                     "Error cleaning up temp file:",

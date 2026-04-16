@@ -3,6 +3,8 @@ import { readdirSync, statSync, unlinkSync, existsSync } from "fs";
 import { join, resolve, dirname } from "path";
 import { CONFIG } from "./index.js";
 
+const MAX_OUTPUT_SIZE = 100_000;
+
 export function sanitizeSessionId(sessionId) {
     if (!sessionId || typeof sessionId !== "string") {
         return "anonymous";
@@ -182,17 +184,25 @@ export function executeCompiler(filePath) {
         let stderr = "";
         let finished = false;
 
-        const child = spawn(CONFIG.COMPILER_PATH, [filePath], {
-            stdio: ["ignore", "pipe", "pipe"],
-            cwd: process.cwd(),
-            env: {
-                PATH: process.env.PATH,
-                NODE_ENV: "production",
+        const child = spawn(
+            "firejail",
+            [
+                "--net=none",
+                "--nosound",
+                "--nogroups",
+                "--caps.drop=all",
+                "--rlimit-nproc=50",
+                "--rlimit-fsize=10485760",
+                "--quiet",
+                CONFIG.COMPILER_PATH,
+                filePath,
+            ],
+            {
+                stdio: ["ignore", "pipe", "pipe"],
+                cwd: process.cwd(),
+                env: { PATH: process.env.PATH },
             },
-            uid: process.getuid ? process.getuid() : undefined,
-            gid: process.getgid ? process.getgid() : undefined,
-            detached: false,
-        });
+        );
 
         const timer = setTimeout(() => {
             if (!finished) {
@@ -210,31 +220,27 @@ export function executeCompiler(filePath) {
         }, CONFIG.EXECUTION_TIMEOUT);
 
         child.stdout?.on("data", (data) => {
-            const chunk = data.toString();
-            if (chunk.length > 100000) {
+            stdout += data.toString();
+            if (stdout.length > MAX_OUTPUT_SIZE) {
                 if (!finished) {
                     finished = true;
                     clearTimeout(timer);
                     child.kill("SIGTERM");
                     reject(new Error("Output too large"));
                 }
-                return;
             }
-            stdout += chunk;
         });
 
         child.stderr?.on("data", (data) => {
-            const chunk = data.toString();
-            if (chunk.length > 100000) {
+            stderr += data.toString();
+            if (stderr.length > MAX_OUTPUT_SIZE) {
                 if (!finished) {
                     finished = true;
                     clearTimeout(timer);
                     child.kill("SIGTERM");
                     reject(new Error("Error output too large"));
                 }
-                return;
             }
-            stderr += chunk;
         });
 
         child.on("error", (err) => {
