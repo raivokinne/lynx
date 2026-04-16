@@ -6,11 +6,11 @@ import { AuthProvider } from "./providers/AuthProvider.tsx";
 import { LanguageProvider } from "./providers/LanguageProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <AuthProvider>
-      <LanguageProvider>
-        <AppRouter />
-      </LanguageProvider>
-    </AuthProvider>
-  </StrictMode>,
+	<StrictMode>
+		<AuthProvider>
+			<LanguageProvider>
+				<AppRouter />
+			</LanguageProvider>
+		</AuthProvider>
+	</StrictMode>,
 );

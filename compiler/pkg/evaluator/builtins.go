@@ -40,7 +40,7 @@ func builtinType(args ...object.Object) object.Object {
 
 	obj := args[0]
 
-	switch obj.(type) {
+	switch obj := obj.(type) {
 	case *object.Integer:
 		return &object.String{Value: "int"}
 	case *object.Float:
@@ -62,7 +62,7 @@ func builtinType(args ...object.Object) object.Object {
 	case *object.Class:
 		return &object.String{Value: "class"}
 	case *object.Instance:
-		return &object.String{Value: obj.(*object.Instance).Class.Name}
+		return &object.String{Value: obj.Class.Name}
 	case *object.Module:
 		return &object.String{Value: "module"}
 	case *object.Error:

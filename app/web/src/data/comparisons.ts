@@ -1,14 +1,14 @@
 import type { ComparisonExample } from "../types/docs";
 
 export const languageComparisons: ComparisonExample[] = [
-  {
-    title: "Fibonacci Sequence",
-    description: "Implementing the Fibonacci sequence",
-    examples: {
-      lynx: {
-        language: "lynx",
-        filename: "fibonacci.lynx",
-        code: `let fibonacci = fn(n) {
+	{
+		title: "Fibonacci Sequence",
+		description: "Implementing the Fibonacci sequence",
+		examples: {
+			lynx: {
+				language: "lynx",
+				filename: "fibonacci.lynx",
+				code: `let fibonacci = fn(n) {
     if n <= 1 {
         return n
     }
@@ -19,11 +19,11 @@ let sequence = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     |> map(fibonacci)
 
 println("Fibonacci:", sequence)`,
-      },
-      javascript: {
-        language: "javascript",
-        filename: "fibonacci.js",
-        code: `function fibonacci(n) {
+			},
+			javascript: {
+				language: "javascript",
+				filename: "fibonacci.js",
+				code: `function fibonacci(n) {
     if (n <= 1) {
         return n;
     }
@@ -34,22 +34,22 @@ const sequence = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     .map(fibonacci);
 
 console.log("Fibonacci:", sequence);`,
-      },
-      python: {
-        language: "python",
-        filename: "fibonacci.py",
-        code: `def fibonacci(n):
+			},
+			python: {
+				language: "python",
+				filename: "fibonacci.py",
+				code: `def fibonacci(n):
     if n <= 1:
         return n
     return fibonacci(n - 1) + fibonacci(n - 2)
 
 sequence = [fibonacci(i) for i in range(10)]
 print("Fibonacci:", sequence)`,
-      },
-      go: {
-        language: "go",
-        filename: "fibonacci.go",
-        code: `package main
+			},
+			go: {
+				language: "go",
+				filename: "fibonacci.go",
+				code: `package main
 
 import "fmt"
 
@@ -67,11 +67,11 @@ func main() {
     }
     fmt.Println("Fibonacci:", sequence)
 }`,
-      },
-      rust: {
-        language: "rust",
-        filename: "fibonacci.rs",
-        code: `fn fibonacci(n: u32) -> u32 {
+			},
+			rust: {
+				language: "rust",
+				filename: "fibonacci.rs",
+				code: `fn fibonacci(n: u32) -> u32 {
     match n {
         0 | 1 => n,
         _ => fibonacci(n - 1) + fibonacci(n - 2),
@@ -84,17 +84,17 @@ fn main() {
         .collect();
     println!("Fibonacci: {:?}", sequence);
 }`,
-      },
-    },
-  },
-  {
-    title: "Array Processing",
-    description: "Filtering and transforming arrays",
-    examples: {
-      lynx: {
-        language: "lynx",
-        filename: "arrays.lynx",
-        code: `@arrays(map, filter, reduce)
+			},
+		},
+	},
+	{
+		title: "Array Processing",
+		description: "Filtering and transforming arrays",
+		examples: {
+			lynx: {
+				language: "lynx",
+				filename: "arrays.lynx",
+				code: `@arrays(map, filter, reduce)
 
 let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
@@ -104,11 +104,11 @@ let result = numbers
     |> reduce(fn(a, b) { a + b }, 0) // Sum them
 
 println("Result:", result)`,
-      },
-      javascript: {
-        language: "javascript",
-        filename: "arrays.js",
-        code: `const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+			},
+			javascript: {
+				language: "javascript",
+				filename: "arrays.js",
+				code: `const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const result = numbers
     .filter(x => x % 2 === 0)  // Even numbers
@@ -116,11 +116,11 @@ const result = numbers
     .reduce((a, b) => a + b, 0); // Sum them
 
 console.log("Result:", result);`,
-      },
-      python: {
-        language: "python",
-        filename: "arrays.py",
-        code: `from functools import reduce
+			},
+			python: {
+				language: "python",
+				filename: "arrays.py",
+				code: `from functools import reduce
 
 numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
@@ -132,11 +132,11 @@ result = reduce(
 )
 
 print("Result:", result)`,
-      },
-      go: {
-        language: "go",
-        filename: "arrays.go",
-        code: `package main
+			},
+			go: {
+				language: "go",
+				filename: "arrays.go",
+				code: `package main
 
 import "fmt"
 
@@ -153,11 +153,11 @@ func main() {
 
     fmt.Println("Result:", result)
 }`,
-      },
-      rust: {
-        language: "rust",
-        filename: "arrays.rs",
-        code: `fn main() {
+			},
+			rust: {
+				language: "rust",
+				filename: "arrays.rs",
+				code: `fn main() {
     let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
     let result: i32 = numbers
@@ -168,17 +168,17 @@ func main() {
 
     println!("Result: {}", result);
 }`,
-      },
-    },
-  },
-  {
-    title: "Pattern Matching",
-    description: "Using pattern matching for control flow",
-    examples: {
-      lynx: {
-        language: "lynx",
-        filename: "pattern.lynx",
-        code: `let processValue = fn(value) {
+			},
+		},
+	},
+	{
+		title: "Pattern Matching",
+		description: "Using pattern matching for control flow",
+		examples: {
+			lynx: {
+				language: "lynx",
+				filename: "pattern.lynx",
+				code: `let processValue = fn(value) {
     switch value {
         case 0: "zero"
         case x if x > 0: "positive: " ++ toString(x)
@@ -190,11 +190,11 @@ func main() {
 println(processValue(0))   // "zero"
 println(processValue(5))   // "positive: 5"
 println(processValue(-3))  // "negative: -3"`,
-      },
-      javascript: {
-        language: "javascript",
-        filename: "pattern.js",
-        code: `function processValue(value) {
+			},
+			javascript: {
+				language: "javascript",
+				filename: "pattern.js",
+				code: `function processValue(value) {
     switch (true) {
         case value === 0:
             return "zero";
@@ -210,11 +210,11 @@ println(processValue(-3))  // "negative: -3"`,
 console.log(processValue(0));   // "zero"
 console.log(processValue(5));   // "positive: 5"
 console.log(processValue(-3));  // "negative: -3"`,
-      },
-      python: {
-        language: "python",
-        filename: "pattern.py",
-        code: `def process_value(value):
+			},
+			python: {
+				language: "python",
+				filename: "pattern.py",
+				code: `def process_value(value):
     match value:
         case 0:
             return "zero"
@@ -228,11 +228,11 @@ console.log(processValue(-3));  // "negative: -3"`,
 print(process_value(0))   # "zero"
 print(process_value(5))   # "positive: 5"
 print(process_value(-3))  # "negative: -3"`,
-      },
-      go: {
-        language: "go",
-        filename: "pattern.go",
-        code: `package main
+			},
+			go: {
+				language: "go",
+				filename: "pattern.go",
+				code: `package main
 
 import "fmt"
 
@@ -254,11 +254,11 @@ func main() {
     fmt.Println(processValue(5))   // "positive: 5"
     fmt.Println(processValue(-3))  // "negative: -3"
 }`,
-      },
-      rust: {
-        language: "rust",
-        filename: "pattern.rs",
-        code: `fn process_value(value: i32) -> String {
+			},
+			rust: {
+				language: "rust",
+				filename: "pattern.rs",
+				code: `fn process_value(value: i32) -> String {
     match value {
         0 => "zero".to_string(),
         x if x > 0 => format!("positive: {}", x),
@@ -272,7 +272,7 @@ fn main() {
     println!("{}", process_value(5));   // "positive: 5"
     println!("{}", process_value(-3));  // "negative: -3"
 }`,
-      },
-    },
-  },
+			},
+		},
+	},
 ];

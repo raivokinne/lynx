@@ -22,45 +22,36 @@ export function cleanupTempFiles() {
         files.forEach((file) => {
             const filePath = join(tempDir, file);
 
-            if (!resolve(filePath).startsWith(tempDir)) {
-                console.error(`Skipping file outside temp dir: ${file}`);
-                return;
-            }
+			if (now - stats.mtimeMs > maxAge) {
+				if (stats.isDirectory()) {
+					try {
+						const subFiles = readdirSync(filePath);
+						subFiles.forEach((subFile) => {
+							const subFilePath = join(filePath, subFile);
+							const subStats = statSync(subFilePath);
+							if (now - subStats.mtimeMs > maxAge) {
+								unlinkSync(subFilePath);
+								console.log(`Cleaned up old temp file: ${join(file, subFile)}`);
+							}
+						});
 
-            const stats = statSync(filePath);
-
-            if (now - stats.mtimeMs > maxAge) {
-                if (stats.isDirectory()) {
-                    try {
-                        const subFiles = readdirSync(filePath);
-                        subFiles.forEach((subFile) => {
-                            const subFilePath = join(filePath, subFile);
-                            if (!resolve(subFilePath).startsWith(tempDir)) {
-                                return;
-                            }
-                            const subStats = statSync(subFilePath);
-                            if (now - subStats.mtimeMs > maxAge) {
-                                unlinkSync(subFilePath);
-                                console.log(
-                                    `Cleaned up old temp file: ${join(file, subFile)}`,
-                                );
-                            }
-                        });
-                    } catch (dirError) {
-                        console.error(
-                            `Error cleaning temp directory ${file}:`,
-                            dirError?.message ?? dirError,
-                        );
-                    }
-                } else {
-                    unlinkSync(filePath);
-                    console.log(`Cleaned up old temp file: ${file}`);
-                }
-            }
-        });
-    } catch (error) {
-        console.error("Error cleaning up temp files:", error?.message ?? error);
-    }
+						const remainingFiles = readdirSync(filePath);
+						if (remainingFiles.length === 0) {
+							files.rmdirSync(filePath);
+							console.log(`Removed empty temp directory: ${file}`);
+						}
+					} catch (dirError) {
+						console.error(`Error cleaning temp directory ${file}:`, dirError?.message ?? dirError);
+					}
+				} else {
+					unlinkSync(filePath);
+					console.log(`Cleaned up old temp file: ${file}`);
+				}
+			}
+		});
+	} catch (error) {
+		console.error("Error cleaning up temp files:", error?.message ?? error);
+	}
 }
 
 export function validateCode(code, options = {}) {
@@ -184,25 +175,17 @@ export function executeCompiler(filePath) {
         let stderr = "";
         let finished = false;
 
-        const child = spawn(
-            "firejail",
-            [
-                "--net=none",
-                "--nosound",
-                "--nogroups",
-                "--caps.drop=all",
-                "--rlimit-nproc=50",
-                "--rlimit-fsize=10485760",
-                "--quiet",
-                CONFIG.COMPILER_PATH,
-                filePath,
-            ],
-            {
-                stdio: ["ignore", "pipe", "pipe"],
-                cwd: process.cwd(),
-                env: { PATH: process.env.PATH },
-            },
-        );
+		const child = spawn(CONFIG.COMPILER_PATH, [filePath], {
+			stdio: ["ignore", "pipe", "pipe"],
+			cwd: CONFIG.TEMP_DIR,
+			env: {
+				PATH: process.env.PATH,
+				NODE_ENV: 'production'
+			},
+			uid: process.getuid ? process.getuid() : undefined,
+			gid: process.getgid ? process.getgid() : undefined,
+			detached: false
+		});
 
         const timer = setTimeout(() => {
             if (!finished) {
