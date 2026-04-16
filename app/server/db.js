@@ -5,10 +5,10 @@ let dbInstance = null;
 let initPromise = null;
 
 export const getDb = () => {
-  if (!dbInstance) {
-    throw new Error("Database not initialized. Call initDb() first.");
-  }
-  return dbInstance;
+	if (!dbInstance) {
+		throw new Error("Database not initialized. Call initDb() first.");
+	}
+	return dbInstance;
 };
 
 export let db;
@@ -22,23 +22,6 @@ export async function initDb() {
 		try {
 			console.log("Initializing database connection...");
 
-<<<<<<< HEAD
-      dbInstance = new Pool({
-        host: process.env.DB_HOST,
-        port: process.env.DB_PORT,
-        database: process.env.DB_NAME,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        max: 20,
-	ssl: {
-	    rejectUnauthorized: false,
-	},
-        idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 2000,
-        statement_timeout: 30000,
-        query_timeout: 30000,
-      });
-=======
 			const sslConfig = process.env.NODE_ENV === 'production' ? {
 				rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false',
 				ca: process.env.DB_CA_CERT,
@@ -59,7 +42,6 @@ export async function initDb() {
 				statement_timeout: 30000,
 				query_timeout: 30000,
 			});
->>>>>>> 8afcce4f6c7361f8a0bf821e875a17be25de86a5
 
 			// Set the exported db variable
 			db = dbInstance;
