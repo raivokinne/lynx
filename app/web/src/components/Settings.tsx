@@ -136,7 +136,7 @@ export const Settings: React.FC<SettingsProps> = ({
   const filteredTabs = tabs.filter(
     (tab) =>
       searchQuery === "" ||
-      tab.label.toLowerCase().includes(searchQuery.toLowerCase()),
+      tab.label.toLowerCase().includes(searchQuery.toLocaleLowerCase()),
   );
 
   return (
@@ -314,18 +314,26 @@ export const Settings: React.FC<SettingsProps> = ({
                 </div>
 
                 <div>
-                  <h3 className={`text-xs font-mono mb-3 flex items-center gap-2 ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`}>
+                  <h3
+                    className={`text-xs font-mono mb-3 flex items-center gap-2 ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`}
+                  >
                     <Info className="w-3 h-3" />
                     about
                   </h3>
 
-                  <div className={`p-3 border ${isDarkMode ? "border-neutral-700 bg-black" : "border-neutral-300 bg-white"}`}>
+                  <div
+                    className={`p-3 border ${isDarkMode ? "border-neutral-700 bg-black" : "border-neutral-300 bg-white"}`}
+                  >
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className={`text-xs font-mono ${isDarkMode ? "text-neutral-500" : "text-neutral-500"}`}>
+                        <span
+                          className={`text-xs font-mono ${isDarkMode ? "text-neutral-500" : "text-neutral-500"}`}
+                        >
                           version
                         </span>
-                        <span className={`text-xs font-mono ${isDarkMode ? "text-neutral-400" : "text-neutral-700"}`}>
+                        <span
+                          className={`text-xs font-mono ${isDarkMode ? "text-neutral-400" : "text-neutral-700"}`}
+                        >
                           1.0.0
                         </span>
                       </div>
@@ -406,8 +414,12 @@ export const Settings: React.FC<SettingsProps> = ({
                       </select>
                     </div>
 
-                    <div className={`p-3 border ${isDarkMode ? "border-neutral-700 bg-black" : "border-neutral-300 bg-white"}`}>
-                      <label className={`block text-xs font-mono mb-2 ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`}>
+                    <div
+                      className={`p-3 border ${isDarkMode ? "border-neutral-700 bg-black" : "border-neutral-300 bg-white"}`}
+                    >
+                      <label
+                        className={`block text-xs font-mono mb-2 ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`}
+                      >
                         tab size
                       </label>
                       <div className="flex items-center gap-2">
@@ -424,7 +436,9 @@ export const Settings: React.FC<SettingsProps> = ({
                           }
                           className="flex-1"
                         />
-                        <span className={`text-xs font-mono px-2 py-0.5 ${isDarkMode ? "bg-neutral-800 text-neutral-400" : "bg-neutral-200 text-neutral-600"}`}>
+                        <span
+                          className={`text-xs font-mono px-2 py-0.5 ${isDarkMode ? "bg-neutral-800 text-neutral-400" : "bg-neutral-200 text-neutral-600"}`}
+                        >
                           {editorSettings.tabSize || 2}
                         </span>
                       </div>
@@ -433,14 +447,20 @@ export const Settings: React.FC<SettingsProps> = ({
                 </div>
 
                 <div>
-                  <h3 className={`text-xs font-mono mb-3 flex items-center gap-2 ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`}>
+                  <h3
+                    className={`text-xs font-mono mb-3 flex items-center gap-2 ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`}
+                  >
                     <Eye className="w-3 h-3" />
                     display
                   </h3>
 
                   <div className="grid grid-cols-1 gap-3">
-                    <div className={`p-3 border ${isDarkMode ? "border-neutral-700 bg-black" : "border-neutral-300 bg-white"}`}>
-                      <label className={`block text-xs font-mono mb-2 ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`}>
+                    <div
+                      className={`p-3 border ${isDarkMode ? "border-neutral-700 bg-black" : "border-neutral-300 bg-white"}`}
+                    >
+                      <label
+                        className={`block text-xs font-mono mb-2 ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`}
+                      >
                         line numbers
                       </label>
                       <select
@@ -456,8 +476,12 @@ export const Settings: React.FC<SettingsProps> = ({
                       </select>
                     </div>
 
-                    <div className={`p-3 border ${isDarkMode ? "border-neutral-700 bg-black" : "border-neutral-300 bg-white"}`}>
-                      <label className={`block text-xs font-mono mb-2 ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`}>
+                    <div
+                      className={`p-3 border ${isDarkMode ? "border-neutral-700 bg-black" : "border-neutral-300 bg-white"}`}
+                    >
+                      <label
+                        className={`block text-xs font-mono mb-2 ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`}
+                      >
                         word wrap
                       </label>
                       <select
@@ -472,9 +496,13 @@ export const Settings: React.FC<SettingsProps> = ({
                       </select>
                     </div>
 
-                    <div className={`p-3 border ${isDarkMode ? "border-neutral-700 bg-black" : "border-neutral-300 bg-white"}`}>
+                    <div
+                      className={`p-3 border ${isDarkMode ? "border-neutral-700 bg-black" : "border-neutral-300 bg-white"}`}
+                    >
                       <div className="flex items-center justify-between">
-                        <label className={`text-xs font-mono ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`}>
+                        <label
+                          className={`text-xs font-mono ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`}
+                        >
                           minimap
                         </label>
                         <input
@@ -490,9 +518,13 @@ export const Settings: React.FC<SettingsProps> = ({
                       </div>
                     </div>
 
-                    <div className={`p-3 border ${isDarkMode ? "border-neutral-700 bg-black" : "border-neutral-300 bg-white"}`}>
+                    <div
+                      className={`p-3 border ${isDarkMode ? "border-neutral-700 bg-black" : "border-neutral-300 bg-white"}`}
+                    >
                       <div className="flex items-center justify-between">
-                        <label className={`text-xs font-mono ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`}>
+                        <label
+                          className={`text-xs font-mono ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`}
+                        >
                           read only
                         </label>
                         <input
@@ -525,12 +557,20 @@ export const Settings: React.FC<SettingsProps> = ({
       </div>
 
       {showResetConfirm && (
-        <div className={`fixed inset-0 ${isDarkMode ? "bg-black/80" : "bg-white/80"} flex items-center justify-center z-60`}>
-          <div className={`p-4 max-w-xs border ${isDarkMode ? "bg-neutral-900 text-neutral-300 border-neutral-700" : "bg-neutral-100 text-neutral-700 border-neutral-300"}`}>
-            <h3 className={`text-sm font-mono mb-2 ${isDarkMode ? "text-neutral-300" : "text-neutral-700"}`}>
+        <div
+          className={`fixed inset-0 ${isDarkMode ? "bg-black/80" : "bg-white/80"} flex items-center justify-center z-60`}
+        >
+          <div
+            className={`p-4 max-w-xs border ${isDarkMode ? "bg-neutral-900 text-neutral-300 border-neutral-700" : "bg-neutral-100 text-neutral-700 border-neutral-300"}`}
+          >
+            <h3
+              className={`text-sm font-mono mb-2 ${isDarkMode ? "text-neutral-300" : "text-neutral-700"}`}
+            >
               reset settings
             </h3>
-            <p className={`mb-4 text-xs font-mono ${isDarkMode ? "text-neutral-500" : "text-neutral-500"}`}>
+            <p
+              className={`mb-4 text-xs font-mono ${isDarkMode ? "text-neutral-500" : "text-neutral-500"}`}
+            >
               reset all to defaults?
             </p>
             <div className="flex gap-2 justify-end">

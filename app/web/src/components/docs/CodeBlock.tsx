@@ -147,16 +147,16 @@ export const CodeBlock = ({
           <span className="ml-1">{filename}</span>
         </div>
       )}
-<pre
-				className={`${isDarkMode ? "bg-[#0a0a0a]" : "bg-neutral-50"} p-5 overflow-x-auto text-sm m-0 font-mono min-h-[100px] leading-7 tracking-wide`}
-			>
-				<code
-					ref={codeRef}
-					className={`language-${language} ${isDarkMode ? "text-amber-300 font-light" : "text-neutral-800 font-normal"}`}
-				>
-					{children}
-				</code>
-			</pre>
+      <pre
+        className={`${isDarkMode ? "bg-[#0a0a0a]" : "bg-neutral-50"} p-5 overflow-x-auto text-sm m-0 font-mono min-h-25 leading-7 tracking-wide`}
+      >
+        <code
+          ref={codeRef}
+          className={`language-${language} ${isDarkMode ? "text-amber-300 font-light" : "text-neutral-800 font-normal"}`}
+        >
+          {children}
+        </code>
+      </pre>
     </div>
   );
 };
