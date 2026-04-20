@@ -129,33 +129,33 @@ export const DocsModal = ({ isDarkMode, onClose }: DocsModalProps) => {
 	};
 
 	return (
-		<div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+		<div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
 			<div
-				className={`w-full mx-4 h-[90vh] rounded-xl ${isDarkMode ? "bg-black border-gray-700" : "bg-white border-gray-200"
+				className={`w-full mx-4 h-[90vh] ${isDarkMode ? "bg-black border-neutral-700" : "bg-neutral-100 border-neutral-300"
 					} border flex overflow-hidden`}
 			>
 				<div
-					className={`w-64 ${isDarkMode ? "bg-black border-gray-700" : "bg-white border-gray-200"
+					className={`w-56 ${isDarkMode ? "bg-black border-neutral-700" : "bg-neutral-100 border-neutral-300"
 						} border-r flex-shrink-0 flex flex-col`}
 				>
 					<div
-						className={`p-4 border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}
+						className={`p-3 border-b ${isDarkMode ? "border-neutral-700" : "border-neutral-300"}`}
 					>
-						<div className="flex items-center justify-between mb-4">
-							<h1 className="text-xl font-bold">{t("docs.title")}</h1>
+						<div className="flex items-center justify-between mb-3">
+							<h1 className="text-sm font-mono">{t("docs.title")}</h1>
 							<button
 								onClick={onClose}
-								className={`p-1 rounded transition-colors ${isDarkMode
-										? "hover:bg-gray-700 text-gray-300 hover:text-white"
-										: "hover:bg-gray-200 text-gray-600 hover:text-black"
+								className={`p-0.5 transition-colors ${isDarkMode
+										? "hover:bg-neutral-800 text-neutral-500"
+										: "hover:bg-neutral-200 text-neutral-500"
 									}`}
 								aria-label={t("common.close")}
 							>
-								<X className="w-6 h-6" />
+								<X className="w-4 h-4" />
 							</button>
 						</div>
 
-						<div className="mb-4">
+						<div className="mb-3">
 							<LanguageSelector isDarkMode={isDarkMode} />
 						</div>
 
@@ -178,7 +178,7 @@ export const DocsModal = ({ isDarkMode, onClose }: DocsModalProps) => {
 				</div>
 
 				<div className="flex-1 overflow-y-auto">
-					<div className="p-6">{renderContent()}</div>
+					<div className="p-4">{renderContent()}</div>
 				</div>
 			</div>
 		</div>

@@ -31,7 +31,7 @@ export default function Register() {
 		if (result.success) {
 			setSuccess(true);
 		} else {
-			setError(result.error || "Reģistrācija neizdevās");
+			setError(result.error || "Registration failed");
 		}
 
 		setIsLoading(false);
@@ -49,22 +49,22 @@ export default function Register() {
 	if (success) {
 		return (
 			<div className="min-h-screen bg-black flex items-center justify-center p-4">
-				<div className="max-w-md w-full">
-					<div className="bg-black border-2 border-white rounded-lg shadow-lg p-8 text-center">
-						<div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full mb-6">
-							<CheckCircle className="w-8 h-8 text-black" />
+				<div className="max-w-sm w-full">
+					<div className="bg-neutral-900 border border-neutral-700 p-6 text-center">
+						<div className="mb-4">
+							<CheckCircle className="w-5 h-5 text-green-600 mx-auto" />
 						</div>
-						<h1 className="text-3xl font-bold text-white mb-4">
-							Account Created!
+						<h1 className="text-sm font-mono text-neutral-300 mb-2">
+							account created
 						</h1>
-						<p className="text-gray-300 mb-8">
-							Your account has been successfully created.
+						<p className="text-xs font-mono text-neutral-500 mb-4">
+							account ready. sign in to continue.
 						</p>
 						<Link
 							to="/login"
-							className="w-full bg-white hover:bg-gray-200 text-black font-medium py-3 px-4 rounded border-2 border-white transition-colors duration-200"
+							className="w-full bg-neutral-700 hover:bg-neutral-600 text-neutral-200 font-mono py-1.5 px-3 transition-colors text-xs block text-center"
 						>
-							Login to your account
+							sign in
 						</Link>
 					</div>
 				</div>
@@ -74,28 +74,27 @@ export default function Register() {
 
 	return (
 		<div className="min-h-screen bg-black flex items-center justify-center p-4">
-			<div className="max-w-md w-full">
-				<div className="bg-black border-2 p-8">
-					<div className="text-center mb-8">
-						<h1 className="text-3xl font-bold text-white mb-2">
-							Create Account
-						</h1>
+			<div className="max-w-sm w-full">
+				<div className="bg-neutral-900 border border-neutral-700 p-6">
+					<div className="text-center mb-6">
+						<h1 className="text-sm font-mono text-neutral-300 mb-1">create account</h1>
+						<p className="text-xs font-mono text-neutral-500">sign up to begin</p>
 					</div>
 
-					<div className="space-y-6">
+					<div className="space-y-4">
 						{error && (
-							<div className="flex items-center gap-2 p-4 bg-red-900/50 border border-red-500 rounded text-red-300 text-sm">
-								<AlertCircle className="w-4 h-4 flex-shrink-0" />
+							<div className="flex items-center gap-2 p-2 border border-red-900 text-red-500 text-xs font-mono">
+								<AlertCircle className="w-3 h-3 flex-shrink-0" />
 								{error}
 							</div>
 						)}
 
-						<div className="space-y-2">
+						<div className="space-y-1">
 							<label
 								htmlFor="username"
-								className="block text-sm font-medium text-white"
+								className="block text-xs font-mono text-neutral-500"
 							>
-								Username
+								username
 							</label>
 							<input
 								id="username"
@@ -104,17 +103,17 @@ export default function Register() {
 								required
 								value={formData.username}
 								onChange={handleInputChange}
-								className="w-full px-4 py-3 border-2 border-white rounded focus:outline-none focus:ring-2 focus:ring-gray-500 bg-black text-white placeholder:text-gray-400"
-								placeholder="Username"
+								className="w-full px-2 py-1.5 bg-black border border-neutral-700 focus:border-neutral-500 text-neutral-300 text-xs font-mono placeholder:text-neutral-600"
+								placeholder="username"
 							/>
 						</div>
 
-						<div className="space-y-2">
+						<div className="space-y-1">
 							<label
 								htmlFor="password"
-								className="block text-sm font-medium text-white"
+								className="block text-xs font-mono text-neutral-500"
 							>
-								Password
+								password
 							</label>
 							<div className="relative">
 								<input
@@ -124,29 +123,29 @@ export default function Register() {
 									required
 									value={formData.password}
 									onChange={handleInputChange}
-									className="w-full px-4 py-3 pr-12 border-2 border-white rounded focus:outline-none focus:ring-2 focus:ring-gray-500 bg-black text-white placeholder:text-gray-400"
-									placeholder="Password"
+									className="w-full px-2 py-1.5 pr-8 bg-black border border-neutral-700 focus:border-neutral-500 text-neutral-300 text-xs font-mono placeholder:text-neutral-600"
+									placeholder="password"
 								/>
 								<button
 									type="button"
 									onClick={() => setShowPassword(!showPassword)}
-									className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+									className="absolute right-2 top-1/2 transform -translate-y-1/2 text-neutral-600 hover:text-neutral-400 transition-colors"
 								>
 									{showPassword ? (
-										<EyeOff className="w-5 h-5" />
+										<EyeOff className="w-3 h-3" />
 									) : (
-										<Eye className="w-5 h-5" />
+										<Eye className="w-3 h-3" />
 									)}
 								</button>
 							</div>
 						</div>
 
-						<div className="space-y-2">
+						<div className="space-y-1">
 							<label
 								htmlFor="confirmPassword"
-								className="block text-sm font-medium text-white"
+								className="block text-xs font-mono text-neutral-500"
 							>
-								Confirm Password
+								confirm
 							</label>
 							<div className="relative">
 								<input
@@ -156,18 +155,18 @@ export default function Register() {
 									required
 									value={formData.confirmPassword}
 									onChange={handleInputChange}
-									className="w-full px-4 py-3 pr-12 border-2 border-white rounded focus:outline-none focus:ring-2 focus:ring-gray-500 bg-black text-white placeholder:text-gray-400"
-									placeholder="Confirm Password"
+									className="w-full px-2 py-1.5 pr-8 bg-black border border-neutral-700 focus:border-neutral-500 text-neutral-300 text-xs font-mono placeholder:text-neutral-600"
+									placeholder="confirm password"
 								/>
 								<button
 									type="button"
 									onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-									className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+									className="absolute right-2 top-1/2 transform -translate-y-1/2 text-neutral-600 hover:text-neutral-400 transition-colors"
 								>
 									{showConfirmPassword ? (
-										<EyeOff className="w-5 h-5" />
+										<EyeOff className="w-3 h-3" />
 									) : (
-										<Eye className="w-5 h-5" />
+										<Eye className="w-3 h-3" />
 									)}
 								</button>
 							</div>
@@ -176,30 +175,30 @@ export default function Register() {
 						<button
 							onClick={handleSubmit}
 							disabled={isLoading}
-							className="w-full bg-white hover:bg-gray-200 disabled:bg-gray-600 text-black font-medium py-3 px-4 rounded border-2 border-white transition-colors duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+							className="w-full bg-neutral-700 hover:bg-neutral-600 disabled:opacity-50 text-neutral-200 font-mono py-1.5 px-3 transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs"
 						>
 							{isLoading ? (
 								<>
-									<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
-									Loading...
+									<div className="animate-spin rounded-full h-3 w-3 border border-neutral-300 border-t-transparent"></div>
+									<span>creating...</span>
 								</>
 							) : (
 								<>
-									<UserPlus className="w-4 h-4" />
-									Create Account
+									<UserPlus className="w-3 h-3" />
+									sign up
 								</>
 							)}
 						</button>
 					</div>
 
-					<div className="mt-8 text-center">
-						<p className="text-gray-300">
-							Already have an account?{" "}
+					<div className="mt-4 text-center">
+						<p className="text-neutral-500 text-xs font-mono">
+							have account?{" "}
 							<Link
 								to="/login"
-								className="text-white hover:text-gray-300 font-medium transition-colors underline cursor-pointer"
+								className="text-neutral-400 hover:text-neutral-300 transition-colors cursor-pointer"
 							>
-								Login
+								sign in
 							</Link>
 						</p>
 					</div>

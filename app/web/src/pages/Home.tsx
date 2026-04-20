@@ -75,7 +75,7 @@ export const Home: React.FC = () => {
 
 	return (
 		<div
-			className={`min-h-screen ${isDarkMode ? "bg-black text-white" : "bg-white text-black"} transition-colors duration-200`}
+			className={`min-h-screen ${isDarkMode ? "bg-black text-gray-400" : "bg-gray-100 text-gray-700"} transition-colors duration-200`}
 		>
 			{showSettings && (
 				<Settings

@@ -16,63 +16,63 @@ export const SaveDialog: React.FC<SaveDialogProps> = ({
 	onSave,
 	onClose,
 }) => (
-	<div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+	<div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
 		<div
-			className={`max-w-md w-full mx-4 p-6 rounded-xl ${isDarkMode ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"} border`}
+			className={`max-w-sm w-full mx-4 p-4 ${isDarkMode ? "bg-neutral-900 border-neutral-700" : "bg-neutral-100 border-neutral-300"} border`}
 		>
-			<div className="flex items-center justify-between mb-4">
+			<div className="flex items-center justify-between mb-3">
 				<h3
-					className={`${isDarkMode ? "text-white" : "text-black"} font-semibold`}
+					className={`text-xs font-mono ${isDarkMode ? "text-neutral-300" : "text-neutral-700"}`}
 				>
-					Save Code
+					save code
 				</h3>
 				<button
 					onClick={onClose}
-					className={`p-1 rounded ${isDarkMode ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
+					className={`p-0.5 ${isDarkMode ? "hover:bg-neutral-800 text-neutral-500" : "hover:bg-neutral-200 text-neutral-500"}`}
 				>
-					<X className="w-4 h-4" />
+					<X className="w-3 h-3" />
 				</button>
 			</div>
 
-			<div className="space-y-4">
+			<div className="space-y-3">
 				<div>
 					<label
-						className={`block text-sm mb-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
+						className={`block text-xs font-mono mb-1 ${isDarkMode ? "text-neutral-500" : "text-neutral-600"}`}
 					>
-						Name
+						name
 					</label>
 					<input
 						type="text"
 						value={saveTitle}
 						onChange={(e) => setSaveTitle(e.target.value)}
-						placeholder="Name"
-						className={`w-full p-3 rounded-lg border ${isDarkMode
-								? "bg-gray-800 border-gray-700 text-white placeholder-gray-400"
-								: "bg-white border-gray-300 text-black placeholder-gray-500"
+						placeholder="filename"
+						className={`w-full p-2 text-xs font-mono border ${isDarkMode
+								? "bg-black border-neutral-700 text-neutral-300 placeholder-neutral-600"
+								: "bg-white border-neutral-300 text-neutral-700 placeholder-neutral-400"
 							}`}
 						autoFocus
 					/>
 				</div>
 
-				<div className="flex gap-3">
+				<div className="flex gap-2">
 					<button
 						onClick={onClose}
-						className={`flex-1 p-3 rounded-lg border ${isDarkMode
-								? "border-gray-700 text-gray-300 hover:bg-gray-800"
-								: "border-gray-300 text-gray-700 hover:bg-gray-50"
+						className={`flex-1 p-2 text-xs font-mono border ${isDarkMode
+								? "border-neutral-700 text-neutral-400 hover:bg-neutral-800"
+								: "border-neutral-300 text-neutral-600 hover:bg-neutral-200"
 							}`}
 					>
-						Cancel
+						cancel
 					</button>
 					<button
 						onClick={onSave}
 						disabled={!saveTitle.trim()}
-						className={`flex-1 p-3 rounded-lg text-white ${saveTitle.trim()
-								? "bg-blue-600 hover:bg-blue-700"
-								: "bg-gray-400 cursor-not-allowed"
+						className={`flex-1 p-2 text-xs font-mono text-black ${saveTitle.trim()
+								? "bg-neutral-300 hover:bg-neutral-200"
+								: "bg-neutral-700 text-neutral-500 cursor-not-allowed"
 							}`}
 					>
-						Save
+						save
 					</button>
 				</div>
 			</div>

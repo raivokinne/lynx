@@ -9,62 +9,57 @@ export const LanguageSection = ({ isDarkMode }: LanguageSectionProps) => {
 	const { t } = useTranslation();
 
 	return (
-		<div className="space-y-6">
-			<h2 className="text-2xl font-bold mb-4">{t("language.title")}</h2>
+		<div className="space-y-4">
+			<h2 className="text-sm font-mono mb-3 text-neutral-300">{t("language.title")}</h2>
 
 			<div>
-				<h3 className="text-lg font-semibold mb-3">
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">
 					{t("language.variables")}
 				</h3>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`// Mutable variables
-let name = "Lynx"
+					{`// mutable variables
+let name = "lynx"
 let version = 1.0
 
-// Constants (immutable)
+// constants (immutable)
 const PI = 3.14159
 const MAX_USERS = 100
 
-// Type inference works automatically
+// type inference works automatically
 let numbers = [1, 2, 3, 4, 5]
-let user = {"name": "Alice", "age": 30}`}
+let user = {"name": "alice", "age": 30}`}
 				</CodeBlock>
 			</div>
 
 			<div>
-				<h3 className="text-lg font-semibold mb-3">
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">
 					{t("language.functions")}
 				</h3>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`// Basic function
+					{`// basic function
 let greet = fn(name) {
-    return "Hello, " ++ name ++ "!"
+    return "hello, " ++ name ++ "!"
 }
 
-// Function with multiple parameters
+// function with multiple parameters
 let add = fn(a, b) {
     return a + b
 }
 
-// Higher-order function
+// higher-order function
 let applyTwice = fn(f, x) {
     return f(f(x))
-}
-
-// Usage
-let result = greet("World")
-let sum = add(5, 3)
-let doubled = applyTwice(fn(x) { x * 2 }, 4) // Returns 16`}
+}`}
 				</CodeBlock>
 			</div>
 
 			<div>
-				<h3 className="text-lg font-semibold mb-3">
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">
 					{t("language.classes")}
 				</h3>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`// Define a class
-class Animal {
+					{`// define a class
+class animal {
     let init = fn(name, age) {
         self.name = name
         self.age = age
@@ -73,15 +68,10 @@ class Animal {
     let speak = fn() {
         return self.name ++ " makes a sound"
     }
-
-    let birthday = fn() {
-        self.age = self.age + 1
-        return "Happy birthday " ++ self.name
-    }
 }
 
-// Inheritance
-class Dog(Animal) {
+// inheritance
+class dog(animal) {
     let init = fn(name, age, breed) {
         self.name = name
         self.age = age
@@ -89,176 +79,100 @@ class Dog(Animal) {
     }
 
     let speak = fn() {
-        return self.name ++ " says: Woof!"
+        return self.name ++ " says: woof!"
     }
-
-    let wagTail = fn() {
-        return self.name ++ " is wagging tail!"
-    }
-}
-
-// Create instances
-let dog = Dog("Buddy", 3, "Golden Retriever")
-println(dog.name)          // Buddy
-println(dog.speak())       // Buddy says: Woof!
-println(dog.wagTail())     // Buddy is wagging tail!
-println(dog.birthday())    // Happy birthday Buddy
-println(dog.age)           // 4`}
+}`}
 				</CodeBlock>
 			</div>
 
 			<div>
-				<h3 className="text-lg font-semibold mb-3">
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">
 					{t("language.controlFlow")}
 				</h3>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`// If-else statements (no parentheses required)
+					{`// if-else statements
 let x = 0
 if x > 0 {
-    println("Positive")
+    println("positive")
 } else {
-    println("Negative")
+    println("negative")
 }
 
-// While loops
+// while loops
 let i = 0
 while i < 10 {
     println(i)
     i = i + 1
 }
 
-// For-range loops
+// for-range loops
 for item in [1, 2, 3, 4, 5] {
     println(item)
-}
-
-// With index
-for item, index in ["a", "b", "c"] {
-    println("Item", index, ":", item)
 }`}
 				</CodeBlock>
 			</div>
 
 			<div>
-				<h3 className="text-lg font-semibold mb-3">
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">
 					{t("language.dataStructures")}
 				</h3>
 
-				<h4 className="font-medium mb-2">{t("language.arrays")}:</h4>
+				<h4 className="text-xs font-mono mb-1 text-neutral-500">{t("language.arrays")}:</h4>
 				<CodeBlock isDarkMode={isDarkMode}>
 					{`let numbers = [1, 2, 3, 4, 5]
-let mixed = [1, "hello", true, 3.14]
-
-// Array operations return new arrays
-let extended = numbers.push(6)        // [1, 2, 3, 4, 5, 6]
-let length = numbers.len()         // 5
-
-// Accessing elements
+let extended = numbers.push(6)
+let length = numbers.len()
 let first = numbers[0]
-let last = numbers[-1]
-let middle = numbers[0.5]`}
+let last = numbers[-1]`}
 				</CodeBlock>
 
-				<h4 className="font-medium mb-2 mt-4">
+				<h4 className="text-xs font-mono mb-1 mt-2 text-neutral-500">
 					{t("language.objects")}:
 				</h4>
 				<CodeBlock isDarkMode={isDarkMode}>
 					{`let person = {
-    "name": "Alice",
+    "name": "alice",
     "age": 30,
-    "city": "New York"
+    "city": "nyc"
 }
-
-// Property access
 let name = person["name"]
-let age = person.age
-
-// Update fields
-person.age = 90`}
+let age = person.age`}
 				</CodeBlock>
 			</div>
 
 			<div>
-				<h3 className="text-lg font-semibold mb-3">
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">
 					{t("language.pipelines")}
 				</h3>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+					{`let numbers = [1, 2, 3, 4, 5]
 
-// Traditional nested calls (harder to read)
-let result1 = filter(map(numbers, fn(x) { x * 2 }), fn(x) { x % 4 == 0 })
-
-// Pipeline style (much cleaner)
-let result2 = numbers
+// pipeline style
+let result = numbers
     |> map(fn(x) { x * 2 })
     |> filter(fn(x) { x % 4 == 0 })
-    |> reduce(fn(acc, x) { acc + x }, 0)
-
-// Complex data transformation
-let users = [
-    {"name": "Alice", "age": 25, "active": true},
-    {"name": "Bob", "age": 17, "active": false},
-    {"name": "Charlie", "age": 35, "active": true}
-]
-
-let activeAdultNames = users
-    |> filter(fn(u) { u.active })
-    |> filter(fn(u) { u.age >= 18 })
-    |> map(fn(u) { u.name })
-    |> sort()`}
+    |> reduce(fn(acc, x) { acc + x }, 0)`}
 				</CodeBlock>
 			</div>
 
 			<div>
-				<h3 className="text-lg font-semibold mb-3">
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">
 					{t("language.errors")}
 				</h3>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`// Function that might fail
-let divide = fn(a, b) {
+					{`let divide = fn(a, b) {
     if b == 0 {
-        error "Division by zero"
+        error "division by zero"
     }
     return a / b
 }
 
-// Handling errors
-let safeCalculation = fn(x, y) {
+let safe = fn(x, y) {
     catch err {
-        let result = divide(x, y)
-        println("Result:", result)
-        return result
+        return divide(x, y)
     } on {
-        println("Error occurred:", err)
+        println("error:", err)
         return 0
-    }
-}`}
-				</CodeBlock>
-			</div>
-
-			<div>
-				<h3 className="text-lg font-semibold mb-3">
-					{t("language.switch")}
-				</h3>
-				<CodeBlock isDarkMode={isDarkMode}>
-					{`let processGrade = fn(grade) {
-    switch grade {
-        case "A": {
-            println("Excellent!")
-            return 4.0
-        }
-        case "B": {
-            println("Good job!")
-            return 3.0
-        }
-        case "C": {
-            println("Satisfactory")
-            return 2.0
-        }
-        default: {
-            println("Needs improvement")
-            return 0.0
-        }
     }
 }`}
 				</CodeBlock>

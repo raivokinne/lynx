@@ -100,26 +100,26 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 			)}
 			<div className="flex-1 flex flex-col">
 				<div
-					className={`${isDarkMode ? "bg-black border-gray-700" : "bg-gray-50 border-gray-200"} border-b px-4 py-2 flex items-center justify-between`}
+					className={`${isDarkMode ? "bg-black border-neutral-800" : "bg-neutral-100 border-neutral-300"} border-b px-2 py-1 flex items-center justify-between`}
 				>
-					<div className="flex items-center gap-2 overflow-x-auto">
+					<div className="flex items-center gap-1 overflow-x-auto">
 						{savedCodes.map((code) => (
 							<div
 								key={code.id}
-								className="flex items-center gap-2 px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-md whitespace-nowrap"
+								className={`flex items-center gap-1 px-2 py-0.5 text-xs font-mono ${isDarkMode ? "bg-neutral-900 text-neutral-400" : "bg-neutral-200 text-neutral-600"}`}
 							>
 								<button
 									onClick={() => onLoad(code)}
-									className="flex gap-2 items-center text-sm hover:opacity-70"
+									className="flex gap-1 items-center text-xs hover:opacity-70"
 								>
-									<Code className="w-4 h-4" />
-									<span className="font-medium">{code.title}</span>
+									<Code className="w-3 h-3" />
+									<span>{code.title}</span>
 								</button>
 								<button
 									onClick={() => deleteCode(code.id)}
-									className="flex items-center text-sm hover:bg-red-500 hover:text-white rounded-sm p-0.5"
+									className={`flex items-center text-xs p-0.5 opacity-50 hover:opacity-100 ${isDarkMode ? "hover:bg-red-900 hover:text-neutral-200" : "hover:bg-red-200 hover:text-neutral-800"}`}
 								>
-									<X className="w-3 h-3" />
+									<X className="w-2.5 h-2.5" />
 								</button>
 							</div>
 						))}
@@ -127,10 +127,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 					{user?.id && (
 						<button
 							onClick={handleShow}
-							className="flex gap-2 items-center text-sm hover:opacity-70 px-2 py-1"
+							className={`flex gap-1 items-center text-xs px-2 py-0.5 font-mono transition-colors ${isDarkMode ? "hover:bg-neutral-800 text-neutral-500" : "hover:bg-neutral-200 text-neutral-500"}`}
 						>
-							<Plus className="w-4 h-4" />
-							<span className="hidden sm:inline">Save</span>
+							<Plus className="w-3 h-3" />
+							<span className="hidden sm:inline">save</span>
 						</button>
 					)}
 				</div>

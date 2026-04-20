@@ -59,20 +59,19 @@ export const SearchResults = ({
 	const hasResults = Object.keys(searchResults).length > 0;
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-4">
 			<div className="flex items-center justify-between">
-				<h2 className="text-2xl font-bold">{resultsTitle}</h2>
+				<h2 className="text-xs font-mono text-neutral-400">{resultsTitle}</h2>
 			</div>
 
 			{!hasResults ? (
 				<div
-					className={`text-center py-8 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
+					className={`text-center py-4 ${isDarkMode ? "text-neutral-600" : "text-neutral-400"}`}
 				>
-					<Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
-					<p className="text-sm mt-2">{tryDifferentText}</p>
+					<p className="text-xs font-mono">{tryDifferentText}</p>
 				</div>
 			) : (
-				<div className="space-y-6">
+				<div className="space-y-3">
 					{Object.entries(searchResults).map(
 						([sectionId, results]) => {
 							const section = sections.find(
@@ -83,82 +82,73 @@ export const SearchResults = ({
 							return (
 								<div
 									key={sectionId}
-									className={`border rounded-lg p-4 ${isDarkMode
-											? "border-gray-700 bg-gray-900"
-											: "border-gray-200 bg-gray-50"
+									className={`border p-2 ${isDarkMode
+											? "border-neutral-700 bg-black"
+											: "border-neutral-300 bg-neutral-100"
 										}`}
 								>
 									<button
 										onClick={() =>
 											onSectionClick(sectionId)
 										}
-										className={`flex items-center gap-2 mb-3 text-lg font-semibold hover:underline ${isDarkMode
-												? "text-blue-400 hover:text-blue-300"
-												: "text-blue-600 hover:text-blue-800"
+										className={`flex items-center gap-1 mb-2 text-xs font-mono hover:underline ${isDarkMode
+												? "text-neutral-400 hover:text-neutral-300"
+												: "text-neutral-600 hover:text-neutral-700"
 											}`}
 									>
-										<SectionIcon className="w-5 h-5" />
-										{section?.title}
+										<SectionIcon className="w-3 h-3" />
+										{section?.title.toLowerCase()}
 									</button>
 
-									<div className="space-y-2">
+									<div className="space-y-1">
 										{results.map((result, index) => (
 											<div
 												key={index}
-												className={`p-3 rounded border-l-2 ${result.type === "heading"
+												className={`p-1.5 text-xs font-mono ${result.type === "heading"
 														? isDarkMode
-															? "border-blue-500 bg-gray-800"
-															: "border-blue-500 bg-blue-50"
+															? "border-l-2 border-neutral-500 bg-neutral-900"
+															: "border-l-2 border-neutral-400 bg-neutral-200"
 														: result.type === "code"
 															? isDarkMode
-																? "border-green-500 bg-gray-800"
-																: "border-green-500 bg-green-50"
+																? "border-l-2 border-green-700 bg-neutral-900"
+																: "border-l-2 border-green-300 bg-neutral-200"
 															: isDarkMode
-																? "border-gray-600 bg-gray-800"
-																: "border-gray-300 bg-white"
+																? "border-l-2 border-neutral-600 bg-neutral-900"
+																: "border-l-2 border-neutral-300 bg-neutral-200"
 													}`}
 											>
-												<div
-													className={`text-sm font-mono ${result.type ===
-															"heading"
-															? "font-bold"
-															: result.type ===
-																"code"
-																? "font-mono text-xs"
-																: ""
-														}`}
-												>
-													{result.type === "code" ? (
-														<pre className="whitespace-pre-wrap">
-															{highlightText(
-																result.content.slice(
-																	0,
-																	200,
-																) +
-																(result
-																	.content
-																	.length >
-																	200
-																	? "..."
-																	: ""),
-																searchQuery,
-															)}
-														</pre>
-													) : (
-														highlightText(
-															result.content.slice(
-																0,
-																200,
-															) +
-															(result.content
-																.length >
-																200
-																? "..."
-																: ""),
-															searchQuery,
-														)
+												{result.type === "code" ? (
+												<pre className="whitespace-pre-wrap text-xs">
+													{highlightText(
+														result.content.slice(
+															0,
+									150,
+														) +
+														(result
+															.content
+															.length >
+															150
+															? "..."
+															: ""),
+														searchQuery,
 													)}
-												</div>
+												</pre>
+											) : (
+												<span className="text-xs">
+													{highlightText(
+														result.content.slice(
+															0,
+									150,
+														) +
+													(result.content
+														.length >
+														150
+														? "..."
+														: ""),
+													searchQuery,
+												)}
+												</span>
+											)}
 											</div>
 										))}
 									</div>
