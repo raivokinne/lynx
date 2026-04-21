@@ -5,53 +5,58 @@ let dbInstance = null;
 let initPromise = null;
 
 export const getDb = () => {
-	if (!dbInstance) {
-		throw new Error("Database not initialized. Call initDb() first.");
-	}
-	return dbInstance;
+    if (!dbInstance) {
+        throw new Error("Database not initialized. Call initDb() first.");
+    }
+    return dbInstance;
 };
 
 export let db;
 
 export async function initDb() {
-	if (initPromise) {
-		return initPromise;
-	}
+    if (initPromise) {
+        return initPromise;
+    }
 
-	initPromise = (async () => {
-		try {
-			console.log("Initializing database connection...");
+    initPromise = (async () => {
+        try {
+            console.log("Initializing database connection...");
 
-			const sslConfig = process.env.NODE_ENV === 'production' ? {
-				rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false',
-				ca: process.env.DB_CA_CERT,
-				key: process.env.DB_CLIENT_KEY,
-				cert: process.env.DB_CLIENT_CERT
-			} : false;
+            const sslConfig =
+                process.env.NODE_ENV === "production"
+                    ? {
+                          rejectUnauthorized:
+                              process.env.DB_SSL_REJECT_UNAUTHORIZED !==
+                              "false",
+                          ca: process.env.DB_CA_CERT,
+                          key: process.env.DB_CLIENT_KEY,
+                          cert: process.env.DB_CLIENT_CERT,
+                      }
+                    : false;
 
-			dbInstance = new Pool({
-				host: process.env.DB_HOST,
-				port: process.env.DB_PORT,
-				database: process.env.DB_NAME,
-				user: process.env.DB_USER,
-				password: process.env.DB_PASSWORD,
-				max: 20,
-				ssl: sslConfig,
-				idleTimeoutMillis: 30000,
-				connectionTimeoutMillis: 2000,
-				statement_timeout: 30000,
-				query_timeout: 30000,
-			});
+            dbInstance = new Pool({
+                host: process.env.DB_HOST,
+                port: process.env.DB_PORT,
+                database: process.env.DB_NAME,
+                user: process.env.DB_USER,
+                password: process.env.DB_PASSWORD,
+                max: 20,
+                ssl: sslConfig,
+                idleTimeoutMillis: 30000,
+                connectionTimeoutMillis: 2000,
+                statement_timeout: 30000,
+                query_timeout: 30000,
+            });
 
-			// Set the exported db variable
-			db = dbInstance;
+            db = dbInstance;
 
-			// Test connection
-			const result = await dbInstance.query("SELECT NOW()");
-			console.log("Database connected successfully at:", result.rows[0].now);
+            const result = await dbInstance.query("SELECT NOW()");
+            console.log(
+                "Database connected successfully at:",
+                result.rows[0].now,
+            );
 
-			// Users table
-			await dbInstance.query(`
+            await dbInstance.query(`
         CREATE TABLE IF NOT EXISTS users (
           id TEXT PRIMARY KEY,
           username TEXT UNIQUE NOT NULL,
@@ -62,8 +67,8 @@ export async function initDb() {
         )
       `);
 
-			// Codes table
-			await dbInstance.query(`
+            // Codes table
+            await dbInstance.query(`
         CREATE TABLE IF NOT EXISTS codes (
           id TEXT PRIMARY KEY,
           user_id TEXT,
@@ -78,8 +83,8 @@ export async function initDb() {
         )
       `);
 
-			// User settings table
-			await dbInstance.query(`
+            // User settings table
+            await dbInstance.query(`
         CREATE TABLE IF NOT EXISTS user_settings (
           id TEXT PRIMARY KEY,
           user_id TEXT UNIQUE NOT NULL,
@@ -90,8 +95,8 @@ export async function initDb() {
         )
       `);
 
-			// Sessions table
-			await dbInstance.query(`
+            // Sessions table
+            await dbInstance.query(`
         CREATE TABLE IF NOT EXISTS sessions (
           id TEXT PRIMARY KEY,
           user_id TEXT NOT NULL,
@@ -105,20 +110,20 @@ export async function initDb() {
         )
       `);
 
-			await dbInstance.query(`
+            await dbInstance.query(`
         CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)
       `);
 
-			await dbInstance.query(`
+            await dbInstance.query(`
         CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token)
       `);
 
-			await dbInstance.query(`
+            await dbInstance.query(`
         CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)
       `);
 
-			// Shared codes table
-			await dbInstance.query(`
+            // Shared codes table
+            await dbInstance.query(`
         CREATE TABLE IF NOT EXISTS shared_codes (
           id TEXT PRIMARY KEY,
           code_id TEXT NOT NULL,
@@ -131,16 +136,16 @@ export async function initDb() {
         )
       `);
 
-			await dbInstance.query(`
+            await dbInstance.query(`
         CREATE INDEX IF NOT EXISTS idx_shared_codes_token ON shared_codes(share_token)
       `);
 
-			await dbInstance.query(`
+            await dbInstance.query(`
         CREATE INDEX IF NOT EXISTS idx_shared_codes_code_id ON shared_codes(code_id)
       `);
 
-			// Code versions table
-			await dbInstance.query(`
+            // Code versions table
+            await dbInstance.query(`
         CREATE TABLE IF NOT EXISTS code_versions (
           id TEXT PRIMARY KEY,
           code_id TEXT NOT NULL,
@@ -152,12 +157,12 @@ export async function initDb() {
         )
       `);
 
-			await dbInstance.query(`
+            await dbInstance.query(`
         CREATE INDEX IF NOT EXISTS idx_code_versions_code_id ON code_versions(code_id)
       `);
 
-			// Execution history table
-			await dbInstance.query(`
+            // Execution history table
+            await dbInstance.query(`
         CREATE TABLE IF NOT EXISTS execution_history (
           id TEXT PRIMARY KEY,
           user_id TEXT,
@@ -172,38 +177,38 @@ export async function initDb() {
         )
       `);
 
-			await dbInstance.query(`
+            await dbInstance.query(`
         CREATE INDEX IF NOT EXISTS idx_execution_history_user_id ON execution_history(user_id)
       `);
 
-			await dbInstance.query(`
+            await dbInstance.query(`
         CREATE INDEX IF NOT EXISTS idx_execution_history_executed_at ON execution_history(executed_at)
       `);
 
-			console.log("Database initialized successfully with all tables");
-			return dbInstance;
-		} catch (error) {
-			console.error("Failed to initialize database:", error);
-			dbInstance = null;
-			db = null;
-			initPromise = null;
-			throw error;
-		}
-	})();
+            console.log("Database initialized successfully with all tables");
+            return dbInstance;
+        } catch (error) {
+            console.error("Failed to initialize database:", error);
+            dbInstance = null;
+            db = null;
+            initPromise = null;
+            throw error;
+        }
+    })();
 
-	return initPromise;
+    return initPromise;
 }
 
 export async function closeDb() {
-	if (dbInstance) {
-		try {
-			await dbInstance.end();
-			dbInstance = null;
-			db = null;
-			initPromise = null;
-			console.log("Database connection closed");
-		} catch (error) {
-			console.warn("Error closing database:", error);
-		}
-	}
+    if (dbInstance) {
+        try {
+            await dbInstance.end();
+            dbInstance = null;
+            db = null;
+            initPromise = null;
+            console.log("Database connection closed");
+        } catch (error) {
+            console.warn("Error closing database:", error);
+        }
+    }
 }
