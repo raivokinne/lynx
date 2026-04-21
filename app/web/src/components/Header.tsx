@@ -1,6 +1,6 @@
 import React from "react";
-import { User, LogOut } from "lucide-react";
-import { useNavigate } from "react-router";
+import { User, LogOut, Book } from "lucide-react";
+import { useNavigate, Link } from "react-router";
 
 interface HeaderProps {
 	isDarkMode: boolean;
@@ -28,7 +28,8 @@ export const Header: React.FC<HeaderProps> = ({
 			{username ? (
 				<div className="max-w-full px-3 py-1.5 flex items-center justify-between">
 					<div className="flex items-center gap-2">
-						<div
+						<Link
+							to="/editor"
 							className={`flex items-center gap-2 px-2 py-0.5 ${isDarkMode ? "bg-black" : "bg-neutral-300"}`}
 						>
 							<img
@@ -37,7 +38,14 @@ export const Header: React.FC<HeaderProps> = ({
 								alt="logo"
 							/>
 							<span className="text-xs font-mono">lynx</span>
-						</div>
+						</Link>
+						<Link
+							to="/docs"
+							className={`flex items-center gap-1 px-2 py-0.5 text-xs font-mono ${isDarkMode ? "hover:bg-neutral-800 text-neutral-400" : "hover:bg-neutral-300 text-neutral-600"}`}
+						>
+							<Book className="w-3 h-3" />
+							<span className="text-xs">docs</span>
+						</Link>
 						<div
 							className={`flex items-center gap-2 px-2 py-0.5 text-xs ${isDarkMode ? "bg-black text-neutral-400" : "bg-neutral-300 text-neutral-600"}`}
 						>
@@ -56,7 +64,8 @@ export const Header: React.FC<HeaderProps> = ({
 			) : (
 				<div className="max-w-full px-3 py-1.5 flex items-center justify-between">
 					<div className="flex items-center gap-2">
-						<div
+						<Link
+							to="/"
 							className={`flex items-center gap-2 px-2 py-0.5 ${isDarkMode ? "bg-black" : "bg-neutral-300"}`}
 						>
 							<img
@@ -65,7 +74,14 @@ export const Header: React.FC<HeaderProps> = ({
 								alt="logo"
 							/>
 							<span className="text-xs font-mono">lynx</span>
-						</div>
+						</Link>
+						<Link
+							to="/docs"
+							className={`flex items-center gap-1 px-2 py-0.5 text-xs font-mono ${isDarkMode ? "hover:bg-neutral-800 text-neutral-400" : "hover:bg-neutral-300 text-neutral-600"}`}
+						>
+							<Book className="w-3 h-3" />
+							<span className="text-xs">docs</span>
+						</Link>
 						<button
 							onClick={onLogin}
 							className={`flex items-center gap-1 px-2 py-0.5 text-xs font-mono ${isDarkMode ? "hover:bg-neutral-800 text-neutral-400" : "hover:bg-neutral-300 text-neutral-600"}`}

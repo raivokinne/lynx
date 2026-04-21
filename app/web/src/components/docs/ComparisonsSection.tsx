@@ -17,6 +17,24 @@ export const ComparisonsSection = ({
 }: ComparisonsSectionProps) => {
 	const { t } = useTranslation();
 
+	const getComparisonTitle = (key: string) => {
+		const titles: Record<string, string> = {
+			"Fibonacci Sequence": t("comparisons.fibonacci"),
+			"Array Processing": t("comparisons.arrayProcessing"),
+			"Pattern Matching": t("comparisons.patternMatching"),
+		};
+		return titles[key] || key;
+	};
+
+	const getComparisonDescription = (key: string) => {
+		const descriptions: Record<string, string> = {
+			"Implementing the Fibonacci sequence": t("comparisons.fibonacci.desc"),
+			"Filtering and transforming arrays": t("comparisons.arrayProcessing.desc"),
+			"Using pattern matching for control flow": t("comparisons.patternMatching.desc"),
+		};
+		return descriptions[key] || key;
+	};
+
 	return (
 		<div className="space-y-4">
 			<div>
@@ -54,14 +72,16 @@ export const ComparisonsSection = ({
 						key={index}
 						className={`border p-3 ${isDarkMode
 								? "border-neutral-700 bg-black"
-								: "border-neutral-300 bg-neutral-100"
+								: "border-neutral-300:bg-neutral-100"
 							}`}
 					>
-						<h3 className="text-xs font-mono mb-1 text-neutral-300">{comparison.title}</h3>
+						<h3 className="text-xs font-mono mb-1 text-neutral-300">
+							{getComparisonTitle(comparison.title)}
+						</h3>
 						<p
 							className={`mb-2 text-xs font-mono ${isDarkMode ? "text-neutral-500" : "text-neutral-600"}`}
 						>
-							{comparison.description}
+							{getComparisonDescription(comparison.description)}
 						</p>
 
 						<div

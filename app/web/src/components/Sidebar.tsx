@@ -1,5 +1,5 @@
 import React from "react";
-import { Settings, BookOpen } from "lucide-react";
+import { Settings } from "lucide-react";
 
 interface SidebarProps {
   isDarkMode: boolean;
@@ -8,8 +8,6 @@ interface SidebarProps {
   onRunCode: () => void;
   onSave: () => void;
   onSettings: () => void;
-  onDocs: () => void;
-  onGit: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -18,7 +16,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   canRun,
   onRunCode,
   onSettings,
-  onDocs,
 }) => (
   <div
     className={`${isDarkMode ? "bg-neutral-900 border-neutral-800" : "bg-neutral-200 border-neutral-300"} w-10 border-r flex flex-col items-center py-2 space-y-1`}
@@ -52,14 +49,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       title="Settings"
     >
       <Settings size={16} />
-    </button>
-
-    <button
-      onClick={onDocs}
-      className={`p-1.5 transition-colors ${isDarkMode ? "hover:bg-neutral-800 text-neutral-500" : "hover:bg-neutral-300 text-neutral-500"}`}
-      title="Documentation"
-    >
-      <BookOpen size={16} />
     </button>
   </div>
 );

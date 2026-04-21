@@ -1,4 +1,8 @@
-import React, { useState, type ChangeEventHandler } from "react";
+import {
+  useState,
+  type ChangeEventHandler,
+  type MouseEventHandler,
+} from "react";
 import { Eye, EyeOff, UserPlus, AlertCircle, CheckCircle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { Link } from "react-router";
@@ -17,7 +21,7 @@ export default function Register() {
 
   const { register } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");

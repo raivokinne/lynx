@@ -20,10 +20,10 @@ export default function Login() {
   const location = useLocation();
 
   if (user) {
-    const from = location.state?.from?.pathname || "/";
+    const from = location.state?.from?.pathname || "/editor";
     return <Navigate to={from} replace />;
   }
-
+  
   const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (e) => {
     e.preventDefault();
     setIsLoading(true);
