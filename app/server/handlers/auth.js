@@ -3,6 +3,9 @@ import bcrypt from "bcrypt";
 import { db } from "../db.js";
 import { createSession } from "./session.js";
 
+const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
+const PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,20}$/;
+
 export const register = async (req, res) => {
 	try {
 		const { username, password, confirmPassword } = req.body;
@@ -14,20 +17,31 @@ export const register = async (req, res) => {
 			});
 		}
 
-		if (password !== confirmPassword) {
+		if (username.length < 3 || username.length > 32) {
 			return res.status(400).json({
 				success: false,
-				error: "Confirm Password and Password don't match",
+				error: "Username must be 3–32 characters",
 			});
 		}
 
-		const passw =
-			/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,20}$/;
-		if (!password.match(passw)) {
+		if (!USERNAME_REGEX.test(username)) {
 			return res.status(400).json({
 				success: false,
-				error:
-					"Password must be 8-20 characters with uppercase, lowercase, number, and special character",
+				error: "Username may only contain letters, numbers, hyphens, and underscores",
+			});
+		}
+
+		if (password !== confirmPassword) {
+			return res.status(400).json({
+				success: false,
+				error: "Passwords do not match",
+			});
+		}
+
+		if (!PASSWORD_REGEX.test(password)) {
+			return res.status(400).json({
+				success: false,
+				error: "Password must be 8-20 characters with uppercase, lowercase, number, and special character",
 			});
 		}
 
@@ -51,8 +65,7 @@ export const register = async (req, res) => {
 			[userId, username, hashed],
 		);
 
-		const ip =
-			req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+		const ip = req.ip;
 		const userAgent = req.headers["user-agent"];
 		const { token } = await createSession(userId, ip, userAgent);
 
@@ -63,13 +76,10 @@ export const register = async (req, res) => {
 			user: { id: userId, username },
 		});
 	} catch (error) {
-		console.error("Register error:", error);
-
-		if (error.code) {
-			console.error("PostgreSQL Error Code:", error.code);
-		}
-		if (error.detail) {
-			console.error("Error Detail:", error.detail);
+		if (process.env.NODE_ENV !== "production") {
+			console.error("Register error:", error);
+			if (error.code) console.error("PostgreSQL Error Code:", error.code);
+			if (error.detail) console.error("Error Detail:", error.detail);
 		}
 
 		let message = "Registration failed";
@@ -79,11 +89,15 @@ export const register = async (req, res) => {
 		} else if (error.code === "23502") {
 			message = "Missing required field";
 		} else if (error.code === "42P01") {
+			if (process.env.NODE_ENV !== "production") {
+				console.error("CRITICAL: users table does not exist!");
+			}
 			message = "Database configuration error";
-			console.error("CRITICAL: users table does not exist!");
 		} else if (error.code === "23503") {
+			if (process.env.NODE_ENV !== "production") {
+				console.error("Session creation failed - check sessions table");
+			}
 			message = "Failed to create session";
-			console.error("Session creation failed - check sessions table");
 		}
 
 		res.status(400).json({ success: false, error: message });
@@ -101,9 +115,10 @@ export const login = async (req, res) => {
 			});
 		}
 
-		const result = await db.query("SELECT * FROM users WHERE username = $1", [
-			username,
-		]);
+		const result = await db.query(
+			"SELECT id, username, password FROM users WHERE username = $1",
+			[username],
+		);
 
 		const user = result.rows[0];
 
@@ -123,8 +138,7 @@ export const login = async (req, res) => {
 			});
 		}
 
-		const ip =
-			req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+		const ip = req.ip;
 		const userAgent = req.headers["user-agent"];
 		const { token } = await createSession(user.id, ip, userAgent);
 
@@ -137,24 +151,28 @@ export const login = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error("Login error:", error);
+		if (process.env.NODE_ENV !== "production") {
+			console.error("Login error:", error);
+		}
 		res.status(500).json({ success: false, error: "Login failed" });
 	}
 };
 
 export const logout = async (req, res) => {
 	try {
-		await db.query("DELETE FROM sessions WHERE user_id = $1 AND token = $2", [
-			req.user.id,
-			req.headers.authorization?.replace("Bearer ", ""),
-		]);
+		await db.query(
+			"DELETE FROM sessions WHERE id = $1 AND user_id = $2",
+			[req.user.sessionId, req.user.id],
+		);
 
 		res.json({
 			success: true,
 			message: "Logged out successfully",
 		});
 	} catch (error) {
-		console.error("Logout error:", error);
+		if (process.env.NODE_ENV !== "production") {
+			console.error("Logout error:", error);
+		}
 		res.status(500).json({ success: false, error: "Logout failed" });
 	}
 };
@@ -162,9 +180,7 @@ export const logout = async (req, res) => {
 export const getProfile = async (req, res) => {
 	try {
 		const result = await db.query(
-			`SELECT id, username, created_at
-       FROM users
-       WHERE id = $1`,
+			"SELECT id, username, created_at FROM users WHERE id = $1",
 			[req.user.id],
 		);
 
@@ -180,7 +196,9 @@ export const getProfile = async (req, res) => {
 			user: result.rows[0],
 		});
 	} catch (error) {
-		console.error("Get profile error:", error);
+		if (process.env.NODE_ENV !== "production") {
+			console.error("Get profile error:", error);
+		}
 		res.status(500).json({
 			success: false,
 			error: "Failed to fetch profile",

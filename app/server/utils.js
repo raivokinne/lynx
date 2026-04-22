@@ -1,6 +1,6 @@
 import { spawn } from "child_process";
-import { readdirSync, statSync, unlinkSync, existsSync } from "fs";
-import { join, resolve, dirname } from "path";
+import { readdirSync, rmdirSync, statSync, unlinkSync, existsSync } from "fs";
+import { join, resolve } from "path";
 import { CONFIG } from "./index.js";
 
 const MAX_OUTPUT_SIZE = 100_000;
@@ -15,6 +15,9 @@ export function sanitizeSessionId(sessionId) {
 export function cleanupTempFiles() {
   try {
     const tempDir = resolve(CONFIG.TEMP_DIR);
+
+    if (!existsSync(tempDir)) return;
+
     const files = readdirSync(tempDir);
     const now = Date.now();
     const maxAge = 60 * 60 * 1000;
@@ -34,24 +37,21 @@ export function cleanupTempFiles() {
 
               if (now - subStats.mtimeMs > maxAge) {
                 unlinkSync(subFilePath);
-                console.log(`Cleaned up old temp file: ${subFile}`);
+                console.log(`Cleaned: ${subFile}`);
               }
             });
 
-            const remainingFiles = readdirSync(filePath);
-            if (remainingFiles.length === 0) {
+            const remaining = readdirSync(filePath);
+            if (remaining.length === 0) {
               rmdirSync(filePath);
-              console.log(`Removed empty temp directory: ${file}`);
+              console.log(`Removed dir: ${file}`);
             }
-          } catch (dirError) {
-            console.error(
-              `Error cleaning temp directory ${file}:`,
-              dirError?.message ?? dirError,
-            );
+          } catch (err) {
+            console.error(`Dir cleanup error ${file}:`, err.message);
           }
         } else {
           unlinkSync(filePath);
-          console.log(`Cleaned up old temp file: ${file}`);
+          console.log(`Cleaned file: ${file}`);
         }
       }
     });
@@ -176,84 +176,109 @@ function validateCodeSecurity(code) {
 }
 
 export function executeCompiler(filePath) {
+  const safePath = resolve(filePath);
+  if (!safePath.startsWith(resolve(CONFIG.TEMP_DIR) + "/")) {
+    return Promise.reject(new Error("Invalid file path"));
+  }
+
   return new Promise((resolve, reject) => {
     let stdout = "";
     let stderr = "";
     let finished = false;
 
-    const child = spawn(CONFIG.COMPILER_PATH, [filePath], {
-      stdio: ["ignore", "pipe", "pipe"],
-      cwd: CONFIG.TEMP_DIR,
-      env: {
-        PATH: process.env.PATH,
-        NODE_ENV: "production",
+    const totalOutput = () => stdout.length + stderr.length;
+
+    const finish = (fn) => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer);
+      fn();
+    };
+
+    const killChild = () => {
+      try {
+        child.kill("SIGTERM");
+        setTimeout(() => {
+          if (!child.killed) child.kill("SIGKILL");
+        }, 5000);
+      } catch (e) {
+        if (process.env.NODE_ENV !== "production") {
+          console.error("Failed to kill child process:", e.message);
+        }
+      }
+    };
+
+    const child = spawn(
+      "firejail",
+      [
+        "--net=none",
+        "--nosound",
+        "--nogroups",
+        "--noroot",
+        "--private-dev",
+        "--seccomp",
+        "--caps.drop=all",
+        "--rlimit-nproc=50",
+        "--rlimit-fsize=10485760",
+        `--whitelist=${CONFIG.COMPILER_PATH}`,
+        `--whitelist=${CONFIG.TEMP_DIR}`,
+        "--quiet",
+        CONFIG.COMPILER_PATH,
+        safePath,
+      ],
+      {
+        stdio: ["ignore", "pipe", "pipe"],
+        cwd: CONFIG.TEMP_DIR,
+        env: { PATH: process.env.PATH },
       },
-      uid: process.getuid ? process.getuid() : undefined,
-      gid: process.getgid ? process.getgid() : undefined,
-      detached: false,
-    });
+    );
 
     const timer = setTimeout(() => {
-      if (!finished) {
-        finished = true;
-        try {
-          child.kill("SIGTERM");
-          setTimeout(() => {
-            if (!child.killed) {
-              child.kill("SIGKILL");
-            }
-          }, 5000);
-        } catch (e) {}
+      finish(() => {
+        killChild();
         reject(new Error("Execution timed out"));
-      }
+      });
     }, CONFIG.EXECUTION_TIMEOUT);
 
     child.stdout?.on("data", (data) => {
       stdout += data.toString();
-      if (stdout.length > MAX_OUTPUT_SIZE) {
-        if (!finished) {
-          finished = true;
-          clearTimeout(timer);
-          child.kill("SIGTERM");
+      if (totalOutput() > MAX_OUTPUT_SIZE) {
+        finish(() => {
+          killChild();
           reject(new Error("Output too large"));
-        }
+        });
       }
     });
 
     child.stderr?.on("data", (data) => {
       stderr += data.toString();
-      if (stderr.length > MAX_OUTPUT_SIZE) {
-        if (!finished) {
-          finished = true;
-          clearTimeout(timer);
-          child.kill("SIGTERM");
+      if (totalOutput() > MAX_OUTPUT_SIZE) {
+        finish(() => {
+          killChild();
           reject(new Error("Error output too large"));
-        }
+        });
       }
     });
 
     child.on("error", (err) => {
-      if (finished) return;
-      finished = true;
-      clearTimeout(timer);
-      reject(new Error(`Failed to start compiler: ${err.message}`));
+      finish(() =>
+        reject(new Error(`Failed to start compiler: ${err.message}`)),
+      );
     });
 
     child.on("close", (code, signal) => {
-      if (finished) return;
-      finished = true;
-      clearTimeout(timer);
-
-      if (code === 0) {
-        resolve(stdout);
-      } else {
-        const parts = [
-          `Compiler exited with code ${code}${signal ? ` (signal: ${signal})` : ""}`,
-        ];
-        if (stderr.trim()) parts.push(`${stderr.trim()}`);
-        if (stdout.trim()) parts.push(`${stdout.trim()}`);
-        reject(new Error(parts.join("\n")));
-      }
+      finish(() => {
+        if (code === 0) {
+          resolve(stdout);
+        } else {
+          const parts = [
+            `Compiler exited with code ${code}${signal ? ` (signal: ${signal})` : ""}`,
+          ];
+          if (stderr.trim()) parts.push(stderr.trim());
+          if (stdout.trim()) parts.push(stdout.trim());
+          reject(new Error(parts.join("\n")));
+        }
+      });
     });
   });
 }

@@ -7,7 +7,7 @@ import { initDb, closeDb } from "./db.js";
 import "dotenv/config";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-
+import logger from "./logger.js";
 import router from "./router.js";
 
 const app = express();
@@ -23,6 +23,7 @@ function validateCorsOrigins(origins) {
   const allowedOrigins = Array.isArray(origins)
     ? origins
     : origins.split(",").map((o) => o.trim());
+
   const validOrigins = allowedOrigins.filter((origin) => {
     try {
       new URL(origin);
@@ -45,7 +46,6 @@ const authLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  skipSuccessfulRequests: true,
 });
 
 const generalLimiter = rateLimit({
@@ -57,6 +57,7 @@ const generalLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: true,
 });
 
 app.use(
@@ -95,15 +96,26 @@ app.use((req, res, next) => {
 
 app.use(json({ limit: "1mb" }));
 
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    logger.info(
+      `${req.method} ${req.originalUrl} ${res.statusCode} - ${duration}ms`,
+    );
+  });
+  next();
+});
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export const CONFIG = {
-  COMPILER_PATH: "../../../compiler/build/lynx-macos",
+  COMPILER_PATH: join(__dirname, "build", "lynx"),
   FILE_EXTENSION: ".lynx",
   EXECUTION_TIMEOUT: 10_000,
   MAX_FILE_SIZE: 1024 * 1024,
-  TEMP_DIR: "./temp",
+  TEMP_DIR: join(__dirname, "temp"),
 };
 
 if (!existsSync(CONFIG.TEMP_DIR)) {
@@ -137,7 +149,9 @@ function sanitizeError(error) {
 }
 
 app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err?.message ?? err);
+  if (process.env.NODE_ENV !== "production") {
+    console.error("Unhandled error:", err?.message ?? err);
+  }
 
   const sanitizedError = sanitizeError(err);
   const isDevelopment = process.env.NODE_ENV !== "production";
@@ -152,10 +166,10 @@ app.use((err, req, res, next) => {
 initDb()
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`🚀 Compiler server running on port ${PORT}`);
-      console.log(`📁 Temp directory: ${CONFIG.TEMP_DIR}`);
-      console.log(`⚡ Compiler path: ${CONFIG.COMPILER_PATH}`);
-      console.log(`⏱️  Execution timeout: ${CONFIG.EXECUTION_TIMEOUT}ms`);
+      console.log(`Compiler server running on port ${PORT}`);
+      console.log(`Temp directory: ${CONFIG.TEMP_DIR}`);
+      console.log(`Compiler path: ${CONFIG.COMPILER_PATH}`);
+      console.log(`Execution timeout: ${CONFIG.EXECUTION_TIMEOUT}ms`);
       cleanupTempFiles();
       setInterval(cleanupTempFiles, 30 * 60 * 1000);
     });
@@ -167,7 +181,7 @@ initDb()
 
 async function shutdown(signal) {
   try {
-    console.log(`\n🛑 Shutting down server... (${signal})`);
+    console.log(`Shutting down server... (${signal})`);
     cleanupTempFiles();
     await closeDb();
   } finally {

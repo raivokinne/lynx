@@ -1,5 +1,13 @@
 import { useState, useMemo } from "react";
-import { Wrench, Book, Package, Shield, Code, Languages, Github } from "lucide-react";
+import {
+  Wrench,
+  Book,
+  Package,
+  Shield,
+  Code,
+  Languages,
+  Github,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "../hooks/useTranslation";
 import { LanguageSelector } from "../components/LanguageSelector";
@@ -15,113 +23,113 @@ import { BuiltinsSection } from "../components/docs/BuiltinsSection";
 import { useSearchableContent } from "../hooks/useSearchableContent";
 
 export const Docs: React.FC = () => {
-	const [activeSection, setActiveSection] = useState("overview");
-	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedComparisonLanguages, setSelectedComparisonLanguages] =
-		useState<string[]>(["lynx", "javascript"]);
-	const { t } = useTranslation();
+  const [activeSection, setActiveSection] = useState("overview");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedComparisonLanguages, setSelectedComparisonLanguages] =
+    useState<string[]>(["lynx", "javascript"]);
+  const { t } = useTranslation();
 
-	const sections = useMemo(
-		() => [
-			{ id: "overview", title: t("nav.overview"), icon: Book },
-			{ id: "language", title: t("nav.language"), icon: Package },
-			{ id: "builtins", title: "Built-ins", icon: Wrench },
-			{ id: "stdlib", title: t("nav.stdlib"), icon: Shield },
-			{ id: "examples", title: t("nav.examples"), icon: Code },
-			{ id: "comparisons", title: t("nav.comparisons"), icon: Languages },
-		],
-		[t],
-	);
+  const sections = useMemo(
+    () => [
+      { id: "overview", title: t("nav.overview"), icon: Book },
+      { id: "language", title: t("nav.language"), icon: Package },
+      { id: "builtins", title: "Built-ins", icon: Wrench },
+      { id: "stdlib", title: t("nav.stdlib"), icon: Shield },
+      { id: "examples", title: t("nav.examples"), icon: Code },
+      { id: "comparisons", title: t("nav.comparisons"), icon: Languages },
+    ],
+    [t],
+  );
 
-	const availableComparisonLanguages = [
-		"lynx",
-		"javascript",
-		"python",
-		"go",
-		"rust",
-	];
+  const availableComparisonLanguages = [
+    "lynx",
+    "javascript",
+    "python",
+    "go",
+    "rust",
+  ];
 
-	const searchableContent = useSearchableContent(t);
+  const searchableContent = useSearchableContent(t);
 
-	const searchResults = useMemo(() => {
-		if (!searchQuery.trim()) return {};
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return {};
 
-		const query = searchQuery.toLowerCase();
-		const results = searchableContent.filter((item) =>
-			item.content.toLowerCase().includes(query),
-		);
+    const query = searchQuery.toLowerCase();
+    const results = searchableContent.filter((item) =>
+      item.content.toLowerCase().includes(query),
+    );
 
-		const groupedResults = results.reduce(
-			(acc, result) => {
-				if (!acc[result.section]) acc[result.section] = [];
-				if (acc[result.section].length < 5) {
-					acc[result.section].push(result);
-				}
-				return acc;
-			},
-			{} as Record<string, typeof searchableContent>,
-		);
+    const groupedResults = results.reduce(
+      (acc, result) => {
+        if (!acc[result.section]) acc[result.section] = [];
+        if (acc[result.section].length < 5) {
+          acc[result.section].push(result);
+        }
+        return acc;
+      },
+      {} as Record<string, typeof searchableContent>,
+    );
 
-		return groupedResults;
-	}, [searchQuery, searchableContent]);
+    return groupedResults;
+  }, [searchQuery, searchableContent]);
 
-	const handleSectionChange = (sectionId: string) => {
-		setActiveSection(sectionId);
-		setSearchQuery("");
-	};
+  const handleSectionChange = (sectionId: string) => {
+    setActiveSection(sectionId);
+    setSearchQuery("");
+  };
 
-	const handleLanguageToggle = (lang: string) => {
-		if (selectedComparisonLanguages.includes(lang)) {
-			if (selectedComparisonLanguages.length > 1) {
-				setSelectedComparisonLanguages(
-					selectedComparisonLanguages.filter((l) => l !== lang),
-				);
-			}
-		} else {
-			setSelectedComparisonLanguages([...selectedComparisonLanguages, lang]);
-		}
-	};
+  const handleLanguageToggle = (lang: string) => {
+    if (selectedComparisonLanguages.includes(lang)) {
+      if (selectedComparisonLanguages.length > 1) {
+        setSelectedComparisonLanguages(
+          selectedComparisonLanguages.filter((l) => l !== lang),
+        );
+      }
+    } else {
+      setSelectedComparisonLanguages([...selectedComparisonLanguages, lang]);
+    }
+  };
 
-	const renderContent = () => {
-		if (searchQuery.trim()) {
-			return (
-				<SearchResults
-					searchQuery={searchQuery}
-					searchResults={searchResults}
-					sections={sections}
-					isDarkMode={true}
-					onSectionClick={handleSectionChange}
-					noResultsText={t("search.noResults")}
-					tryDifferentText={t("search.tryDifferent")}
-					resultsTitle={t("search.results")}
-				/>
-			);
-		}
+  const renderContent = () => {
+    if (searchQuery.trim()) {
+      return (
+        <SearchResults
+          searchQuery={searchQuery}
+          searchResults={searchResults}
+          sections={sections}
+          isDarkMode={true}
+          onSectionClick={handleSectionChange}
+          noResultsText={t("search.noResults")}
+          tryDifferentText={t("search.tryDifferent")}
+          resultsTitle={t("search.results")}
+        />
+      );
+    }
 
-		switch (activeSection) {
-			case "overview":
-				return <OverviewSection isDarkMode={true} />;
-			case "language":
-				return <LanguageSection isDarkMode={true} />;
-			case "builtins":
-				return <BuiltinsSection isDarkMode={true} />;
-			case "stdlib":
-				return <StdLibSection isDarkMode={true} />;
-			case "examples":
-				return <ExamplesSection isDarkMode={true} />;
-			case "comparisons":
-				return (
-					<ComparisonsSection
-						isDarkMode={true}
-						selectedLanguages={selectedComparisonLanguages}
-						availableLanguages={availableComparisonLanguages}
-						onLanguageToggle={handleLanguageToggle}
-					/>
-				);
-			default:
-				return null;
-		}
-	};
+    switch (activeSection) {
+      case "overview":
+        return <OverviewSection isDarkMode={true} />;
+      case "language":
+        return <LanguageSection isDarkMode={true} />;
+      case "builtins":
+        return <BuiltinsSection isDarkMode={true} />;
+      case "stdlib":
+        return <StdLibSection isDarkMode={true} />;
+      case "examples":
+        return <ExamplesSection isDarkMode={true} />;
+      case "comparisons":
+        return (
+          <ComparisonsSection
+            isDarkMode={true}
+            selectedLanguages={selectedComparisonLanguages}
+            availableLanguages={availableComparisonLanguages}
+            onLanguageToggle={handleLanguageToggle}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
 	return (
 		<div className="min-h-screen bg-black text-neutral-300 font-mono">
@@ -160,23 +168,23 @@ export const Docs: React.FC = () => {
 							<LanguageSelector isDarkMode={true} />
 						</div>
 
-						<SearchBar
-							value={searchQuery}
-							onChange={setSearchQuery}
-							isDarkMode={true}
-							placeholder={t("search.placeholder")}
-							clearLabel={t("search.clear")}
-						/>
-					</div>
+            <SearchBar
+              value={searchQuery}
+              onChange={setSearchQuery}
+              isDarkMode={true}
+              placeholder={t("search.placeholder")}
+              clearLabel={t("search.clear")}
+            />
+          </div>
 
-					<NavigationSidebar
-						sections={sections}
-						activeSection={activeSection}
-						onSectionChange={handleSectionChange}
-						isDarkMode={true}
-						searchQuery={searchQuery}
-					/>
-				</aside>
+          <NavigationSidebar
+            sections={sections}
+            activeSection={activeSection}
+            onSectionChange={handleSectionChange}
+            isDarkMode={true}
+            searchQuery={searchQuery}
+          />
+        </aside>
 
 				<main className="flex-1 overflow-y-auto">
 					<div className="p-6">{renderContent()}</div>
