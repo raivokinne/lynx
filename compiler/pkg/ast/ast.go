@@ -591,6 +591,7 @@ type ErrorStatement struct {
 }
 
 func (es *ErrorStatement) statementNode()       {}
+func (es *ErrorStatement) expressionNode()     {}
 func (es *ErrorStatement) TokenLiteral() string { return es.Token.Literal }
 func (es *ErrorStatement) String() string {
 	var out bytes.Buffer

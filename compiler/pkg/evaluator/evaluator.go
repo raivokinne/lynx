@@ -1763,6 +1763,7 @@ func loadModuleSource(name string, env *object.Env) ([]byte, error) {
 		filepath.Join(env.Dir, name+".lynx"),
 		filepath.Join("./modules", name+".lynx"),
 		filepath.Join(os.Getenv("HOME"), "modules", name+".lynx"),
+		filepath.Join("./std", name+".lynx"),
 	}
 
 	var existingPaths []string
