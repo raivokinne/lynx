@@ -713,4 +713,48 @@ export const translations: TranslatedContent = {
 		zh: "使用模式匹配进行控制流",
 		ja: "制御フローにパターンマッチングを使用",
 	},
+
+	// Language - new keys
+	"language.tuples": {
+		en: "Tuples",
+		es: "Tuplas",
+		fr: "Tuples",
+		de: "Tupel",
+		zh: "元组",
+		ja: "タプル",
+	},
+	"language.slices": {
+		en: "Array Slices",
+		es: "Rebanadas de Arrays",
+		fr: "Tranches de Tableaux",
+		de: "Array-Scheiben",
+		zh: "数组切片",
+		ja: "配列スライス",
+	},
+
+	// Stdlib - new modules
+	"stdlib.strings": {
+		en: "@strings - String Operations",
+		es: "@strings - Operaciones de Strings",
+		fr: "@strings - Opérations de Chaînes",
+		de: "@strings - String-Operationen",
+		zh: "@strings - 字符串操作",
+		ja: "@strings - 文字列操作",
+	},
+	"stdlib.io": {
+		en: "@io - File Operations",
+		es: "@io - Operaciones de Archivos",
+		fr: "@io - Opérations de Fichiers",
+		de: "@io - Dateioperationen",
+		zh: "@io - 文件操作",
+		ja: "@io - ファイル操作",
+	},
+	"stdlib.net": {
+		en: "@net - Network Operations",
+		es: "@io - Operaciones de Red",
+		fr: "@net - Opérations Réseau",
+		de: "@net - Netzwerkoperationen",
+		zh: "@net - 网络操作",
+		ja: "@net - ネットワーク操作",
+	},
 };

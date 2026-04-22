@@ -1,0 +1,242 @@
+let io = @module()
+
+io.readLine = fn() {
+    return _readLine()
+}
+
+io.read = fn() {
+    return _read()
+}
+
+io.write = fn(msg) {
+    return _write(msg)
+}
+
+io.print = fn(msg) {
+    println(msg)
+    return null
+}
+
+io.println = fn(msg) {
+    println(msg)
+    return null
+}
+
+io.printf = fn(format, args) {
+    let formatted = _formatPrint(format, args)
+    println(formatted)
+    return null
+}
+
+io.format = fn(format, args) {
+    return _formatPrint(format, args)
+}
+
+io.readFile = fn(path) {
+    return _readFile(path)
+}
+
+io.writeFile = fn(path, content) {
+    return _writeFile(path, content)
+}
+
+io.readFileAsync = fn(path, callback) {
+    return _readFileAsync(path, callback)
+}
+
+io.writeFileAsync = fn(path, content, callback) {
+    return _writeFileAsync(path, content, callback)
+}
+
+io.lines = fn(text) {
+    let result = []
+    let current = ""
+    for char in text {
+        if char == "\n" {
+            result = result + [current]
+            current = ""
+        } else {
+            current = current + char
+        }
+    }
+    if current != "" {
+        result = result + [current]
+    }
+    return result
+}
+
+io.words = fn(text) {
+    let result = []
+    let current = ""
+    for char in text {
+        if char == " " or char == "\n" or char == "\t" {
+            if current != "" {
+                result = result + [current]
+                current = ""
+            }
+        } else {
+            current = current + char
+        }
+    }
+    if current != "" {
+        result = result + [current]
+    }
+    return result
+}
+
+io.split = fn(text, delimiter) {
+    let result = []
+    let current = ""
+    let delimLen = len(delimiter)
+    let i = 0
+    while i < len(text) {
+        let match = true
+        for j in range(0, delimLen) {
+            if text[i + j] != delimiter[j] {
+                match = false
+                break
+            }
+        }
+        if match {
+            result = result + [current]
+            current = ""
+            i = i + delimLen
+        } else {
+            current = current + text[i]
+            i = i + 1
+        }
+    }
+    if current != "" {
+        result = result + [current]
+    }
+    return result
+}
+
+io.join = fn(parts, separator) {
+    let result = ""
+    for i in range(0, len(parts)) {
+        if i > 0 {
+            result = result + separator
+        }
+        result = result + parts[i]
+    }
+    return result
+}
+
+io.trim = fn(text) {
+    let start = 0
+    while start < len(text) and (text[start] == " " or text[start] == "\n" or text[start] == "\t") {
+        start = start + 1
+    }
+    let end = len(text)
+    while end > start and (text[end - 1] == " " or text[end - 1] == "\n" or text[end - 1] == "\t") {
+        end = end - 1
+    }
+    if start >= end {
+        return ""
+    }
+    return text[start:end]
+}
+
+io.upper = fn(text) {
+    let result = ""
+    let a = 65
+    let z = 90
+    let A = 97
+    for char in text {
+        if char >= "A" and char <= "Z" {
+            result = result + char
+        } else {
+            let code = int(char)
+            if code >= a and code <= z {
+                result = result + str(code - 32)
+            } else {
+                result = result + char
+            }
+        }
+    }
+    return result
+}
+
+io.lower = fn(text) {
+    let result = ""
+    for char in text {
+        let code = int(char)
+        if code >= 65 and code <= 90 {
+            result = result + str(code + 32)
+        } else {
+            result = result + char
+        }
+    }
+    return result
+}
+
+io.replace = fn(text, old, new) {
+    if old == "" {
+        return text
+    }
+    let result = ""
+    let i = 0
+    while i < len(text) {
+        let match = true
+        for j in range(0, len(old)) {
+            if i + j >= len(text) or text[i + j] != old[j] {
+                match = false
+                break
+            }
+        }
+        if match {
+            result = result + new
+            i = i + len(old)
+        } else {
+            result = result + text[i]
+            i = i + 1
+        }
+    }
+    return result
+}
+
+io.contains = fn(text, substring) {
+    if substring == "" {
+        return true
+    }
+    let subLen = len(substring)
+    for i in range(0, len(text) - subLen + 1) {
+        let match = true
+        for j in range(0, subLen) {
+            if text[i + j] != substring[j] {
+                match = false
+                break
+            }
+        }
+        if match {
+            return true
+        }
+    }
+    return false
+}
+
+io.startsWith = fn(text, prefix) {
+    if len(prefix) > len(text) {
+        return false
+    }
+    for i in range(0, len(prefix)) {
+        if text[i] != prefix[i] {
+            return false
+        }
+    }
+    return true
+}
+
+io.endsWith = fn(text, suffix) {
+    if len(suffix) > len(text) {
+        return false
+    }
+    let start = len(text) - len(suffix)
+    for i in range(0, len(suffix)) {
+        if text[start + i] != suffix[i] {
+            return false
+        }
+    }
+    return true
+}

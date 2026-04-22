@@ -1,0 +1,186 @@
+let net = @module()
+
+net.httpGet = fn(url) {
+    return _http_get(url)
+}
+
+net.httpPost = fn(url, contentType, body) {
+    return _http_post(url, contentType, body)
+}
+
+net.httpPut = fn(url, contentType, body) {
+    return _http_put(url, contentType, body)
+}
+
+net.httpDelete = fn(url) {
+    return _http_delete(url)
+}
+
+net.httpHead = fn(url) {
+    return _http_head(url)
+}
+
+net.parseUrl = fn(urlString) {
+    let proto = ""
+    let host = ""
+    let path = "/"
+    let i = 0
+    while i < len(urlString) and urlString[i] != ":" {
+        proto = proto + urlString[i]
+        i = i + 1
+    }
+    i = i + 3
+    let startHost = i
+    let hasPort = false
+    while i < len(urlString) and urlString[i] != "/" {
+        if urlString[i] == ":" {
+            hasPort = true
+        }
+        i = i + 1
+    }
+    if hasPort {
+        host = urlString[startHost:i]
+    } else {
+        host = urlString[startHost:i]
+    }
+    if i < len(urlString) {
+        path = urlString[i:]
+    }
+    return {
+        "protocol": proto,
+        "host": host,
+        "path": path
+    }
+}
+
+net.buildUrl = fn(parts) {
+    let url = parts["protocol"] + "://" + parts["host"]
+    if parts["path"] != "" {
+        url = url + parts["path"]
+    }
+    return url
+}
+
+net.queryEncode = fn(params) {
+    let result = ""
+    let keys = []
+    for key in params {
+        keys = keys + [key]
+    }
+    for i in range(0, len(keys)) {
+        if i > 0 {
+            result = result + "&"
+        }
+        result = result + keys[i] + "=" + params[keys[i]]
+    }
+    return result
+}
+
+net.queryDecode = fn(query) {
+    let result = {}
+    let pairs = net.splitQuery(query)
+    for pair in pairs {
+        let eq = 0
+        while eq < len(pair) and pair[eq] != "=" {
+            eq = eq + 1
+        }
+        if eq < len(pair) {
+            let key = pair[:eq]
+            let val = pair[eq + 1:]
+            result[key] = val
+        }
+    }
+    return result
+}
+
+net.splitQuery = fn(query) {
+    let parts = []
+    let current = ""
+    for char in query {
+        if char == "&" {
+            if current != "" {
+                parts = parts + [current]
+                current = ""
+            }
+        } else {
+            current = current + char
+        }
+    }
+    if current != "" {
+        parts = parts + [current]
+    }
+    return parts
+}
+
+net.base64Encode = fn(data) {
+    let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+    let result = ""
+    let i = 0
+    while i < len(data) {
+        let b1 = int(data[i])
+        let b2 = 0
+        let b3 = 0
+        if i + 1 < len(data) {
+            b2 = int(data[i + 1])
+        }
+        if i + 2 < len(data) {
+            b3 = int(data[i + 2])
+        }
+        result = result + alphabet[b1 >> 2]
+        result = result + alphabet[((b1 & 3) << 4) | (b2 >> 4)]
+        if i + 1 < len(data) {
+            result = result + alphabet[((b2 & 15) << 2) | (b3 >> 6)]
+        } else {
+            result = result + "="
+        }
+        if i + 2 < len(data) {
+            result = result + alphabet[b3 & 63]
+        } else {
+            result = result + "="
+        }
+        i = i + 3
+    }
+    return result
+}
+
+net.base64Decode = fn(data) {
+    let result = ""
+    let cleanData = ""
+    for char in data {
+        if char != "=" {
+            cleanData = cleanData + char
+        }
+    }
+    let i = 0
+    while i < len(cleanData) {
+        let idx1 = net.b64Index(cleanData[i])
+        let idx2 = net.b64Index(cleanData[i + 1])
+        let idx3 = 0
+        let idx4 = 0
+        if i + 2 < len(cleanData) {
+            idx3 = net.b64Index(cleanData[i + 2])
+        }
+        if i + 3 < len(cleanData) {
+            idx4 = net.b64Index(cleanData[i + 3])
+        }
+        result = result + str((idx1 << 2) | (idx2 >> 4))
+        if i + 2 < len(cleanData) and cleanData[i + 2] != "=" {
+            result = result + str(((idx2 & 15) << 4) | (idx3 >> 2))
+        }
+        if i + 3 < len(cleanData) and cleanData[i + 3] != "=" {
+            result = result + str(((idx3 & 3) << 6) | idx4)
+        }
+        i = i + 4
+    }
+    return result
+}
+
+net.b64Index = fn(char) {
+    let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+    for i in range(0, len(alphabet)) {
+        if alphabet[i] == char {
+            return i
+        }
+    }
+    return 0
+}

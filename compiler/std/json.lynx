@@ -1,0 +1,111 @@
+let json = @module()
+
+json.parse = fn(text) {
+    return _jsonParse(text)
+}
+
+json.stringify = fn(value) {
+    return _jsonStringify(value)
+}
+
+json.encode = fn(value) {
+    return _jsonStringify(value)
+}
+
+json.decode = fn(text) {
+    return _jsonParse(text)
+}
+
+json.pretty = fn(value) {
+    return _jsonPretty(value)
+}
+
+json.toMap = fn(obj) {
+    let result = {}
+    for key in obj {
+        result[key] = obj[key]
+    }
+    return result
+}
+
+json.toList = fn(arr) {
+    let result = []
+    for item in arr {
+        result = result + [item]
+    }
+    return result
+}
+
+json.clone = fn(value) {
+    return json.parse(json.stringify(value))
+}
+
+json.merge = fn(target, source) {
+    for key in source {
+        target[key] = source[key]
+    }
+    return target
+}
+
+json.pick = fn(obj, keys) {
+    let result = {}
+    for key in keys {
+        if obj[key] != null {
+            result[key] = obj[key]
+        }
+    }
+    return result
+}
+
+json.omit = fn(obj, keys) {
+    let result = {}
+    for key in obj {
+        let skip = false
+        for k in keys {
+            if k == key {
+                skip = true
+                break
+            }
+        }
+        if !skip {
+            result[key] = obj[key]
+        }
+    }
+    return result
+}
+
+json.has = fn(obj, key) {
+    return obj[key] != null
+}
+
+json.keys = fn(obj) {
+    let result = []
+    for key in obj {
+        result = result + [key]
+    }
+    return result
+}
+
+json.values = fn(obj) {
+    let result = []
+    for key in obj {
+        result = result + [obj[key]]
+    }
+    return result
+}
+
+json.entries = fn(obj) {
+    let result = []
+    for key in obj {
+        result = result + [{ "key": key, "value": obj[key] }]
+    }
+    return result
+}
+
+json.fromEntries = fn(entries) {
+    let result = {}
+    for entry in entries {
+        result[entry["key"]] = entry["value"]
+    }
+    return result
+}

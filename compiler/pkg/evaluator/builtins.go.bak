@@ -9,12 +9,16 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"hash/adler32"
+	"hash/crc32"
 	"io"
 	"lynx/pkg/object"
 	"math/rand/v2"
 	"net/http"
 	"os"
+	"os/exec"
 	"os/user"
+	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -52,10 +56,15 @@ func RegisterBuiltins() {
 	builtins["_parseTime"] = &object.Builtin{Fn: builtinParseTime}
 	builtins["_weekday"] = &object.Builtin{Fn: builtinWeekday}
 	builtins["_month"] = &object.Builtin{Fn: builtinMonth}
+	builtins["_setTimeout"] = &object.Builtin{Fn: builtinSetTimeout}
+	builtins["_setInterval"] = &object.Builtin{Fn: builtinSetInterval}
+	builtins["_clearTimeout"] = &object.Builtin{Fn: builtinClearTimeout}
+	builtins["_clearInterval"] = &object.Builtin{Fn: builtinClearInterval}
 	builtins["_getEnv"] = &object.Builtin{Fn: builtinGetEnv}
 	builtins["_setEnv"] = &object.Builtin{Fn: builtinSetEnv}
 	builtins["_exit"] = &object.Builtin{Fn: builtinExit}
 	builtins["_cwd"] = &object.Builtin{Fn: builtinCwd}
+	builtins["_chdir"] = &object.Builtin{Fn: builtinChdir}
 	builtins["_home"] = &object.Builtin{Fn: builtinHome}
 	builtins["_temp"] = &object.Builtin{Fn: builtinTemp}
 	builtins["_arch"] = &object.Builtin{Fn: builtinArch}
@@ -70,13 +79,30 @@ func RegisterBuiltins() {
 	builtins["_rename"] = &object.Builtin{Fn: builtinRename}
 	builtins["_stat"] = &object.Builtin{Fn: builtinStat}
 	builtins["_listDir"] = &object.Builtin{Fn: builtinListDir}
+	builtins["_readDir"] = &object.Builtin{Fn: builtinReadDir}
+	builtins["_copy"] = &object.Builtin{Fn: builtinCopyFile}
+	builtins["_move"] = &object.Builtin{Fn: builtinMove}
+	builtins["_expand"] = &object.Builtin{Fn: builtinExpand}
+	builtins["_abs"] = &object.Builtin{Fn: builtinAbs}
+	builtins["_splitPath"] = &object.Builtin{Fn: builtinSplitPath}
+	builtins["_joinPath"] = &object.Builtin{Fn: builtinJoinPath}
 	builtins["_md5"] = &object.Builtin{Fn: builtinMd5}
 	builtins["_sha1"] = &object.Builtin{Fn: builtinSha1}
 	builtins["_sha256"] = &object.Builtin{Fn: builtinSha256}
 	builtins["_sha512"] = &object.Builtin{Fn: builtinSha512}
+	builtins["_hmac"] = &object.Builtin{Fn: builtinHmac}
+	builtins["_crc32"] = &object.Builtin{Fn: builtinCrc32}
+	builtins["_adler32"] = &object.Builtin{Fn: builtinAdler32}
 	builtins["_jsonParse"] = &object.Builtin{Fn: builtinJsonParse}
 	builtins["_jsonStringify"] = &object.Builtin{Fn: builtinJsonStringify}
-}
+	builtins["_jsonPretty"] = &object.Builtin{Fn: builtinJsonPretty}
+	builtins["_reMatch"] = &object.Builtin{Fn: builtinReMatch}
+	builtins["_reSearch"] = &object.Builtin{Fn: builtinReSearch}
+	builtins["_reFind"] = &object.Builtin{Fn: builtinReFind}
+	builtins["_reFindAll"] = &object.Builtin{Fn: builtinReFindAll}
+	builtins["_reReplace"] = &object.Builtin{Fn: builtinReReplace}
+	builtins["_reSplit"] = &object.Builtin{Fn: builtinReSplit}
+	builtins["_reCompile"] = &object.Builtin{Fn: builtinReCompile}
 
 func builtinType(args ...object.Object) object.Object {
 	if len(args) != 1 {
@@ -457,15 +483,9 @@ func builtinHttpHead(args ...object.Object) object.Object {
 		return newError("%s", err.Error())
 	}
 	defer resp.Body.Close()
-	m := map[string]object.Object{
-		"status": &object.Integer{Value: int64(resp.StatusCode)},
-	}
-	pairs := map[object.HashKey]object.HashPair{}
-	for k, v := range m {
-		key := &object.String{Value: k}
-		pairs[key.HashKey()] = object.HashPair{Key: &object.String{Value: k}, Value: v}
-	}
-	return &object.Hash{Pairs: pairs}
+	return &object.Hash{Pairs: map[object.HashKey]object.HashPair{
+		{Type: "STRING", Value: 0}: {Key: &object.String{Value: "status"}, Value: &object.Integer{Value: int64(resp.StatusCode)}},
+	}}
 }
 
 func builtinTimestamp(args ...object.Object) object.Object {
@@ -534,6 +554,22 @@ func builtinMonth(args ...object.Object) object.Object {
 	return &object.Integer{Value: int64(t.Month()) - 1}
 }
 
+func builtinSetTimeout(args ...object.Object) object.Object {
+	return &object.Integer{Value: 0}
+}
+
+func builtinSetInterval(args ...object.Object) object.Object {
+	return &object.Integer{Value: 0}
+}
+
+func builtinClearTimeout(args ...object.Object) object.Object {
+	return NULL
+}
+
+func builtinClearInterval(args ...object.Object) object.Object {
+	return NULL
+}
+
 func builtinGetEnv(args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return newError("_getEnv expects 1 argument")
@@ -574,6 +610,21 @@ func builtinCwd(args ...object.Object) object.Object {
 	return &object.String{Value: dir}
 }
 
+func builtinChdir(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("_chdir expects 1 argument")
+	}
+	path, ok := args[0].(*object.String)
+	if !ok {
+		return newError("_chdir expects a string")
+	}
+	err := os.Chdir(path.Value)
+	if err != nil {
+		return newError("%s", err.Error())
+	}
+	return NULL
+}
+
 func builtinHome(args ...object.Object) object.Object {
 	home, _ := os.UserHomeDir()
 	return &object.String{Value: home}
@@ -601,15 +652,12 @@ func builtinHostname(args ...object.Object) object.Object {
 }
 
 func builtinUser(args ...object.Object) object.Object {
-	usr, err := user.Current()
-	if err != nil {
-		return &object.String{Value: ""}
-	}
-	return &object.String{Value: usr.Name}
+	user, _ := user.Current()
+	return &object.String{Value: user.Name}
 }
 
 func builtinArgs(args ...object.Object) object.Object {
-	return &object.Array{Elements: []object.Object{}}
+	return &object.Array{Elements: nil}
 }
 
 func builtinMkdir(args ...object.Object) object.Object {
@@ -677,6 +725,7 @@ func builtinStat(args ...object.Object) object.Object {
 	m := map[string]object.Object{
 		"name":    &object.String{Value: info.Name()},
 		"size":    &object.Integer{Value: info.Size()},
+		"mode":    &object.Integer{Value: int64(info.Mode())},
 		"modTime": &object.Integer{Value: info.ModTime().UnixMilli()},
 	}
 	if info.IsDir() {
@@ -686,8 +735,7 @@ func builtinStat(args ...object.Object) object.Object {
 	}
 	pairs := map[object.HashKey]object.HashPair{}
 	for k, v := range m {
-		key := &object.String{Value: k}
-		pairs[key.HashKey()] = object.HashPair{Key: key, Value: v}
+		pairs[object.String{Value: k}.HashKey()] = object.HashPair{Key: &object.String{Value: k}, Value: v}
 	}
 	return &object.Hash{Pairs: pairs}
 }
@@ -709,6 +757,109 @@ func builtinListDir(args ...object.Object) object.Object {
 		elements = append(elements, &object.String{Value: e.Name()})
 	}
 	return &object.Array{Elements: elements}
+}
+
+func builtinReadDir(args ...object.Object) object.Object {
+	return builtinListDir(args...)
+}
+
+func builtinCopyFile(args ...object.Object) object.Object {
+	if len(args) != 2 {
+		return newError("_copy expects 2 arguments")
+	}
+	src, ok1 := args[0].(*object.String)
+	dst, ok2 := args[1].(*object.String)
+	if !ok1 || !ok2 {
+		return newError("_copy expects (string, string)")
+	}
+	data, err := os.ReadFile(src.Value)
+	if err != nil {
+		return newError("%s", err.Error())
+	}
+	err = os.WriteFile(dst.Value, data, 0644)
+	if err != nil {
+		return newError("%s", err.Error())
+	}
+	return NULL
+}
+
+func builtinMove(args ...object.Object) object.Object {
+	if len(args) != 2 {
+		return newError("_move expects 2 arguments")
+	}
+	src, ok1 := args[0].(*object.String)
+	dst, ok2 := args[1].(*object.String)
+	if !ok1 || !ok2 {
+		return newError("_move expects (string, string)")
+	}
+	err := os.Rename(src.Value, dst.Value)
+	if err != nil {
+		return newError("%s", err.Error())
+	}
+	return NULL
+}
+
+func builtinExpand(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("_expand expects 1 argument")
+	}
+	path, ok := args[0].(*object.String)
+	if !ok {
+		return newError("_expand expects a string")
+	}
+	expanded := os.ExpandEnv(path.Value)
+	return &object.String{Value: expanded}
+}
+
+func builtinAbs(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("_abs expects 1 argument")
+	}
+	path, ok := args[0].(*object.String)
+	if !ok {
+		return newError("_abs expects a string")
+	}
+	abs, err := filepath.Abs(path.Value)
+	if err != nil {
+		return &object.String{Value: path.Value}
+	}
+	return &object.String{Value: abs}
+}
+
+func builtinSplitPath(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("_splitPath expects 1 argument")
+	}
+	path, ok := args[0].(*object.String)
+	if !ok {
+		return newError("_splitPath expects a string")
+	}
+	dir := filepath.Dir(path.Value)
+	base := filepath.Base(path.Value)
+	ext := filepath.Ext(path.Value)
+	pairs := map[object.HashKey]object.HashPair{
+		{Type: "STRING", Value: 0}: {Key: &object.String{Value: "dir"}, Value: &object.String{Value: dir}},
+		{Type: "STRING", Value: 1}: {Key: &object.String{Value: "base"}, Value: &object.String{Value: base}},
+		{Type: "STRING", Value: 2}: {Key: &object.String{Value: "ext"}, Value: &object.String{Value: ext}},
+	}
+	return &object.Hash{Pairs: pairs}
+}
+
+func builtinJoinPath(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("_joinPath expects 1 argument")
+	}
+	arr, ok := args[0].(*object.Array)
+	if !ok {
+		return newError("_joinPath expects an array")
+	}
+	var parts []string
+	for _, e := range arr.Elements {
+		if s, ok := e.(*object.String); ok {
+			parts = append(parts, s.Value)
+		}
+	}
+	return &object.String{Value: filepath.Join(parts...)}
 }
 
 func builtinMd5(args ...object.Object) object.Object {
@@ -763,6 +914,36 @@ func builtinSha512(args ...object.Object) object.Object {
 	return &object.String{Value: hex.EncodeToString(h.Sum(nil))}
 }
 
+func builtinHmac(args ...object.Object) object.Object {
+	return &object.String{Value: ""}
+}
+
+func builtinCrc32(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("_crc32 expects 1 argument")
+	}
+	data, ok := args[0].(*object.String)
+	if !ok {
+		return newError("_crc32 expects a string")
+	}
+	h := crc32.New()
+	h.Write([]byte(data.Value))
+	return &object.Integer{Value: int64(h.Sum32())}
+}
+
+func builtinAdler32(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("_adler32 expects 1 argument")
+	}
+	data, ok := args[0].(*object.String)
+	if !ok {
+		return newError("_adler32 expects a string")
+	}
+	h := adler32.New()
+	h.Write([]byte(data.Value))
+	return &object.Integer{Value: int64(h.Sum32())}
+}
+
 func builtinJsonParse(args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return newError("_jsonParse expects 1 argument")
@@ -791,13 +972,52 @@ func builtinJsonStringify(args ...object.Object) object.Object {
 	return &object.String{Value: string(jsonData)}
 }
 
+func builtinJsonPretty(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("_jsonPretty expects 1 argument")
+	}
+	data := args[0]
+	jsonData, err := json.MarshalIndent(data.Inspect(), "", "  ")
+	if err != nil {
+		return newError("%s", err.Error())
+	}
+	return &object.String{Value: string(jsonData)}
+}
+
+func builtinReMatch(args ...object.Object) object.Object {
+	return NULL
+}
+
+func builtinReSearch(args ...object.Object) object.Object {
+	return NULL
+}
+
+func builtinReFind(args ...object.Object) object.Object {
+	return NULL
+}
+
+func builtinReFindAll(args ...object.Object) object.Object {
+	return &object.Array{Elements: []object.Object{}}
+}
+
+func builtinReReplace(args ...object.Object) object.Object {
+	return &object.String{Value: ""}
+}
+
+func builtinReSplit(args ...object.Object) object.Object {
+	return &object.Array{Elements: []object.Object{}}
+}
+
+func builtinReCompile(args ...object.Object) object.Object {
+	return &object.Hash{Pairs: map[object.HashKey]object.HashPair{}}
+}
+
 func convertJSON(v interface{}) object.Object {
 	switch val := v.(type) {
 	case map[string]interface{}:
 		pairs := map[object.HashKey]object.HashPair{}
 		for k, vv := range val {
-			key := &object.String{Value: k}
-		pairs[key.HashKey()] = object.HashPair{
+			pairs[object.String{Value: k}.HashKey()] = object.HashPair{
 				Key:   &object.String{Value: k},
 				Value: convertJSON(vv),
 			}
@@ -820,4 +1040,15 @@ func convertJSON(v interface{}) object.Object {
 	default:
 		return NULL
 	}
+}
+	path, ok1 := args[0].(*object.String)
+	content, ok2 := args[1].(*object.String)
+	if !ok1 || !ok2 {
+		return newError("_writeFile expects (string, string)")
+	}
+	err := os.WriteFile(path.Value, []byte(content.Value), 0644)
+	if err != nil {
+		return newError("%s", err.Error())
+	}
+	return NULL
 }

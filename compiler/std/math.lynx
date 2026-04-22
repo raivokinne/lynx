@@ -1,0 +1,149 @@
+let math = @module()
+
+math.pi = 3.14159265359
+math.e = 2.71828182845
+
+math.abs = fn(x) {
+    if x < 0 {
+        return -x
+    }
+    return x
+}
+
+math.floor = fn(x) {
+    let n = int(x)
+    if x < 0 and x != float(n) {
+        return float(n - 1)
+    }
+    return float(n)
+}
+
+math.ceil = fn(x) {
+    let n = int(x)
+    if x > 0 and x != float(n) {
+        return float(n + 1)
+    }
+    return float(n)
+}
+
+math.round = fn(x) {
+    let n = int(x)
+    let f = float(n)
+    if x - f >= 0.5 {
+        return float(n + 1)
+    }
+    if f - x >= 0.5 {
+        return float(n - 1)
+    }
+    return f
+}
+
+math.sqrt = fn(x) {
+    if x < 0 {
+        return error("cannot take square root of negative number")
+    }
+    if x == 0 {
+        return 0.0
+    }
+    let guess = x / 2.0
+    for i in range(0, 50) {
+        guess = (guess + x / guess) / 2.0
+    }
+    return guess
+}
+
+math.pow = fn(base, exp) {
+    if exp == 0 {
+        return 1.0
+    }
+    if exp < 0 {
+        let result = 1.0
+        for i in range(0, -exp) {
+            result = result / base
+        }
+        return result
+    }
+    let result = 1.0
+    for i in range(0, exp) {
+        result = result * base
+    }
+    return result
+}
+
+math.min = fn(a, b) {
+    if a < b {
+        return a
+    }
+    return b
+}
+
+math.max = fn(a, b) {
+    if a > b {
+        return a
+    }
+    return b
+}
+
+math.clamp = fn(value, minVal, maxVal) {
+    if value < minVal {
+        return minVal
+    }
+    if value > maxVal {
+        return maxVal
+    }
+    return value
+}
+
+math.sin = fn(x) {
+    let result = 0.0
+    let term = x
+    for i in range(1, 25) {
+        result = result + term
+        term = -term * x * x / float((2 * i) * (2 * i + 1))
+    }
+    return result
+}
+
+math.cos = fn(x) {
+    let result = 1.0
+    let term = 1.0
+    for i in range(1, 25) {
+        term = -term * x * x / float((2 * i - 1) * (2 * i))
+        result = result + term
+    }
+    return result
+}
+
+math.log = fn(x) {
+    if x <= 0 {
+        return error("log: argument must be positive")
+    }
+    if x == 1.0 {
+        return 0.0
+    }
+    let count = 0
+    while x >= 2.0 {
+        x = x / 2.0
+        count = count + 1
+    }
+    while x < 1.0 {
+        x = x * 2.0
+        count = count - 1
+    }
+    let result = 0.0
+    let y = (x - 1.0) / (x + 1.0)
+    let term = y
+    for i in range(1, 50, 2) {
+        result = result + term / float(i)
+        term = term * y * y
+    }
+    return result * 2.0 + float(count) * 0.69314718055
+}
+
+math.degrees = fn(radians) {
+    return radians * 180.0 / math.pi
+}
+
+math.radians = fn(degrees) {
+    return degrees * math.pi / 180.0
+}

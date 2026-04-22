@@ -131,44 +131,42 @@ export const Docs: React.FC = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-black text-neutral-300 font-mono">
-      <header className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-neutral-800">
-        <div className="max-w-6xl mx-auto px-4 h-12 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link
-              to="/"
-              className="flex items-center gap-2 hover:text-white transition-colors"
-            >
-              <span className="text-sm font-bold">lynx</span>
-            </Link>
-            <Link
-              to="/editor"
-              className="text-xs hover:text-white transition-colors"
-            >
-              editor
-            </Link>
-          </div>
-          <div className="flex items-center gap-4 text-xs">
-            <a
-              href="https://github.com/raivokinne/lynx"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white transition-colors flex items-center gap-1"
-            >
-              <Github className="w-3 h-3" />
-              github
-            </a>
-          </div>
-        </div>
-      </header>
+	return (
+		<div className="min-h-screen bg-black text-neutral-300 font-mono">
+			<header className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-neutral-800">
+				<div className="max-w-6xl mx-auto px-4 h-12 flex items-center justify-between">
+					<div className="flex items-center gap-4">
+						<Link to="/" className="flex items-center gap-2 hover:text-white transition-colors">
+							<img src="/logo.png" alt="logo" className="w-5 h-5" />
+							<span className="text-sm font-bold">lynx</span>
+						</Link>
+						<Link
+							to="/editor"
+							className="text-xs hover:text-white transition-colors"
+						>
+							editor
+						</Link>
+					</div>
+					<div className="flex items-center gap-4 text-xs">
+						<a
+							href="https://github.com/raivokinne/lynx"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="hover:text-white transition-colors flex items-center gap-1"
+						>
+							<Github className="w-3 h-3" />
+							github
+						</a>
+					</div>
+				</div>
+			</header>
 
-      <div className="pt-12 flex">
-        <aside className="fixed left-0 top-12 bottom-0 w-56 bg-black border-r border-neutral-800 flex flex-col">
-          <div className="p-3 border-b border-neutral-800">
-            <div className="mb-3">
-              <LanguageSelector isDarkMode={true} />
-            </div>
+			<div className="pt-12 flex h-[calc(100vh-3rem)]">
+				<aside className="w-56 bg-black border-r border-neutral-800 flex flex-col overflow-hidden">
+					<div className="p-3 border-b border-neutral-800 shrink-0">
+						<div className="mb-3">
+							<LanguageSelector isDarkMode={true} />
+						</div>
 
             <SearchBar
               value={searchQuery}
@@ -188,12 +186,12 @@ export const Docs: React.FC = () => {
           />
         </aside>
 
-        <main className="ml-56 flex-1 overflow-y-auto">
-          <div className="p-6">{renderContent()}</div>
-        </main>
-      </div>
-    </div>
-  );
+				<main className="flex-1 overflow-y-auto">
+					<div className="p-6">{renderContent()}</div>
+				</main>
+			</div>
+		</div>
+	);
 };
 
 export default Docs;
