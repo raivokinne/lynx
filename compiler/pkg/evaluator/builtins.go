@@ -270,6 +270,7 @@ func builtinWrite(args ...object.Object) object.Object {
 	switch arg := args[0].(type) {
 	case *object.String:
 		fmt.Print(arg.Value)
+		os.Stdout.Sync()
 	default:
 		return newError("argument to write must be STRING, got %T", arg)
 	}
@@ -350,6 +351,7 @@ func builtinPrint(args ...object.Object) object.Object {
 		out = append(out, arg.Inspect())
 	}
 	fmt.Println(strings.Join(out, ""))
+	os.Stdout.Sync()
 	return NULL
 }
 
