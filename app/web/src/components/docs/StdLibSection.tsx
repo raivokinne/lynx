@@ -14,15 +14,10 @@ export const StdLibSection = ({ isDarkMode }: StdLibSectionProps) => {
 
 			<div>
 				<h3 className="text-xs font-mono mb-2 text-neutral-400">{t("stdlib.modules")}</h3>
-				<CodeBlock isDarkMode={isDarkMode}>{`// import specific functions
-@math(sqrt, pow, abs)
-@io(readFile, writeFile)
-@net(httpGet, httpPost)
-
-// import entire module
-@import("math")
-@import("io")
-@import("net")
+				<CodeBlock isDarkMode={isDarkMode}>{`// import entire module
+@math
+@io
+@net
 
 // use module functions
 math.sqrt(16)  // 4.0

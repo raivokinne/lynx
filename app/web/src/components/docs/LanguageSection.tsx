@@ -215,16 +215,18 @@ let first = coordinates[0]`}
 					{t("language.pipelines")}
 				</h3>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`let numbers = [1, 2, 3, 4, 5]
+					{`@iter
+
+let numbers = [1, 2, 3, 4, 5]
 
 // pipeline style
 let result = numbers
-    |> map(fn(x) { x * 2 })
-    |> filter(fn(x) { x % 4 == 0 })
-    |> reduce(fn(acc, x) { acc + x }, 0)
+    |> iter.map(fn(x) { x * 2 })
+    |> iter.filter(fn(x) { x % 4 == 0 })
+    |> iter.reduce(fn(acc, x) { acc + x }, 0)
 
 // chaining in traditional style
-let result2 = filter(map(numbers, fn(x) { x * 2 }), fn(x) { x > 2 })`}
+let result2 = iter.filter(iter.map(numbers, fn(x) { x * 2 }), fn(x) { x > 2 })`}
 				</CodeBlock>
 			</div>
 

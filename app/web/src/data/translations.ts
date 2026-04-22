@@ -360,12 +360,12 @@ export const translations: TranslatedContent = {
 		ja: "モジュールシステム",
 	},
 	"stdlib.arrays": {
-		en: "@arrays - Array Operations",
-		es: "@arrays - Operaciones de Arrays",
-		fr: "@arrays - Opérations sur les Tableaux",
-		de: "@arrays - Array-Operationen",
-		zh: "@arrays - 数组操作",
-		ja: "@arrays - 配列操作",
+		en: "@iter - Iterator Functions",
+		es: "@iter - Funciones de Iterador",
+		fr: "@iter - Fonctions d'Itérateur",
+		de: "@iter - Iterator-Funktionen",
+		zh: "@iter - 迭代器函数",
+		ja: "@iter - イテレータ関数",
 	},
 	"stdlib.math": {
 		en: "@math - Mathematical Functions",
@@ -733,14 +733,6 @@ export const translations: TranslatedContent = {
 	},
 
 	// Stdlib - new modules
-	"stdlib.strings": {
-		en: "@strings - String Operations",
-		es: "@strings - Operaciones de Strings",
-		fr: "@strings - Opérations de Chaînes",
-		de: "@strings - String-Operationen",
-		zh: "@strings - 字符串操作",
-		ja: "@strings - 文字列操作",
-	},
 	"stdlib.io": {
 		en: "@io - File Operations",
 		es: "@io - Operaciones de Archivos",

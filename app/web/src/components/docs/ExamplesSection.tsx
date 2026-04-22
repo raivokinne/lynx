@@ -17,7 +17,7 @@ export const ExamplesSection = ({ isDarkMode }: ExamplesSectionProps) => {
 					1. {t("examples.fibonacci")}
 				</h3>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`@arrays(map)
+					{`@iter
 
 // Recursive implementation
 let fibonacci = fn(n) {
@@ -45,23 +45,23 @@ let fibonacciIter = fn(n) {
     return b
 }
 
-let sequence = map(range(0, 10), fibonacciIter)
-println("Fibonacci sequence:", sequence)`}
-				</CodeBlock>
+let sequence = iter.map(range(0, 10), fibonacciIter)
+println("Fibonacci sequence:", sequence)`}</CodeBlock>
 			</div>
 
-			<div>
+<div>
 				<h3 className="text-xs font-mono mb-2 text-neutral-400">
 					2. {t("examples.dataProcessing")}
 				</h3>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`@arrays(filter, map, reduce, sort)
+					{`@iter
+@fmt
 
 let processUserData = fn(rawData) {
     return rawData
-        |> filter(fn(user) { user.age >= 18 })           // Adults only
-        |> filter(fn(user) { user.active })              // Active users
-        |> map(fn(user) {                                // Normalize names
+        |> iter.filter(fn(user) { user.age >= 18 })           // Adults only
+        |> iter.filter(fn(user) { user.active })              // Active users
+        |> iter.map(fn(user) {                               // Normalize names
             return user.name.upper().trim()
         })
 }
@@ -74,8 +74,7 @@ let users = [
 ]
 
 let processedNames = processUserData(users)
-println("Processed users:", processedNames)`}
-				</CodeBlock>
+println("Processed users:", processedNames)`}</CodeBlock>
 			</div>
 			<div>
 				<h3 className="text-xs font-mono mb-2 text-neutral-400">3. {t("examples.rpg")}</h3>
