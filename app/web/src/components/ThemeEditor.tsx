@@ -16,7 +16,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
 	onClose,
 	onSaveTheme,
 	currentThemes,
-	isDarkMode = false,
+	isDarkMode = true,
 	editingTheme = null,
 }) => {
 	const generateThemeTemplate = (): CustomTheme => {
@@ -233,47 +233,42 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
 	if (!isOpen) return null;
 
 	return (
-		<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-			<div
-				className={`${isDarkMode ? "bg-black text-white" : "bg-white text-black"} rounded-lg w-11/12 h-5/6 max-w-6xl flex flex-col border border-gray-600`}
-			>
-				{/* Header */}
-				<div
-					className={`flex items-center justify-between p-4 border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}
-				>
+		<div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+			<div className={`w-11/12 h-5/6 max-w-4xl flex flex-col ${isDarkMode ? "bg-neutral-900 border-neutral-700" : "bg-neutral-100 border-neutral-300"} border`}>
+				<div className={`flex items-center justify-between px-3 py-2 border-b ${isDarkMode ? "border-neutral-700" : "border-neutral-300"}`}>
 					<div className="flex items-center gap-2">
-						<Palette className="w-6 h-6" />
-						<h2 className="text-xl font-semibold">
-							{editingTheme ? "Edit Theme" : "Create Theme"}
+						<div className={`p-0.5 ${isDarkMode ? "bg-black" : "bg-neutral-200"}`}>
+							<Palette className={`w-3 h-3 ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`} />
+						</div>
+						<h2 className={`text-xs font-mono ${isDarkMode ? "text-neutral-300" : "text-neutral-700"}`}>
+							{editingTheme ? "edit theme" : "create theme"}
 						</h2>
 					</div>
-					<div className="flex items-center gap-2">
+					<div className="flex items-center gap-1">
 						<button
 							onClick={resetTheme}
-							className={`px-3 py-1 flex items-center gap-2 bg-red-500 hover:bg-red-600 rounded transition-colors`}
+							className={`flex items-center gap-1 px-2 py-0.5 text-xs font-mono transition-colors ${isDarkMode ? "bg-red-900/50 text-red-500 hover:bg-red-900/70" : "bg-red-100 text-red-600 hover:bg-red-200"}`}
 						>
-							<RotateCcw className="w-4 h-4" />
-							Reset
+							<RotateCcw className="w-3 h-3" />
+							reset
 						</button>
 						<button
 							onClick={onClose}
-							className={`p-1 ${isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-200"} rounded transition-colors`}
+							className={`p-0.5 transition-colors ${isDarkMode ? "hover:bg-neutral-800" : "hover:bg-neutral-200"}`}
 						>
-							<X className="w-5 h-5" />
+							<X className={`w-3 h-3 ${isDarkMode ? "text-neutral-500" : "text-neutral-500"}`} />
 						</button>
 					</div>
 				</div>
 
-				{/* Content */}
 				<div className="flex-1 overflow-hidden">
-					<div className="h-full overflow-y-auto p-4">
-						<div className="grid grid-cols-2 gap-6">
-							{/* Theme Info */}
-							<div className="space-y-4">
-								<h3 className="text-lg font-medium">Theme Information</h3>
+					<div className="h-full overflow-y-auto p-3">
+						<div className="grid grid-cols-2 gap-4">
+							<div className="space-y-3">
+								<h3 className={`text-xs font-mono ${isDarkMode ? "text-neutral-500" : "text-neutral-600"}`}>theme name</h3>
 								<input
 									type="text"
-									placeholder="Theme Name"
+									placeholder="theme name"
 									value={currentTheme.name}
 									onChange={(e) =>
 										setCurrentTheme((prev) => ({
@@ -281,61 +276,59 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
 											name: e.target.value,
 										}))
 									}
-									className={`w-full p-2 border rounded transition-colors ${isDarkMode
-											? "bg-gray-700 border-gray-600 text-white focus:border-blue-500"
-											: "bg-white border-gray-300 focus:border-blue-500"
+									className={`w-full p-1.5 text-xs font-mono border transition-colors ${isDarkMode
+											? "bg-black border-neutral-700 text-neutral-300 focus:border-neutral-500"
+											: "bg-white border-neutral-300 focus:border-neutral-400"
 										}`}
 								/>
 							</div>
 
-							{/* Colors */}
-							<div className="space-y-4">
-								<h3 className="text-lg font-medium">Editor Colors</h3>
+							<div className="space-y-3">
+								<h3 className={`text-xs font-mono ${isDarkMode ? "text-neutral-500" : "text-neutral-600"}`}>editor colors</h3>
 								{Object.entries(currentTheme.colors).map(([key, value]) => (
 									<div key={key} className="flex items-center gap-2">
-										<label className="w-24 text-sm capitalize">
+										<label className={`w-20 text-xs font-mono lowercase ${isDarkMode ? "text-neutral-500" : "text-neutral-600"}`}>
 											{key.replace(/([A-Z])/g, " $1")}:
 										</label>
 										<input
 											type="color"
 											value={value || "#000000"}
 											onChange={(e) => handleColorChange(key, e.target.value)}
-											className={`w-12 h-8 rounded border cursor-pointer ${isDarkMode ? "border-gray-600" : "border-gray-300"
+											className={`w-6 h-5 border cursor-pointer ${isDarkMode ? "border-neutral-700" : "border-neutral-300"
 												}`}
 										/>
 										<input
 											type="text"
 											value={value || ""}
 											onChange={(e) => handleColorChange(key, e.target.value)}
-											className={`flex-1 p-1 border rounded text-sm transition-colors ${isDarkMode
-													? "bg-gray-700 border-gray-600 text-white focus:border-blue-500"
-													: "bg-white border-gray-300 focus:border-blue-500"
+											className={`flex-1 p-1 text-xs font-mono border transition-colors ${isDarkMode
+													? "bg-black border-neutral-700 text-neutral-400 focus:border-neutral-500"
+													: "bg-white border-neutral-300 focus:border-neutral-400"
 												}`}
-											placeholder="#hex color"
+											placeholder="#hex"
 										/>
 									</div>
 								))}
 							</div>
 
-							{/* Token Colors */}
-							<div className="col-span-2 space-y-4">
-								<h3 className="text-lg font-medium">Syntax Highlighting</h3>
-								<div className="grid grid-cols-2 gap-4">
+							<div className="col-span-2 space-y-3">
+								<h3 className={`text-xs font-mono ${isDarkMode ? "text-neutral-500" : "text-neutral-600"}`}>syntax highlighting</h3>
+								<div className="grid grid-cols-2 gap-2">
 									{Object.entries(currentTheme.tokenColors).map(
 										([tokenType, style]) => (
 											<div
 												key={tokenType}
-												className={`p-3 border rounded transition-colors ${isDarkMode
-														? "border-gray-600 bg-gray-700"
-														: "border-gray-300 bg-white"
+												className={`p-2 border text-xs font-mono ${isDarkMode
+														? "border-neutral-700 bg-black"
+														: "border-neutral-300 bg-white"
 													}`}
 											>
-												<h4 className="font-medium capitalize mb-2">
+												<h4 className={`text-xs font-mono mb-2 lowercase ${isDarkMode ? "text-neutral-500" : "text-neutral-600"}`}>
 													{tokenType}
 												</h4>
-												<div className="space-y-2">
-													<div className="flex items-center gap-2">
-														<label className="w-20 text-sm">Color:</label>
+												<div className="space-y-1">
+													<div className="flex items-center gap-1">
+														<label className="w-10 text-xs text-neutral-600">color:</label>
 														<input
 															type="color"
 															value={style.foreground || "#000000"}
@@ -346,9 +339,9 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
 																	e.target.value,
 																)
 															}
-															className={`w-8 h-6 rounded border cursor-pointer ${isDarkMode
-																	? "border-gray-600"
-																	: "border-gray-300"
+															className={`w-5 h-4 border cursor-pointer ${isDarkMode
+																	? "border-neutral-700"
+																	: "border-neutral-300"
 																}`}
 														/>
 														<input
@@ -361,15 +354,15 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
 																	e.target.value,
 																)
 															}
-															className={`flex-1 p-1 border rounded text-sm transition-colors ${isDarkMode
-																	? "bg-gray-600 border-gray-500 text-white focus:border-blue-400"
-																	: "bg-white border-gray-300 focus:border-blue-500"
+															className={`flex-1 p-0.5 text-xs font-mono border transition-colors ${isDarkMode
+																	? "bg-neutral-900 border-neutral-700 text-neutral-400 focus:border-neutral-500"
+																	: "bg-white border-neutral-300 focus:border-neutral-400"
 																}`}
-															placeholder="#hex color"
+															placeholder="#hex"
 														/>
 													</div>
-													<div className="flex items-center gap-2">
-														<label className="w-20 text-sm">Style:</label>
+													<div className="flex items-center gap-1">
+														<label className="w-10 text-xs text-neutral-600">style:</label>
 														<select
 															value={style.fontStyle || ""}
 															onChange={(e) =>
@@ -379,15 +372,14 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
 																	e.target.value,
 																)
 															}
-															className={`flex-1 p-1 border rounded text-sm transition-colors ${isDarkMode
-																	? "bg-gray-600 border-gray-500 text-white focus:border-blue-400"
-																	: "bg-white border-gray-300 focus:border-blue-500"
+															className={`flex-1 p-0.5 text-xs font-mono border transition-colors ${isDarkMode
+																	? "bg-neutral-900 border-neutral-700 text-neutral-400 focus:border-neutral-500"
+																	: "bg-white border-neutral-300 focus:border-neutral-400"
 																}`}
 														>
-															<option value="">Normal</option>
-															<option value="bold">Bold</option>
-															<option value="italic">Italic</option>
-															<option value="bold italic">Bold Italic</option>
+															<option value="">normal</option>
+															<option value="bold">bold</option>
+															<option value="italic">italic</option>
 														</select>
 													</div>
 												</div>
@@ -400,26 +392,25 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
 					</div>
 				</div>
 
-				{/* Footer */}
 				<div
-					className={`flex items-center justify-end gap-2 p-4 border-t ${isDarkMode ? "border-gray-700" : "border-gray-200"
+					className={`flex items-center justify-end gap-2 px-3 py-2 border-t ${isDarkMode ? "border-neutral-700" : "border-neutral-300"
 						}`}
 				>
 					<button
 						onClick={onClose}
-						className={`px-4 py-2 border rounded transition-colors ${isDarkMode
-								? "border-gray-600 hover:bg-gray-700"
-								: "border-gray-300 hover:bg-gray-50"
+						className={`px-3 py-1 text-xs font-mono border transition-colors ${isDarkMode
+								? "border-neutral-700 hover:bg-neutral-800 text-neutral-400"
+								: "border-neutral-300 hover:bg-neutral-200 text-neutral-600"
 							}`}
 					>
-						Cancel
+						cancel
 					</button>
 					<button
 						onClick={handleSave}
-						className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+						className="flex items-center gap-1 px-3 py-1 bg-neutral-700 text-neutral-200 text-xs font-mono hover:bg-neutral-600 transition-colors"
 					>
-						<Save className="w-4 h-4" />
-						{editingTheme ? "Update Theme" : "Save Theme"}
+						<Save className="w-3 h-3" />
+						{editingTheme ? "update" : "save"}
 					</button>
 				</div>
 			</div>

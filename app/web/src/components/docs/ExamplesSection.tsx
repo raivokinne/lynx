@@ -9,11 +9,11 @@ export const ExamplesSection = ({ isDarkMode }: ExamplesSectionProps) => {
 	const { t } = useTranslation();
 
 	return (
-		<div className="space-y-6">
-			<h2 className="text-2xl font-bold mb-4">{t("examples.title")}</h2>
+		<div className="space-y-4">
+			<h2 className="text-sm font-mono mb-3 text-neutral-300">{t("examples.title")}</h2>
 
 			<div>
-				<h3 className="text-lg font-semibold mb-3">
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">
 					1. {t("examples.fibonacci")}
 				</h3>
 				<CodeBlock isDarkMode={isDarkMode}>
@@ -51,7 +51,7 @@ println("Fibonacci sequence:", sequence)`}
 			</div>
 
 			<div>
-				<h3 className="text-lg font-semibold mb-3">
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">
 					2. {t("examples.dataProcessing")}
 				</h3>
 				<CodeBlock isDarkMode={isDarkMode}>
@@ -78,7 +78,7 @@ println("Processed users:", processedNames)`}
 				</CodeBlock>
 			</div>
 			<div>
-				<h3 className="text-lg font-semibold mb-3">3. {t("examples.rpg")}</h3>
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">3. {t("examples.rpg")}</h3>
 				<CodeBlock isDarkMode={isDarkMode}>
 					{`const MAX_HEALTH = 100
 const MAX_ENEMIES = 3

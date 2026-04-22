@@ -13,51 +13,51 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
 	error,
 }) => (
 	<div
-		className={`${isDarkMode ? "bg-black border-gray-700" : "bg-white border-gray-200"} w-96 border-l flex flex-col`}
+		className={`${isDarkMode ? "bg-black border-neutral-800" : "bg-neutral-100 border-neutral-300"} w-80 border-l flex flex-col`}
 	>
 		<div
-			className={`border-b px-4 py-2 ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}
+			className={`border-b px-2 py-1 ${isDarkMode ? "border-neutral-800 bg-neutral-900" : "border-neutral-300 bg-neutral-200"}`}
 		>
 			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-2 text-sm">
-					<Terminal className="w-4 h-4" />
-					<span className="font-medium">Console Output</span>
+				<div className="flex items-center gap-1 text-xs font-mono text-neutral-500">
+					<Terminal className="w-3 h-3" />
+					<span>output</span>
 				</div>
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-1">
 					<div
-						className={`w-2 h-2 rounded-full ${output && !error
-								? "bg-green-500"
+						className={`w-2 h-2 ${output && !error
+								? "bg-green-600"
 								: error
-									? "bg-red-500"
-									: "bg-gray-400"
+									? "bg-red-600"
+									: "bg-neutral-600"
 							}`}
 					></div>
-					<span className="text-xs">
-						{output && !error ? "Ready" : error ? "Error" : "Waiting"}
+					<span className="text-xs font-mono text-neutral-500">
+						{output && !error ? "done" : error ? "error" : "idle"}
 					</span>
 				</div>
 			</div>
 		</div>
 
-		<div className="flex-1 p-4 overflow-auto">
+		<div className="flex-1 p-2 overflow-auto font-mono text-xs">
 			{!output && !error && (
 				<div className="flex items-center justify-center h-full">
 					<div
-						className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
+						className={`text-xs font-mono ${isDarkMode ? "text-neutral-600" : "text-neutral-400"}`}
 					>
-						Waiting to compile
+						_
 					</div>
 				</div>
 			)}
 
 			{error && (
-				<div className="space-y-2">
-					<div className="flex items-center gap-2 text-red-500 text-sm font-medium">
-						<AlertCircle className="w-4 h-4" />
-						Error
+				<div className="space-y-1">
+					<div className="flex items-center gap-1 text-red-500 text-xs font-mono">
+						<AlertCircle className="w-3 h-3" />
+						error
 					</div>
 					<pre
-						className={`text-sm font-mono whitespace-pre-wrap ${isDarkMode ? "text-red-400" : "text-red-600"}`}
+						className={`text-xs whitespace-pre-wrap font-mono ${isDarkMode ? "text-red-500" : "text-red-600"}`}
 					>
 						{error}
 					</pre>
@@ -65,13 +65,9 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
 			)}
 
 			{output && (
-				<div className="space-y-2">
-					<div className="flex items-center gap-2 text-green-500 text-sm font-medium">
-						<Terminal className="w-4 h-4" />
-						Output
-					</div>
+				<div className="space-y-1">
 					<pre
-						className={`text-sm font-mono whitespace-pre-wrap ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
+						className={`text-xs whitespace-pre-wrap font-mono ${isDarkMode ? "text-neutral-300" : "text-neutral-700"}`}
 					>
 						{output}
 					</pre>

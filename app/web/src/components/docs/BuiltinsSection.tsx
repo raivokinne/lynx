@@ -1,151 +1,87 @@
 import { CodeBlock } from "./CodeBlock";
+import { useTranslation } from "../../hooks/useTranslation";
 
 interface BuiltinsSectionProps {
 	isDarkMode: boolean;
 }
 
 export const BuiltinsSection = ({ isDarkMode }: BuiltinsSectionProps) => {
+	const { t } = useTranslation();
+
 	return (
-		<div className="space-y-6">
-			<h2 className="text-2xl font-bold mb-4">Built-in Functions</h2>
+		<div className="space-y-4">
+			<h2 className="text-sm font-mono mb-3 text-neutral-300">{t("builtins.title")}</h2>
 
 			<div>
-				<h3 className="text-lg font-semibold mb-3">Input/Output</h3>
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">{t("builtins.io")}</h3>
 
-				<h4 className="font-medium mb-2">println(...values)</h4>
-				<p className="text-sm mb-2 opacity-80">
-					Prints values to stdout with a newline.
+				<h4 className="text-xs font-mono mb-1 text-neutral-300">{t("builtins.println")}</h4>
+				<p className="text-xs font-mono mb-2 text-neutral-500">
+					{t("builtins.println.desc")}
 				</p>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`println("Hello, World!")
-println("The answer is:", 42)
-println("Multiple", "values", "separated", "by", "spaces")`}
+					{`println("hello, world!")
+println("answer:", 42)`}
 				</CodeBlock>
 			</div>
 
 			<div>
-				<h3 className="text-lg font-semibold mb-3">Type Conversion</h3>
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">{t("builtins.typeConversion")}</h3>
 
-				<h4 className="font-medium mb-2">int(value)</h4>
-				<p className="text-sm mb-2 opacity-80">
-					Converts a value to an integer.
+				<h4 className="text-xs font-mono mb-1 text-neutral-300">{t("builtins.int")}</h4>
+				<p className="text-xs font-mono mb-2 text-neutral-500">
+					{t("builtins.int.desc")}
 				</p>
 				<CodeBlock isDarkMode={isDarkMode}>
 					{`let x = int("42")        // 42
-let y = int(3.14)       // 3
-let z = int(true)       // 1`}
+let y = int(3.14)       // 3`}
 				</CodeBlock>
 
-				<h4 className="font-medium mb-2 mt-4">float(value)</h4>
-				<p className="text-sm mb-2 opacity-80">
-					Converts a value to a float.
-				</p>
+				<h4 className="text-xs font-mono mb-1 mt-2 text-neutral-300">{t("builtins.float")}</h4>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`let x = float("3.14")   // 3.14
-let y = float(42)       // 42.0
-let z = float("2.5e2")  // 250.0`}
+					{`let x = float("3.14")   // 3.14`}
 				</CodeBlock>
 
-				<h4 className="font-medium mb-2 mt-4">str(value)</h4>
-				<p className="text-sm mb-2 opacity-80">
-					Converts a value to a string.
-				</p>
+				<h4 className="text-xs font-mono mb-1 mt-2 text-neutral-300">{t("builtins.str")}</h4>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`let x = str(42)         // "42"
-let y = str(3.14)       // "3.14"
-let z = str(true)       // "true"`}
-				</CodeBlock>
-
-				<h4 className="font-medium mb-2 mt-4">type(value)</h4>
-				<p className="text-sm mb-2 opacity-80">
-					Returns the type of a value as a string.
-				</p>
-				<CodeBlock isDarkMode={isDarkMode}>
-					{`println(type(42))           // "int"
-println(type(3.14))         // "float"
-println(type("hello"))      // "str"
-println(type([1, 2, 3]))    // "array"
-println(type({"a": 1}))     // "hash"
-
-class Dog {
-    let init = fn(name) {
-        self.name = name
-    }
-}
-let dog = Dog("Buddy")
-println(type(dog))          // "Dog"`}
+					{`let x = str(42)         // "42"`}
 				</CodeBlock>
 			</div>
 
 			<div>
-				<h3 className="text-lg font-semibold mb-3">Collections</h3>
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">{t("builtins.collections")}</h3>
 
-				<h4 className="font-medium mb-2">len(collection)</h4>
-				<p className="text-sm mb-2 opacity-80">
-					Returns the length of a string, array, or hash.
+				<h4 className="text-xs font-mono mb-1 text-neutral-300">{t("builtins.len")}</h4>
+				<p className="text-xs font-mono mb-2 text-neutral-500">
+					{t("builtins.len.desc")}
 				</p>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`let arrLen = len([1, 2, 3, 4])        // 4
-let strLen = len("hello")             // 5
-let hashLen = len({"a": 1, "b": 2})   // 2`}
+					{`let arr = len([1, 2, 3])    // 3`}
 				</CodeBlock>
 
-				<h4 className="font-medium mb-2 mt-4">
-					range(start, end, [step])
-				</h4>
-				<p className="text-sm mb-2 opacity-80">
-					Creates an array of numbers from start to end (exclusive).
-				</p>
+				<h4 className="text-xs font-mono mb-1 mt-2 text-neutral-300">{t("builtins.range")}</h4>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`let nums = range(0, 5)           // [0, 1, 2, 3, 4]
-
-// Usage in loops
-for i in range(0, 5) {
-    println(i)
-}`}
-				</CodeBlock>
-
-				<h4 className="font-medium mb-2 mt-4">copy(dest, src)</h4>
-				<p className="text-sm mb-2 opacity-80">
-					Copies elements from source array to destination array.
-					Returns number of elements copied.
-				</p>
-				<CodeBlock isDarkMode={isDarkMode}>
-					{`let dest = [0, 0, 0, 0, 0]
-let src = [1, 2, 3]
-let n = copy(dest, src)
-println(dest)  // [1, 2, 3, 0, 0]
-println(n)     // 3`}
+					{`let nums = range(0, 5)  // [0,1,2,3,4]`}
 				</CodeBlock>
 			</div>
 
 			<div>
-				<h3 className="text-lg font-semibold mb-3">Utility</h3>
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">{t("builtins.utility")}</h3>
 
-				<h4 className="font-medium mb-2">random()</h4>
-				<p className="text-sm mb-2 opacity-80">
-					Returns a random float between 0.0 and 1.0.
+				<h4 className="text-xs font-mono mb-1 text-neutral-300">{t("builtins.random")}</h4>
+				<p className="text-xs font-mono mb-2 text-neutral-500">
+					{t("builtins.random.desc")}
 				</p>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`let rand = random()              // e.g., 0.7234
-let dice = int(random() * 6) + 1 // Random number 1-6
-let coin = random() < 0.5        // true or false`}
+					{`let dice = int(random() * 6) + 1`}
 				</CodeBlock>
 
-				<h4 className="font-medium mb-2 mt-4">sleep(milliseconds)</h4>
-				<p className="text-sm mb-2 opacity-80">
-					Pauses execution for the specified number of milliseconds.
+				<h4 className="text-xs font-mono mb-1 mt-2 text-neutral-300">{t("builtins.sleep")}</h4>
+				<p className="text-xs font-mono mb-2 text-neutral-500">
+					{t("builtins.sleep.desc")}
 				</p>
 				<CodeBlock isDarkMode={isDarkMode}>
-					{`println("Starting...")
-sleep(1000)  // Wait 1 second
-println("Done!")
-
-// Animation loop
-for i in range(0, 5) {
-    println("Frame", i)
-    sleep(100)  // 100ms delay
-}`}
+					{`sleep(1000)  // wait 1 second`}
 				</CodeBlock>
 			</div>
 		</div>

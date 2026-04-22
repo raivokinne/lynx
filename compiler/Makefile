@@ -20,9 +20,8 @@ test:
 
 build-all:
 	GOOS=linux GOARCH=amd64 go build -o build/lynx-linux lynx.go
-	GOOS=darwin GOARCH=amd64 go build -o build/lynx-macos lynx.go
+	GOOS=darwin GOARCH=arm64 go build -o build/lynx-macos lynx.go
 	GOOS=windows GOARCH=amd64 go build -o build/lynx.exe lynx.go
 
 clean:
 	rm -rf $(BUILD_DIR)
-

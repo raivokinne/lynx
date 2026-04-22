@@ -1,57 +1,54 @@
 import React from "react";
-import { Play, Settings, BookOpen } from "lucide-react";
+import { Settings } from "lucide-react";
 
 interface SidebarProps {
-	isDarkMode: boolean;
-	isRunning: boolean;
-	canRun: boolean;
-	onRunCode: () => void;
-	onSave: () => void;
-	onSettings: () => void;
-	onDocs: () => void;
-	onGit: () => void;
+  isDarkMode: boolean;
+  isRunning: boolean;
+  canRun: boolean;
+  onRunCode: () => void;
+  onSave: () => void;
+  onSettings: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
-	isDarkMode,
-	isRunning,
-	canRun,
-	onRunCode,
-	onSettings,
-	onDocs,
+  isDarkMode,
+  isRunning,
+  canRun,
+  onRunCode,
+  onSettings,
 }) => (
-	<div
-		className={`${isDarkMode ? "bg-black border-gray-700" : "bg-white border-gray-200"} w-12 border-r flex flex-col items-center py-4 space-y-3`}
-	>
-		<button
-			onClick={onRunCode}
-			disabled={!canRun || isRunning}
-			className={`p-2 rounded-lg ${isDarkMode ? "hover:bg-gray-800" : "hover:bg-gray-100"} disabled:opacity-50`}
-			title="Palaist kodu"
-		>
-			{isRunning ? (
-				<div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-			) : (
-				<Play size={24} />
-			)}
-		</button>
+  <div
+    className={`${isDarkMode ? "bg-neutral-900 border-neutral-800" : "bg-neutral-200 border-neutral-300"} w-10 border-r flex flex-col items-center py-2 space-y-1`}
+  >
+    <button
+      onClick={onRunCode}
+      disabled={!canRun || isRunning}
+      className={`p-1.5 transition-colors font-mono text-xs ${isDarkMode ? "hover:bg-neutral-800 text-neutral-400" : "hover:bg-neutral-300 text-neutral-600"} disabled:opacity-30`}
+      title="Run code"
+    >
+      {isRunning ? (
+        <div className="animate-spin h-5 w-5 border border-current border-t-transparent" />
+      ) : canRun ? (
+        <span
+          className={
+            isDarkMode ? "text-amber-400 text-2xl" : "text-amber-600 text-2xl"
+          }
+        >
+          ▶
+        </span>
+      ) : (
+        <span className="opacity-30">▶</span>
+      )}
+    </button>
 
-		<div className="flex-1" />
+    <div className="flex-1" />
 
-		<button
-			onClick={onSettings}
-			className={`p-2 rounded-lg ${isDarkMode ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
-			title="Redaktora iestatījumi"
-		>
-			<Settings size={24} />
-		</button>
-
-		<button
-			onClick={onDocs}
-			className={`p-2 rounded-lg ${isDarkMode ? "hover:bg-gray-800" : "hover:bg-gray-100"}`}
-			title="Redaktora iestatījumi"
-		>
-			<BookOpen size={24} />
-		</button>
-	</div>
+    <button
+      onClick={onSettings}
+      className={`p-1.5 transition-colors ${isDarkMode ? "hover:bg-neutral-800 text-neutral-500" : "hover:bg-neutral-300 text-neutral-500"}`}
+      title="Settings"
+    >
+      <Settings size={16} />
+    </button>
+  </div>
 );

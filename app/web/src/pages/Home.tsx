@@ -10,7 +10,6 @@ import { SaveDialog } from "../components/SaveDialog";
 import { Settings } from "../components/Settings";
 import type { SavedCode } from "../types/types";
 import { useSettings } from "../hooks/useSettings";
-import { DocsModal } from "../components/DocsModal";
 
 export const Home: React.FC = () => {
 	const { user, logout } = useAuth();
@@ -38,9 +37,7 @@ export const Home: React.FC = () => {
 	});
 	const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
 	const [showSettings, setShowSettings] = useState<boolean>(false);
-	const [showDocs, setShowDocs] = useState<boolean>(false);
 	const [saveTitle, setSaveTitle] = useState<string>("");
-	const [showGit, setShowGit] = useState<boolean>(false);
 
 	useEffect(() => {
 		localStorage.setItem("darkMode", isDarkMode.toString());
@@ -57,16 +54,8 @@ export const Home: React.FC = () => {
 		clearOutput();
 	};
 
-	const handleCloseDocs = () => {
-		setShowDocs(!showDocs);
-	};
-
 	const handleExecuteCode = () => {
 		executeCode(code);
-	};
-
-	const handleCloseGit = () => {
-		setShowGit(!showGit);
 	};
 
 	const handleToggleDarkMode = () => {
@@ -75,7 +64,7 @@ export const Home: React.FC = () => {
 
 	return (
 		<div
-			className={`min-h-screen ${isDarkMode ? "bg-black text-white" : "bg-white text-black"} transition-colors duration-200`}
+			className={`min-h-screen ${isDarkMode ? "bg-black text-gray-400" : "bg-gray-100 text-gray-700"} transition-colors duration-200`}
 		>
 			{showSettings && (
 				<Settings
@@ -99,10 +88,6 @@ export const Home: React.FC = () => {
 				/>
 			)}
 
-			{showDocs && (
-				<DocsModal isDarkMode={isDarkMode} onClose={handleCloseDocs} />
-			)}
-
 			<Header
 				isDarkMode={isDarkMode}
 				username={user?.username}
@@ -120,8 +105,6 @@ export const Home: React.FC = () => {
 						setShowSaveDialog(true);
 					}}
 					onSettings={() => setShowSettings(true)}
-					onDocs={handleCloseDocs}
-					onGit={handleCloseGit}
 				/>
 
 				<div className="flex-1 flex">

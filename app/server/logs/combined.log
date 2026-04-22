@@ -92,3 +92,4 @@
 2026-04-20 11:28:44 [info]: GET /api/codes?limit=50&offset=0 200 - 42ms
 2026-04-20 11:28:51 [info]: POST /api/codes 422 - 15ms
 2026-04-20 12:05:03 [info]: POST /api/compile 400 - 229ms
+2026-04-22 02:46:33 [info]: GET /api/.env 404 - 13ms

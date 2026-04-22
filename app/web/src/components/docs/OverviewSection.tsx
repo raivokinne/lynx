@@ -8,17 +8,17 @@ export const OverviewSection = ({ isDarkMode }: OverviewSectionProps) => {
 	const { t } = useTranslation();
 
 	return (
-		<div className="space-y-6">
-			<h2 className="text-2xl font-bold mb-4">{t("overview.title")}</h2>
+		<div className="space-y-4">
+			<h2 className="text-sm font-mono mb-3 text-neutral-300">{t("overview.title")}</h2>
 
-			<div className="prose max-w-none">
-				<p className="text-lg mb-6">{t("overview.description")}</p>
+			<div>
+				<p className="text-xs font-mono mb-4 text-neutral-400">{t("overview.description")}</p>
 
-				<h3 className="text-lg font-semibold mb-3">
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">
 					{t("overview.whenToUse")}
 				</h3>
 				<ul
-					className={`list-disc list-inside space-y-1 mb-6 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
+					className={`list-disc list-inside space-y-0.5 mb-4 text-xs font-mono ${isDarkMode ? "text-neutral-400" : "text-neutral-600"}`}
 				>
 					<li>{t("overview.whenToUse.rapid")}</li>
 					<li>{t("overview.whenToUse.data")}</li>
@@ -27,33 +27,33 @@ export const OverviewSection = ({ isDarkMode }: OverviewSectionProps) => {
 					<li>{t("overview.whenToUse.functional")}</li>
 				</ul>
 
-				<h3 className="text-lg font-semibold mb-3">
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">
 					{t("overview.keyFeatures")}
 				</h3>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+				<div className="grid grid-cols-1 gap-2 mb-4">
 					<div
-						className={`p-4 rounded-lg border ${isDarkMode ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-gray-50"}`}
+						className={`p-2 border ${isDarkMode ? "border-neutral-700 bg-black" : "border-neutral-300 bg-neutral-100"}`}
 					>
-						<h4 className="font-semibold mb-2">
+						<h4 className="text-xs font-mono mb-1 text-neutral-300">
 							{t("overview.features.clean")}
 						</h4>
-						<p className="text-sm">{t("overview.features.clean.desc")}</p>
+						<p className="text-xs font-mono text-neutral-500">{t("overview.features.clean.desc")}</p>
 					</div>
 					<div
-						className={`p-4 rounded-lg border ${isDarkMode ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-gray-50"}`}
+						className={`p-2 border ${isDarkMode ? "border-neutral-700 bg-black" : "border-neutral-300 bg-neutral-100"}`}
 					>
-						<h4 className="font-semibold mb-2">
+						<h4 className="text-xs font-mono mb-1 text-neutral-300">
 							{t("overview.features.functional")}
 						</h4>
-						<p className="text-sm">{t("overview.features.functional.desc")}</p>
+						<p className="text-xs font-mono text-neutral-500">{t("overview.features.functional.desc")}</p>
 					</div>
 					<div
-						className={`p-4 rounded-lg border ${isDarkMode ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-gray-50"}`}
+						className={`p-2 border ${isDarkMode ? "border-neutral-700 bg-black" : "border-neutral-300 bg-neutral-100"}`}
 					>
-						<h4 className="font-semibold mb-2">
+						<h4 className="text-xs font-mono mb-1 text-neutral-300">
 							{t("overview.features.immutable")}
 						</h4>
-						<p className="text-sm">{t("overview.features.immutable.desc")}</p>
+						<p className="text-xs font-mono text-neutral-500">{t("overview.features.immutable.desc")}</p>
 					</div>
 				</div>
 			</div>

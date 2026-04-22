@@ -18,7 +18,7 @@ export const SearchBar = ({
 	return (
 		<div className="relative">
 			<Search
-				className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDarkMode ? "text-gray-400" : "text-gray-500"
+				className={`absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 ${isDarkMode ? "text-neutral-600" : "text-neutral-400"
 					}`}
 			/>
 			<input
@@ -26,21 +26,21 @@ export const SearchBar = ({
 				placeholder={placeholder}
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
-				className={`w-full pl-10 pr-4 py-2 rounded-lg text-sm border transition-colors ${isDarkMode
-					? "bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-gray-500 focus:bg-gray-700"
-					: "bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400 focus:bg-gray-50"
+				className={`w-full pl-7 pr-6 py-1 text-xs font-mono border transition-colors ${isDarkMode
+					? "bg-black border-neutral-700 text-neutral-400 placeholder-neutral-600 focus:border-neutral-500"
+					: "bg-white border-neutral-300 text-neutral-700 placeholder-neutral-400 focus:border-neutral-400"
 					}`}
 			/>
 			{value && (
 				<button
 					onClick={() => onChange("")}
-					className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded transition-colors ${isDarkMode
-						? "hover:bg-gray-600 text-gray-400 hover:text-white"
-						: "hover:bg-gray-200 text-gray-500 hover:text-black"
+					className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-0.5 transition-colors ${isDarkMode
+						? "hover:bg-neutral-800 text-neutral-500"
+						: "hover:bg-neutral-200 text-neutral-400"
 						}`}
 					aria-label={clearLabel}
 				>
-					<X className="w-3 h-3" />
+					<X className="w-2.5 h-2.5" />
 				</button>
 			)}
 		</div>

@@ -1,285 +1,284 @@
 import { spawn } from "child_process";
-import { readdirSync, statSync, unlinkSync, existsSync } from "fs";
+import { readdirSync, rmdirSync, statSync, unlinkSync, existsSync } from "fs";
 import { join, resolve } from "path";
 import { CONFIG } from "./index.js";
 
 const MAX_OUTPUT_SIZE = 100_000;
 
 export function sanitizeSessionId(sessionId) {
-    if (!sessionId || typeof sessionId !== "string") {
-        return "anonymous";
-    }
-    return sessionId.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 50) || "anonymous";
+  if (!sessionId || typeof sessionId !== "string") {
+    return "anonymous";
+  }
+  return sessionId.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 50) || "anonymous";
 }
 
 export function cleanupTempFiles() {
-    try {
-        const tempDir = resolve(CONFIG.TEMP_DIR);
+  try {
+    const tempDir = resolve(CONFIG.TEMP_DIR);
 
-        if (!existsSync(tempDir)) return;
+    if (!existsSync(tempDir)) return;
 
-        const files = readdirSync(tempDir);
-        const now = Date.now();
-        const maxAge = 60 * 60 * 1000;
+    const files = readdirSync(tempDir);
+    const now = Date.now();
+    const maxAge = 60 * 60 * 1000;
 
-        files.forEach((file) => {
-            const filePath = join(tempDir, file);
-            const stats = statSync(filePath);
+    files.forEach((file) => {
+      const filePath = join(tempDir, file);
+      const stats = statSync(filePath);
 
-            if (now - stats.mtimeMs > maxAge) {
-                if (stats.isDirectory()) {
-                    try {
-                        const subFiles = readdirSync(filePath);
+      if (now - stats.mtimeMs > maxAge) {
+        if (stats.isDirectory()) {
+          try {
+            const subFiles = readdirSync(filePath);
 
-                        subFiles.forEach((subFile) => {
-                            const subFilePath = join(filePath, subFile);
-                            const subStats = statSync(subFilePath);
+            subFiles.forEach((subFile) => {
+              const subFilePath = join(filePath, subFile);
+              const subStats = statSync(subFilePath);
 
-                            if (now - subStats.mtimeMs > maxAge) {
-                                unlinkSync(subFilePath);
-                                console.log(`Cleaned: ${subFile}`);
-                            }
-                        });
+              if (now - subStats.mtimeMs > maxAge) {
+                unlinkSync(subFilePath);
+                console.log(`Cleaned: ${subFile}`);
+              }
+            });
 
-                        const remaining = readdirSync(filePath);
-                        if (remaining.length === 0) {
-                            rmdirSync(filePath);
-                            console.log(`Removed dir: ${file}`);
-                        }
-                    } catch (err) {
-                        console.error(
-                            `Dir cleanup error ${file}:`,
-                            err.message,
-                        );
-                    }
-                } else {
-                    unlinkSync(filePath);
-                    console.log(`Cleaned file: ${file}`);
-                }
+            const remaining = readdirSync(filePath);
+            if (remaining.length === 0) {
+              rmdirSync(filePath);
+              console.log(`Removed dir: ${file}`);
             }
-        });
-    } catch (error) {
-        console.error("Error cleaning up temp files:", error?.message ?? error);
-    }
+          } catch (err) {
+            console.error(`Dir cleanup error ${file}:`, err.message);
+          }
+        } else {
+          unlinkSync(filePath);
+          console.log(`Cleaned file: ${file}`);
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Error cleaning up temp files:", error?.message ?? error);
+  }
 }
 
 export function validateCode(code, options = {}) {
-    const {
-        maxSize = CONFIG.MAX_FILE_SIZE,
-        minSize = 1,
-        allowEmpty = false,
-        checkSecurity = true,
-        trimWhitespace = true,
-    } = options;
+  const {
+    maxSize = CONFIG.MAX_FILE_SIZE,
+    minSize = 1,
+    allowEmpty = false,
+    checkSecurity = true,
+    trimWhitespace = true,
+  } = options;
 
-    if (!code || typeof code !== "string") {
-        return {
-            valid: false,
-            error: "Code is required and must be a string",
-        };
+  if (!code || typeof code !== "string") {
+    return {
+      valid: false,
+      error: "Code is required and must be a string",
+    };
+  }
+
+  const processedCode = trimWhitespace ? code.trim() : code;
+
+  if (!allowEmpty && processedCode.length === 0) {
+    return {
+      valid: false,
+      error: "Code cannot be empty",
+    };
+  }
+
+  if (code.length > maxSize) {
+    return {
+      valid: false,
+      error: `Code exceeds maximum size of ${maxSize} characters (current: ${code.length})`,
+    };
+  }
+
+  if (processedCode.length < minSize) {
+    return {
+      valid: false,
+      error: `Code must be at least ${minSize} character(s)`,
+    };
+  }
+
+  if (checkSecurity) {
+    const securityCheck = validateCodeSecurity(code);
+    if (!securityCheck.valid) {
+      return securityCheck;
     }
+  }
 
-    const processedCode = trimWhitespace ? code.trim() : code;
-
-    if (!allowEmpty && processedCode.length === 0) {
-        return {
-            valid: false,
-            error: "Code cannot be empty",
-        };
-    }
-
-    if (code.length > maxSize) {
-        return {
-            valid: false,
-            error: `Code exceeds maximum size of ${maxSize} characters (current: ${code.length})`,
-        };
-    }
-
-    if (processedCode.length < minSize) {
-        return {
-            valid: false,
-            error: `Code must be at least ${minSize} character(s)`,
-        };
-    }
-
-    if (checkSecurity) {
-        const securityCheck = validateCodeSecurity(code);
-        if (!securityCheck.valid) {
-            return securityCheck;
-        }
-    }
-
-    return { valid: true };
+  return { valid: true };
 }
 
 function validateCodeSecurity(code) {
-    const dangerousPatterns = [
-        { pattern: /eval\s*\(/gi, name: "eval()" },
-        { pattern: /Function\s*\(/gi, name: "Function constructor" },
-        {
-            pattern: /setTimeout\s*\(\s*["'`]/gi,
-            name: "setTimeout with string",
-        },
-        {
-            pattern: /setInterval\s*\(\s*["'`]/gi,
-            name: "setInterval with string",
-        },
-        { pattern: /require\s*\(/gi, name: "require()" },
-        { pattern: /import\s+.*\s+from/gi, name: "import statement" },
-        { pattern: /process\./gi, name: "process object access" },
-        { pattern: /global\./gi, name: "global object access" },
-        { pattern: /Buffer\./gi, name: "Buffer object access" },
-        { pattern: /child_process/gi, name: "child_process module" },
-        { pattern: /fs\./gi, name: "fs module access" },
-        { pattern: /os\./gi, name: "os module access" },
-        { pattern: /net\./gi, name: "net module access" },
-        { pattern: /http\./gi, name: "http module access" },
-        { pattern: /https\./gi, name: "https module access" },
-        { pattern: /exec\s*\(/gi, name: "exec()" },
-        { pattern: /spawn\s*\(/gi, name: "spawn()" },
-        { pattern: /fork\s*\(/gi, name: "fork()" },
-        { pattern: /<script/gi, name: "script tag" },
-        { pattern: /javascript:/gi, name: "javascript protocol" },
-        { pattern: /on\w+\s*=/gi, name: "event handler" },
-    ];
+  const dangerousPatterns = [
+    { pattern: /eval\s*\(/gi, name: "eval()" },
+    { pattern: /Function\s*\(/gi, name: "Function constructor" },
+    {
+      pattern: /setTimeout\s*\(\s*["'`]/gi,
+      name: "setTimeout with string",
+    },
+    {
+      pattern: /setInterval\s*\(\s*["'`]/gi,
+      name: "setInterval with string",
+    },
+    { pattern: /require\s*\(/gi, name: "require()" },
+    { pattern: /import\s+.*\s+from/gi, name: "import statement" },
+    { pattern: /process\./gi, name: "process object access" },
+    { pattern: /global\./gi, name: "global object access" },
+    { pattern: /Buffer\./gi, name: "Buffer object access" },
+    { pattern: /child_process/gi, name: "child_process module" },
+    { pattern: /fs\./gi, name: "fs module access" },
+    { pattern: /os\./gi, name: "os module access" },
+    { pattern: /net\./gi, name: "net module access" },
+    { pattern: /http\./gi, name: "http module access" },
+    { pattern: /https\./gi, name: "https module access" },
+    { pattern: /exec\s*\(/gi, name: "exec()" },
+    { pattern: /spawn\s*\(/gi, name: "spawn()" },
+    { pattern: /fork\s*\(/gi, name: "fork()" },
+    { pattern: /<script/gi, name: "script tag" },
+    { pattern: /javascript:/gi, name: "javascript protocol" },
+    { pattern: /on\w+\s*=/gi, name: "event handler" },
+  ];
 
-    for (const { pattern, name } of dangerousPatterns) {
-        if (pattern.test(code)) {
-            return {
-                valid: false,
-                error: `Code contains potentially unsafe pattern: ${name}`,
-            };
-        }
+  for (const { pattern, name } of dangerousPatterns) {
+    if (pattern.test(code)) {
+      return {
+        valid: false,
+        error: `Code contains potentially unsafe pattern: ${name}`,
+      };
     }
+  }
 
-    if (code.includes("\0")) {
-        return {
-            valid: false,
-            error: "Code contains null bytes",
-        };
-    }
+  if (code.includes("\0")) {
+    return {
+      valid: false,
+      error: "Code contains null bytes",
+    };
+  }
 
-    const controlChars = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g;
-    if (controlChars.test(code)) {
-        return {
-            valid: false,
-            error: "Code contains invalid control characters",
-        };
-    }
+  const controlChars = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g;
+  if (controlChars.test(code)) {
+    return {
+      valid: false,
+      error: "Code contains invalid control characters",
+    };
+  }
 
-    const pathTraversal = /\.\.[\/\\]/g;
-    if (pathTraversal.test(code)) {
-        return {
-            valid: false,
-            error: "Code contains potential path traversal patterns",
-        };
-    }
+  const pathTraversal = /\.\.[\/\\]/g;
+  if (pathTraversal.test(code)) {
+    return {
+      valid: false,
+      error: "Code contains potential path traversal patterns",
+    };
+  }
 
-    return { valid: true };
+  return { valid: true };
 }
 
 export function executeCompiler(filePath) {
-    const safePath = resolve(filePath);
-    if (!safePath.startsWith(resolve(CONFIG.TEMP_DIR) + "/")) {
-        return Promise.reject(new Error("Invalid file path"));
-    }
+  const safePath = resolve(filePath);
+  if (!safePath.startsWith(resolve(CONFIG.TEMP_DIR) + "/")) {
+    return Promise.reject(new Error("Invalid file path"));
+  }
 
-    return new Promise((resolve, reject) => {
-        let stdout = "";
-        let stderr = "";
-        let finished = false;
+  return new Promise((resolve, reject) => {
+    let stdout = "";
+    let stderr = "";
+    let finished = false;
 
-        const totalOutput = () => stdout.length + stderr.length;
+    const totalOutput = () => stdout.length + stderr.length;
 
-        const finish = (fn) => {
-            if (finished) return;
-            finished = true;
-            clearTimeout(timer);
-            fn();
-        };
+    const finish = (fn) => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer);
+      fn();
+    };
 
-        const killChild = () => {
-            try {
-                child.kill("SIGTERM");
-                setTimeout(() => {
-                    if (!child.killed) child.kill("SIGKILL");
-                }, 5000);
-            } catch (e) {
-                if (process.env.NODE_ENV !== "production") {
-                    console.error("Failed to kill child process:", e.message);
-                }
-            }
-        };
+    const killChild = () => {
+      try {
+        child.kill("SIGTERM");
+        setTimeout(() => {
+          if (!child.killed) child.kill("SIGKILL");
+        }, 5000);
+      } catch (e) {
+        if (process.env.NODE_ENV !== "production") {
+          console.error("Failed to kill child process:", e.message);
+        }
+      }
+    };
 
-        const child = spawn(
-            "firejail",
-            [
-              "--net=none",
-              "--nosound",
-              "--nogroups",
-              "--noroot",
-              "--private-dev",
-              "--seccomp",
-              "--caps.drop=all",
-              "--rlimit-nproc=50",
-              "--rlimit-fsize=10485760",
-              `--whitelist=${CONFIG.COMPILER_PATH}`,
-              `--whitelist=${CONFIG.TEMP_DIR}`,
-              "--quiet",
-              CONFIG.COMPILER_PATH,
-              safePath,
-            ],
-            {
-                stdio: ["ignore", "pipe", "pipe"],
-                cwd: CONFIG.TEMP_DIR,
-                env: { PATH: process.env.PATH },
-            },
-        );
+    const child = spawn(
+      "firejail",
+      [
+        "--net=none",
+        "--nosound",
+        "--nogroups",
+        "--noroot",
+        "--private-dev",
+        "--seccomp",
+        "--caps.drop=all",
+        "--rlimit-nproc=50",
+        "--rlimit-fsize=10485760",
+        `--whitelist=${CONFIG.COMPILER_PATH}`,
+        `--whitelist=${CONFIG.TEMP_DIR}`,
+        "--quiet",
+        CONFIG.COMPILER_PATH,
+        safePath,
+      ],
+      {
+        stdio: ["ignore", "pipe", "pipe"],
+        cwd: CONFIG.TEMP_DIR,
+        env: { PATH: process.env.PATH },
+      },
+    );
 
-        const timer = setTimeout(() => {
-            finish(() => {
-                killChild();
-                reject(new Error("Execution timed out"));
-            });
-        }, CONFIG.EXECUTION_TIMEOUT);
+    const timer = setTimeout(() => {
+      finish(() => {
+        killChild();
+        reject(new Error("Execution timed out"));
+      });
+    }, CONFIG.EXECUTION_TIMEOUT);
 
-        child.stdout?.on("data", (data) => {
-            stdout += data.toString();
-            if (totalOutput() > MAX_OUTPUT_SIZE) {
-                finish(() => {
-                    killChild();
-                    reject(new Error("Output too large"));
-                });
-            }
+    child.stdout?.on("data", (data) => {
+      stdout += data.toString();
+      if (totalOutput() > MAX_OUTPUT_SIZE) {
+        finish(() => {
+          killChild();
+          reject(new Error("Output too large"));
         });
-
-        child.stderr?.on("data", (data) => {
-            stderr += data.toString();
-            if (totalOutput() > MAX_OUTPUT_SIZE) {
-                finish(() => {
-                    killChild();
-                    reject(new Error("Error output too large"));
-                });
-            }
-        });
-
-        child.on("error", (err) => {
-            finish(() => reject(new Error(`Failed to start compiler: ${err.message}`)));
-        });
-
-        child.on("close", (code, signal) => {
-            finish(() => {
-                if (code === 0) {
-                    resolve(stdout);
-                } else {
-                    const parts = [
-                        `Compiler exited with code ${code}${signal ? ` (signal: ${signal})` : ""}`,
-                    ];
-                    if (stderr.trim()) parts.push(stderr.trim());
-                    if (stdout.trim()) parts.push(stdout.trim());
-                    reject(new Error(parts.join("\n")));
-                }
-            });
-        });
+      }
     });
+
+    child.stderr?.on("data", (data) => {
+      stderr += data.toString();
+      if (totalOutput() > MAX_OUTPUT_SIZE) {
+        finish(() => {
+          killChild();
+          reject(new Error("Error output too large"));
+        });
+      }
+    });
+
+    child.on("error", (err) => {
+      finish(() =>
+        reject(new Error(`Failed to start compiler: ${err.message}`)),
+      );
+    });
+
+    child.on("close", (code, signal) => {
+      finish(() => {
+        if (code === 0) {
+          resolve(stdout);
+        } else {
+          const parts = [
+            `Compiler exited with code ${code}${signal ? ` (signal: ${signal})` : ""}`,
+          ];
+          if (stderr.trim()) parts.push(stderr.trim());
+          if (stdout.trim()) parts.push(stdout.trim());
+          reject(new Error(parts.join("\n")));
+        }
+      });
+    });
+  });
 }

@@ -1,5 +1,5 @@
 import { API_BASE } from "../types/constants";
-import type { SavedCode } from "../types/types";
+import type { SavedCode, ResponseCode } from "../types/types";
 
 export const codeApi = {
   saveCode: async (
@@ -153,16 +153,15 @@ export const codeApi = {
         },
       });
 
-      const data = await response.json();
+      const data: ResponseCode = await response.json();
 
       if (data.success && data.codes) {
-        data.codes = data.codes.map((code: any) => ({
+        data.codes = data.codes.map((code) => ({
           id: code.id,
           title: code.title,
-          language: code.language,
-          description: code.description,
-          createdAt: code.created_at,
-          updatedAt: code.updated_at,
+          code: code.code,
+          createdAt: code.createdAt,
+          updatedAt: code.updatedAt,
         }));
       }
 

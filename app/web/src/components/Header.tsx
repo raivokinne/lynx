@@ -1,6 +1,6 @@
 import React from "react";
-import { User, LogOut } from "lucide-react";
-import { useNavigate } from "react-router";
+import { User, LogOut, Book } from "lucide-react";
+import { useNavigate, Link } from "react-router";
 
 interface HeaderProps {
 	isDarkMode: boolean;
@@ -23,60 +23,76 @@ export const Header: React.FC<HeaderProps> = ({
 	};
 	return (
 		<header
-			className={`${isDarkMode ? "bg-black border-gray-700" : "bg-white border-gray-200"} border-b`}
+			className={`${isDarkMode ? "bg-neutral-900 border-neutral-800" : "bg-neutral-200 border-neutral-300"} border-b`}
 		>
 			{username ? (
-				<div className="max-w-full px-2 py-2 flex items-center justify-between">
-					<div className="flex items-center gap-3">
-						<div
-							className={`flex items-center gap-2 px-3 py-1.5 ${isDarkMode ? "bg-black" : "bg-gray-100"} rounded-lg`}
+				<div className="max-w-full px-3 py-1.5 flex items-center justify-between">
+					<div className="flex items-center gap-2">
+						<Link
+							to="/editor"
+							className={`flex items-center gap-2 px-2 py-0.5 ${isDarkMode ? "bg-black" : "bg-neutral-300"}`}
 						>
 							<img
 								src="/logo.png"
-								className="w-8 h-8 rounded-full"
+								className="w-4 h-4"
 								alt="logo"
 							/>
-							<span>Lynx IDE</span>
-						</div>
-						<div
-							className={`flex items-center gap-2 px-3 py-1.5 ${isDarkMode ? "bg-gray-900" : "bg-gray-100"} rounded-lg`}
+							<span className="text-xs font-mono">lynx</span>
+						</Link>
+						<Link
+							to="/docs"
+							className={`flex items-center gap-1 px-2 py-0.5 text-xs font-mono ${isDarkMode ? "hover:bg-neutral-800 text-neutral-400" : "hover:bg-neutral-300 text-neutral-600"}`}
 						>
-							<User className="w-4 h-4" />
-							<span className="text-sm">{username}</span>
+							<Book className="w-3 h-3" />
+							<span className="text-xs">docs</span>
+						</Link>
+						<div
+							className={`flex items-center gap-2 px-2 py-0.5 text-xs ${isDarkMode ? "bg-black text-neutral-400" : "bg-neutral-300 text-neutral-600"}`}
+						>
+							<User className="w-3 h-3" />
+							<span className="text-xs font-mono">{username}</span>
 						</div>
 						<button
 							onClick={onLogout}
-							className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg ${isDarkMode ? "border-gray-700 hover:bg-gray-800" : "border-gray-300 hover:bg-gray-50"}`}
+							className={`flex items-center gap-1 px-2 py-0.5 text-xs font-mono ${isDarkMode ? "hover:bg-neutral-800 text-neutral-400" : "hover:bg-neutral-300 text-neutral-600"}`}
 						>
-							<LogOut className="w-4 h-4" />
-							<span className="text-sm">Log out</span>
+							<LogOut className="w-3 h-3" />
+							<span className="text-xs">logout</span>
 						</button>
 					</div>
 				</div>
 			) : (
-				<div className="max-w-full px-2 py-2 flex items-center justify-between">
-					<div className="flex items-center gap-3">
-						<div
-							className={`flex items-center gap-2 px-3 py-1.5 ${isDarkMode ? "bg-black" : "bg-gray-100"} rounded-lg`}
+				<div className="max-w-full px-3 py-1.5 flex items-center justify-between">
+					<div className="flex items-center gap-2">
+						<Link
+							to="/"
+							className={`flex items-center gap-2 px-2 py-0.5 ${isDarkMode ? "bg-black" : "bg-neutral-300"}`}
 						>
 							<img
 								src="/logo.png"
-								className="w-8 h-8 rounded-full"
+								className="w-4 h-4"
 								alt="logo"
 							/>
-							<span>Lynx IDE</span>
-						</div>
+							<span className="text-xs font-mono">lynx</span>
+						</Link>
+						<Link
+							to="/docs"
+							className={`flex items-center gap-1 px-2 py-0.5 text-xs font-mono ${isDarkMode ? "hover:bg-neutral-800 text-neutral-400" : "hover:bg-neutral-300 text-neutral-600"}`}
+						>
+							<Book className="w-3 h-3" />
+							<span className="text-xs">docs</span>
+						</Link>
 						<button
 							onClick={onLogin}
-							className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg ${isDarkMode ? "border-gray-700 hover:bg-gray-800" : "border-gray-300 hover:bg-gray-50"}`}
+							className={`flex items-center gap-1 px-2 py-0.5 text-xs font-mono ${isDarkMode ? "hover:bg-neutral-800 text-neutral-400" : "hover:bg-neutral-300 text-neutral-600"}`}
 						>
-							<span className="text-sm">Login</span>
+							<span className="text-xs">login</span>
 						</button>
 						<button
 							onClick={onRegister}
-							className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg ${isDarkMode ? "border-gray-700 hover:bg-gray-800" : "border-gray-300 hover:bg-gray-50"}`}
+							className={`flex items-center gap-1 px-2 py-0.5 text-xs font-mono ${isDarkMode ? "hover:bg-neutral-800 text-neutral-400" : "hover:bg-neutral-300 text-neutral-600"}`}
 						>
-							<span className="text-sm">Register</span>
+							<span className="text-xs">register</span>
 						</button>
 					</div>
 				</div>

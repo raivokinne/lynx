@@ -36,27 +36,27 @@ export const LanguageSelector = ({ isDarkMode }: LanguageSelectorProps) => {
 		<div className="relative" ref={dropdownRef}>
 			<button
 				onClick={() => setIsOpen(!isOpen)}
-				className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${isDarkMode
-						? "bg-gray-800 border-gray-600 text-white hover:bg-gray-700"
-						: "bg-white border-gray-300 text-gray-900 hover:bg-gray-50"
+				className={`flex items-center gap-1 px-2 py-1 border transition-colors text-xs font-mono ${isDarkMode
+						? "bg-black border-neutral-700 text-neutral-400 hover:bg-neutral-800"
+						: "bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-100"
 					}`}
 				aria-label={t("language.select")}
 			>
-				<Globe className="w-4 h-4" />
-				<span className="text-sm">
+				<Globe className="w-3 h-3" />
+				<span className="text-xs">
 					{selectedLanguage?.flag} {selectedLanguage?.nativeName}
 				</span>
 				<ChevronDown
-					className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
+					className={`w-3 h-3 transition-transform ${isOpen ? "rotate-180" : ""}`}
 				/>
 			</button>
 
 			{isOpen && (
 				<div
-					className={`absolute top-full left-0 mt-1 min-w-full bg-white dark:bg-gray-800 border rounded-lg shadow-lg z-50 ${isDarkMode ? "border-gray-600" : "border-gray-300"
+					className={`absolute top-full left-0 mt-px min-w-full border z-50 ${isDarkMode ? "bg-neutral-900 border-neutral-700" : "bg-neutral-100 border-neutral-300"
 						}`}
 				>
-					<div className="py-1">
+					<div>
 						{SUPPORTED_LANGUAGES.map((language) => (
 							<button
 								key={language.code}
@@ -64,24 +64,17 @@ export const LanguageSelector = ({ isDarkMode }: LanguageSelectorProps) => {
 									changeLanguage(language.code);
 									setIsOpen(false);
 								}}
-								className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors ${currentLanguage === language.code
+								className={`w-full flex items-center gap-2 px-2 py-1 text-left transition-colors text-xs font-mono ${currentLanguage === language.code
 										? isDarkMode
-											? "bg-gray-700 text-white"
-											: "bg-gray-100 text-gray-900"
+											? "bg-neutral-800 text-neutral-200"
+											: "bg-neutral-200 text-neutral-800"
 										: isDarkMode
-											? "text-gray-300 hover:bg-gray-700 hover:text-white"
-											: "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+											? "text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"
+											: "text-neutral-600 hover:bg-neutral-200 hover:text-neutral-800"
 									}`}
 							>
-								<span className="text-lg">{language.flag}</span>
-								<div>
-									<div className="font-medium">{language.nativeName}</div>
-									<div
-										className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
-									>
-										{language.name}
-									</div>
-								</div>
+								<span>{language.flag}</span>
+								<span>{language.nativeName}</span>
 							</button>
 						))}
 					</div>
