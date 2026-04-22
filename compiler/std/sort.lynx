@@ -1,0 +1,229 @@
+let sort = @module()
+
+sort.bubble = fn(arr) {
+    let n = len(arr)
+    for i in range(0, n) {
+        for j in range(0, n - i - 1) {
+            if arr[j] > arr[j + 1] {
+                let tmp = arr[j]
+                arr[j] = arr[j + 1]
+                arr[j + 1] = tmp
+            }
+        }
+    }
+    return arr
+}
+
+sort.insertion = fn(arr) {
+    for i in range(1, len(arr)) {
+        let key = arr[i]
+        let j = i - 1
+        while j >= 0 and arr[j] > key {
+            arr[j + 1] = arr[j]
+            j = j - 1
+        }
+        arr[j + 1] = key
+    }
+    return arr
+}
+
+sort.selection = fn(arr) {
+    for i in range(0, len(arr)) {
+        let minIdx = i
+        for j in range(i + 1, len(arr)) {
+            if arr[j] < arr[minIdx] {
+                minIdx = j
+            }
+        }
+        let tmp = arr[i]
+        arr[i] = arr[minIdx]
+        arr[minIdx] = tmp
+    }
+    return arr
+}
+
+sort.quick = fn(arr) {
+    sort.quickSort(arr, 0, len(arr) - 1)
+    return arr
+}
+
+sort.quickSort = fn(arr, low, high) {
+    if low < high {
+        let pi = sort.partition(arr, low, high)
+        sort.quickSort(arr, low, pi - 1)
+        sort.quickSort(arr, pi + 1, high)
+    }
+}
+
+sort.partition = fn(arr, low, high) {
+    let pivot = arr[high]
+    let i = low - 1
+    for j in range(low, high) {
+        if arr[j] <= pivot {
+            i = i + 1
+            let tmp = arr[i]
+            arr[i] = arr[j]
+            arr[j] = tmp
+        }
+    }
+    let tmp = arr[i + 1]
+    arr[i + 1] = arr[high]
+    arr[high] = tmp
+    return i + 1
+}
+
+sort.merge = fn(arr) {
+    if len(arr) <= 1 {
+        return arr
+    }
+    return sort.mergeSort(arr)
+}
+
+sort.mergeSort = fn(arr) {
+    if len(arr) <= 1 {
+        return arr
+    }
+    let mid = int(len(arr) / 2)
+    let left = sort.mergeSort(arr[:mid])
+    let right = sort.mergeSort(arr[mid:])
+    return sort.mergeLists(left, right)
+}
+
+sort.mergeLists = fn(left, right) {
+    let result = []
+    let i = 0
+    let j = 0
+    while i < len(left) and j < len(right) {
+        if left[i] <= right[j] {
+            result = result + [left[i]]
+            i = i + 1
+        } else {
+            result = result + [right[j]]
+            j = j + 1
+        }
+    }
+    while i < len(left) {
+        result = result + [left[i]]
+        i = i + 1
+    }
+    while j < len(right) {
+        result = result + [right[j]]
+        j = j + 1
+    }
+    return result
+}
+
+sort.heap = fn(arr) {
+    let n = len(arr)
+    for i in range(int(n / 2) - 1, -1, -1) {
+        sort.heapify(arr, n, i)
+    }
+    for i in range(n - 1, -1, -1) {
+        let tmp = arr[0]
+        arr[0] = arr[i]
+        arr[i] = tmp
+        sort.heapify(arr, i, 0)
+    }
+    return arr
+}
+
+sort.heapify = fn(arr, n, i) {
+    let largest = i
+    let left = 2 * i + 1
+    let right = 2 * i + 2
+    if left < n and arr[left] > arr[largest] {
+        largest = left
+    }
+    if right < n and arr[right] > arr[largest] {
+        largest = right
+    }
+    if largest != i {
+        let tmp = arr[i]
+        arr[i] = arr[largest]
+        arr[largest] = tmp
+        sort.heapify(arr, n, largest)
+    }
+}
+
+sort.counting = fn(arr, maxVal) {
+    let count = []
+    for i in range(0, maxVal + 1) {
+        count = count + [0]
+    }
+    for val in arr {
+        count[int(val)] = count[int(val)] + 1
+    }
+    let result = []
+    for i in range(0, maxVal + 1) {
+        while count[i] > 0 {
+            result = result + [float(i)]
+            count[i] = count[i] - 1
+        }
+    }
+    return result
+}
+
+sort.radix = fn(arr) {
+    let maxVal = arr[0]
+    for val in arr {
+        if val > maxVal {
+            maxVal = val
+        }
+    }
+    let place = 1
+    while int(maxVal / place) > 0 {
+        let buckets = []
+        for i in range(0, 10) {
+            buckets = buckets + [[]]
+        }
+        for val in arr {
+            let digit = int(int(val / place) % 10)
+            buckets[digit] = buckets[digit] + [val]
+        }
+        let result = []
+        for bucket in buckets {
+            for val in bucket {
+                result = result + [val]
+            }
+        }
+        arr = result
+        place = place * 10
+    }
+    return arr
+}
+
+sort.reverse = fn(arr) {
+    let result = []
+    for i in range(len(arr) - 1, -1, -1) {
+        result = result + [arr[i]]
+    }
+    return result
+}
+
+sort.shuffle = fn(arr) {
+    let result = sort.clone(arr)
+    for i in range(len(result) - 1, 0, -1) {
+        let j = int(random() * float(i + 1))
+        let tmp = result[i]
+        result[i] = result[j]
+        result[j] = tmp
+    }
+    return result
+}
+
+sort.clone = fn(arr) {
+    let result = []
+    for item in arr {
+        result = result + [item]
+    }
+    return result
+}
+
+sort.isSorted = fn(arr) {
+    for i in range(1, len(arr)) {
+        if arr[i - 1] > arr[i] {
+            return false
+        }
+    }
+    return true
+}

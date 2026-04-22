@@ -1,0 +1,85 @@
+let re = @module()
+
+re.match = fn(pattern, text) {
+    return _reMatch(pattern, text)
+}
+
+re.search = fn(pattern, text) {
+    return _reSearch(pattern, text)
+}
+
+re.find = fn(pattern, text) {
+    return _reFind(pattern, text)
+}
+
+re.findAll = fn(pattern, text) {
+    return _reFindAll(pattern, text)
+}
+
+re.replace = fn(pattern, text, replacement) {
+    return _reReplace(pattern, text, replacement)
+}
+
+re.split = fn(pattern, text) {
+    return _reSplit(pattern, text)
+}
+
+re.test = fn(pattern, text) {
+    return _reMatch(pattern, text) != null
+}
+
+re.groups = fn(match) {
+    if match == null {
+        return []
+    }
+    let groups = []
+    for i in range(1, 20) {
+        if match[i] != null {
+            groups = groups + [match[i]]
+        } else {
+            break
+        }
+    }
+    return groups
+}
+
+re.namedGroups = fn(match) {
+    if match == null {
+        return {}
+    }
+    return match
+}
+
+re.escape = fn(text) {
+    let result = ""
+    for char in text {
+        if char == "\\" or char == "." or char == "*" or char == "+" or char == "?" or 
+           char == "(" or char == ")" or char == "{" or char == "}" or char == "[" or 
+           char == "]" or char == "^" or char == "$" or char == "|" or char == "?" {
+            result = result + "\\" + char
+        } else if char == "\n" {
+            result = result + "\\n"
+        } else if char == "\t" {
+            result = result + "\\t"
+        } else {
+            result = result + char
+        }
+    }
+    return result
+}
+
+re.compile = fn(pattern) {
+    return _reCompile(pattern)
+}
+
+re.isMatch = fn(pattern, text) {
+    return re.test(pattern, text)
+}
+
+re.first = fn(pattern, text) {
+    let result = _reSearch(pattern, text)
+    if result == null {
+        return null
+    }
+    return result[0]
+}

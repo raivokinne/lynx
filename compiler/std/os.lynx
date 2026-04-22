@@ -1,0 +1,153 @@
+let os = @module()
+
+os.env = fn(key) {
+    return _getEnv(key)
+}
+
+os.setEnv = fn(key, value) {
+    return _setEnv(key, value)
+}
+
+os.getenv = fn(key, default) {
+    let val = _getEnv(key)
+    if val == "" or val == "null" {
+        return default
+    }
+    return val
+}
+
+os.exit = fn(code) {
+    return _exit(code)
+}
+
+os.cwd = fn() {
+    return _cwd()
+}
+
+os.chdir = fn(path) {
+    return _chdir(path)
+}
+
+os.home = fn() {
+    return _home()
+}
+
+os.temp = fn() {
+    return _temp()
+}
+
+os.arch = fn() {
+    return _arch()
+}
+
+os.platform = fn() {
+    return _platform()
+}
+
+os.version = fn() {
+    return _version()
+}
+
+os.hostname = fn() {
+    return _hostname()
+}
+
+os.user = fn() {
+    return _user()
+}
+
+os.args = fn() {
+    return _args()
+}
+
+os.mkdir = fn(path) {
+    return _mkdir(path)
+}
+
+os.rmdir = fn(path) {
+    return _rmdir(path)
+}
+
+os.remove = fn(path) {
+    return _remove(path)
+}
+
+os.rename = fn(oldPath, newPath) {
+    return _rename(oldPath, newPath)
+}
+
+os.stat = fn(path) {
+    return _stat(path)
+}
+
+os.exists = fn(path) {
+    let info = _stat(path)
+    return info != null
+}
+
+os.isFile = fn(path) {
+    let info = _stat(path)
+    if info == null {
+        return false
+    }
+    return info["type"] == "file"
+}
+
+os.isDir = fn(path) {
+    let info = _stat(path)
+    if info == null {
+        return false
+    }
+    return info["type"] == "dir"
+}
+
+os.isSymlink = fn(path) {
+    let info = _stat(path)
+    if info == null {
+        return false
+    }
+    return info["type"] == "symlink"
+}
+
+os.listDir = fn(path) {
+    return _listDir(path)
+}
+
+os.readDir = fn(path) {
+    return _readDir(path)
+}
+
+os.copy = fn(src, dest) {
+    return _copy(src, dest)
+}
+
+os.move = fn(src, dest) {
+    return _move(src, dest)
+}
+
+os.expand = fn(path) {
+    return _expand(path)
+}
+
+os.abs = fn(path) {
+    return _abs(path)
+}
+
+os.baseName = fn(path) {
+    let parts = _splitPath(path)
+    return parts["base"]
+}
+
+os.dirName = fn(path) {
+    let parts = _splitPath(path)
+    return parts["dir"]
+}
+
+os.ext = fn(path) {
+    let parts = _splitPath(path)
+    return parts["ext"]
+}
+
+os.join = fn(parts) {
+    return _joinPath(parts)
+}

@@ -1,0 +1,107 @@
+let time = @module()
+
+time.now = fn() {
+    let ts = _timestamp()
+    return ts
+}
+
+time.sleep = fn(ms) {
+    return sleep(ms)
+}
+
+time.format = fn(timestamp, format) {
+    return _formatTime(timestamp, format)
+}
+
+time.parse = fn(dateString, format) {
+    return _parseTime(dateString, format)
+}
+
+time.unix = fn() {
+    return _unix()
+}
+
+time.unixNano = fn() {
+    return _unixNano()
+}
+
+time.add = fn(timestamp, amount, unit) {
+    let factor = 1
+    if unit == "seconds" or unit == "s" {
+        factor = 1000
+    }
+    if unit == "minutes" or unit == "m" {
+        factor = 60000
+    }
+    if unit == "hours" or unit == "h" {
+        factor = 3600000
+    }
+    if unit == "days" or unit == "d" {
+        factor = 86400000
+    }
+    return timestamp + amount * factor
+}
+
+time.sub = fn(timestamp, amount, unit) {
+    return time.add(timestamp, -amount, unit)
+}
+
+time.since = fn(timestamp) {
+    return _unix() - timestamp
+}
+
+time.diff = fn(start, end) {
+    return end - start
+}
+
+time.weekday = fn(timestamp) {
+    let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+    let d = _weekday(timestamp)
+    return days[d]
+}
+
+time.monthName = fn(timestamp) {
+    let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    let m = _month(timestamp)
+    return months[m]
+}
+
+time.iso = fn() {
+    return time.format(_unix(), "%Y-%m-%dT%H:%M:%SZ")
+}
+
+time.iso8601 = fn(timestamp) {
+    return time.format(timestamp, "%Y-%m-%dT%H:%M:%S")
+}
+
+time.durHuman = fn(ms) {
+    if ms < 1000 {
+        return str(ms) + "ms"
+    }
+    if ms < 60000 {
+        return str(int(ms / 1000)) + "s"
+    }
+    if ms < 3600000 {
+        return str(int(ms / 60000)) + "m"
+    }
+    if ms < 86400000 {
+        return str(int(ms / 3600000)) + "h"
+    }
+    return str(int(ms / 86400000)) + "d"
+}
+
+time.tick = fn(ms, callback) {
+    return _setInterval(ms, callback)
+}
+
+time.timeout = fn(ms, callback) {
+    return _setTimeout(ms, callback)
+}
+
+time.stopTick = fn(id) {
+    return _clearInterval(id)
+}
+
+time.stopTimeout = fn(id) {
+    return _clearTimeout(id)
+}

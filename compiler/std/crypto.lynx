@@ -1,0 +1,117 @@
+let crypto = @module()
+
+crypto.md5 = fn(data) {
+    return _md5(data)
+}
+
+crypto.sha1 = fn(data) {
+    return _sha1(data)
+}
+
+crypto.sha256 = fn(data) {
+    return _sha256(data)
+}
+
+crypto.sha512 = fn(data) {
+    return _sha512(data)
+}
+
+crypto.hmac = fn(data, key, algorithm) {
+    return _hmac(data, key, algorithm)
+}
+
+crypto.hash = fn(data, algorithm) {
+    if algorithm == "md5" {
+        return crypto.md5(data)
+    }
+    if algorithm == "sha1" {
+        return crypto.sha1(data)
+    }
+    if algorithm == "sha256" {
+        return crypto.sha256(data)
+    }
+    if algorithm == "sha512" {
+        return crypto.sha512(data)
+    }
+    return error("unknown hash algorithm: " + algorithm)
+}
+
+crypto.random = fn(n) {
+    let result = []
+    for i in range(0, n) {
+        result = result + [str(int(random() * 256))]
+    }
+    return result
+}
+
+crypto.randomHex = fn(n) {
+    let hex = "0123456789abcdef"
+    let result = ""
+    let bytes = crypto.random(n)
+    for b in bytes {
+        result = result + hex[int(b) / 16] + hex[int(b) % 16]
+    }
+    return result
+}
+
+crypto.randomString = fn(n) {
+    let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    let result = ""
+    for i in range(0, n) {
+        let idx = int(random() * float(len(chars)))
+        result = result + chars[idx]
+    }
+    return result
+}
+
+crypto.uuid = fn() {
+    return crypto.randomHex(16)
+}
+
+crypto.crc32 = fn(data) {
+    return _crc32(data)
+}
+
+crypto.adler32 = fn(data) {
+    return _adler32(data)
+}
+
+crypto.verifyHash = fn(data, hash, algorithm) {
+    let computed = crypto.hash(data, algorithm)
+    return computed == hash
+}
+
+crypto.hexEncode = fn(data) {
+    let hex = "0123456789abcdef"
+    let result = ""
+    for byte in data {
+        result = result + hex[int(byte) / 16]
+        result = result + hex[int(byte) % 16]
+    }
+    return result
+}
+
+crypto.hexDecode = fn(hexString) {
+    let result = ""
+    let hex = "0123456789abcdef"
+    let i = 0
+    while i < len(hexString) {
+        let high = 0
+        let low = 0
+        for j in range(0, 16) {
+            if hexString[i] == hex[j] {
+                high = j
+            }
+        }
+        if i + 1 < len(hexString) {
+            for j in range(0, 16) {
+                if hexString[i + 1] == hex[j] {
+                    low = j
+                }
+            }
+        }
+        result = result + str(high * 16 + low)
+        i = i + 2
+    }
+    return result
+}

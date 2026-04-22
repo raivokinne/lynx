@@ -1,0 +1,348 @@
+let iter = @module()
+
+iter.map = fn(arr, fn) {
+    let result = []
+    for item in arr {
+        result = result + [fn(item)]
+    }
+    return result
+}
+
+iter.filter = fn(arr, fn) {
+    let result = []
+    for item in arr {
+        if fn(item) {
+            result = result + [item]
+        }
+    }
+    return result
+}
+
+iter.reduce = fn(arr, fn, initial) {
+    let acc = initial
+    for item in arr {
+        acc = fn(acc, item)
+    }
+    return acc
+}
+
+iter.fold = fn(arr, fn, initial) {
+    return iter.reduce(arr, fn, initial)
+}
+
+iter.forEach = fn(arr, fn) {
+    for item in arr {
+        fn(item)
+    }
+}
+
+iter.some = fn(arr, fn) {
+    for item in arr {
+        if fn(item) {
+            return true
+        }
+    }
+    return false
+}
+
+iter.every = fn(arr, fn) {
+    for item in arr {
+        if !fn(item) {
+            return false
+        }
+    }
+    return true
+}
+
+iter.none = fn(arr, fn) {
+    for item in arr {
+        if fn(item) {
+            return false
+        }
+    }
+    return true
+}
+
+iter.find = fn(arr, fn) {
+    for item in arr {
+        if fn(item) {
+            return item
+        }
+    }
+    return null
+}
+
+iter.findIndex = fn(arr, fn) {
+    for i in range(0, len(arr)) {
+        if fn(arr[i]) {
+            return i
+        }
+    }
+    return null
+}
+
+iter.indexOf = fn(arr, item) {
+    for i in range(0, len(arr)) {
+        if arr[i] == item {
+            return i
+        }
+    }
+    return null
+}
+
+iter.lastIndexOf = fn(arr, item) {
+    let result = null
+    for i in range(0, len(arr)) {
+        if arr[i] == item {
+            result = i
+        }
+    }
+    return result
+}
+
+iter.includes = fn(arr, item) {
+    return iter.indexOf(arr, item) != null
+}
+
+iter.flatMap = fn(arr, fn) {
+    let result = []
+    for item in arr {
+        let mapped = fn(item)
+        for val in mapped {
+            result = result + [val]
+        }
+    }
+    return result
+}
+
+iter.flatten = fn(arr) {
+    let result = []
+    for item in arr {
+        if type(item) == "array" {
+            for val in item {
+                result = result + [val]
+            }
+        } else {
+            result = result + [item]
+        }
+    }
+    return result
+}
+
+iter.chunk = fn(arr, size) {
+    let result = []
+    let current = []
+    for item in arr {
+        current = current + [item]
+        if len(current) == size {
+            result = result + [current]
+            current = []
+        }
+    }
+    if len(current) > 0 {
+        result = result + [current]
+    }
+    return result
+}
+
+iter.take = fn(arr, n) {
+    return arr[:n]
+}
+
+iter.skip = fn(arr, n) {
+    if n >= len(arr) {
+        return []
+    }
+    return arr[n:]
+}
+
+iter.takeWhile = fn(arr, fn) {
+    let result = []
+    for item in arr {
+        if fn(item) {
+            result = result + [item]
+        } else {
+            break
+        }
+    }
+    return result
+}
+
+iter.skipWhile = fn(arr, fn) {
+    let result = []
+    let skipping = true
+    for item in arr {
+        if skipping and fn(item) {
+            continue
+        }
+        skipping = false
+        result = result + [item]
+    }
+    return result
+}
+
+iter.zip = fn(a, b) {
+    let result = []
+    let lenA = len(a)
+    let lenB = len(b)
+    let maxLen = lenA
+    if lenB < maxLen {
+        maxLen = lenB
+    }
+    for i in range(0, maxLen) {
+        result = result + [[a[i], b[i]]]
+    }
+    return result
+}
+
+iter.enumerate = fn(arr) {
+    let result = []
+    for i in range(0, len(arr)) {
+        result = result + [[i, arr[i]]]
+    }
+    return result
+}
+
+iter.sum = fn(arr) {
+    let total = 0
+    for item in arr {
+        total = total + item
+    }
+    return total
+}
+
+iter.product = fn(arr) {
+    let total = 1
+    for item in arr {
+        total = total * item
+    }
+    return total
+}
+
+iter.join = fn(arr, sep) {
+    let result = ""
+    for i in range(0, len(arr)) {
+        if i > 0 {
+            result = result + sep
+        }
+        result = result + str(arr[i])
+    }
+    return result
+}
+
+iter.unique = fn(arr) {
+    let result = []
+    let seen = {}
+    for item in arr {
+        if seen[item] == null {
+            seen[item] = true
+            result = result + [item]
+        }
+    }
+    return result
+}
+
+iter.duplicates = fn(arr) {
+    let result = []
+    let seen = {}
+    let duplicates = {}
+    for item in arr {
+        if seen[item] != null {
+            duplicates[item] = true
+        }
+        seen[item] = true
+    }
+    for item in arr {
+        if duplicates[item] != null and iter.indexOf(result, item) == null {
+            result = result + [item]
+        }
+    }
+    return result
+}
+
+iter.groupBy = fn(arr, fn) {
+    let result = {}
+    for item in arr {
+        let key = fn(item)
+        if result[key] == null {
+            result[key] = []
+        }
+        result[key] = result[key] + [item]
+    }
+    return result
+}
+
+iter.partition = fn(arr, fn) {
+    let pass = []
+    let fail = []
+    for item in arr {
+        if fn(item) {
+            pass = pass + [item]
+        } else {
+            fail = fail + [item]
+        }
+    }
+    return [pass, fail]
+}
+
+iter.reverse = fn(arr) {
+    let result = []
+    for i in range(len(arr) - 1, -1, -1) {
+        result = result + [arr[i]]
+    }
+    return result
+}
+
+iter.sample = fn(arr, n) {
+    if n >= len(arr) {
+        return iter.shuffle(arr)
+    }
+    let result = []
+    let copy = arr
+    for i in range(0, n) {
+        let idx = int(random() * float(len(copy)))
+        result = result + [copy[idx]]
+        copy = copy[:idx] + copy[idx + 1:]
+    }
+    return result
+}
+
+iter.shuffle = fn(arr) {
+    let result = []
+    let copy = []
+    for item in arr {
+        copy = copy + [item]
+    }
+    while len(copy) > 0 {
+        let idx = int(random() * float(len(copy)))
+        result = result + [copy[idx]]
+        copy = copy[:idx] + copy[idx + 1:]
+    }
+    return result
+}
+
+iter.min = fn(arr) {
+    if len(arr) == 0 {
+        return null
+    }
+    let minVal = arr[0]
+    for item in arr {
+        if item < minVal {
+            minVal = item
+        }
+    }
+    return minVal
+}
+
+iter.max = fn(arr) {
+    if len(arr) == 0 {
+        return null
+    }
+    let maxVal = arr[0]
+    for item in arr {
+        if item > maxVal {
+            maxVal = item
+        }
+    }
+    return maxVal
+}

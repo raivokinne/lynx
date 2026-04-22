@@ -1,0 +1,140 @@
+let rand = @module()
+
+rand.int = fn(min, max) {
+    let r = random()
+    return min + int(r * float(max - min + 1))
+}
+
+rand.float = fn(min, max) {
+    let r = random()
+    return min + r * (max - min)
+}
+
+rand.bool = fn() {
+    return random() > 0.5
+}
+
+rand.char = fn(charset) {
+    if charset == null {
+        charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    }
+    let idx = int(random() * float(len(charset)))
+    return charset[idx]
+}
+
+rand.string = fn(length, charset) {
+    let result = ""
+    for i in range(0, length) {
+        result = result + rand.char(charset)
+    }
+    return result
+}
+
+rand.upper = fn(length) {
+    return rand.string(length, "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+}
+
+rand.lower = fn(length) {
+    return rand.string(length, "abcdefghijklmnopqrstuvwxyz")
+}
+
+rand.alpha = fn(length) {
+    return rand.string(length, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+}
+
+rand.alphaNum = fn(length) {
+    return rand.string(length, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+}
+
+rand.hex = fn(length) {
+    return rand.string(length, "0123456789abcdef")
+}
+
+rand.element = fn(arr) {
+    if len(arr) == 0 {
+        return null
+    }
+    let idx = int(random() * float(len(arr)))
+    return arr[idx]
+}
+
+rand.shuffle = fn(arr) {
+    let result = []
+    let copy = []
+    for item in arr {
+        copy = copy + [item]
+    }
+    while len(copy) > 0 {
+        let idx = int(random() * float(len(copy)))
+        result = result + [copy[idx]]
+        copy = copy[:idx] + copy[idx + 1:]
+    }
+    return result
+}
+
+rand.sample = fn(arr, n) {
+    let count = n
+    if count > len(arr) {
+        count = len(arr)
+    }
+    let shuffled = rand.shuffle(arr)
+    return shuffled[:count]
+}
+
+rand.weighted = fn(weights) {
+    let total = 0
+    let cumulative = []
+    for weight in weights {
+        total = total + weight
+        cumulative = cumulative + [total]
+    }
+    let r = random() * total
+    for i in range(0, len(cumulative)) {
+        if r < cumulative[i] {
+            return i
+        }
+    }
+    return len(cumulative) - 1
+}
+
+rand.gauss = fn(mean, stddev) {
+    let u1 = 1.0 - random()
+    let u2 = random()
+    let z0 = sqrt(-2.0 * log(u1)) * cos(2.0 * 3.14159265359 * u2)
+    return mean + z0 * stddev
+}
+
+let sqrt = fn(x) {
+    if x < 0 {
+        return error("sqrt: negative argument")
+    }
+    let guess = x / 2.0
+    for i in range(0, 20) {
+        guess = (guess + x / guess) / 2.0
+    }
+    return guess
+}
+
+let log = fn(x) {
+    if x <= 0 {
+        return error("log: argument must be positive")
+    }
+    let result = 0.0
+    let y = (x - 1.0) / (x + 1.0)
+    let term = y
+    for i in range(1, 30, 2) {
+        result = result + term / float(i)
+        term = term * y * y
+    }
+    return result * 2.0
+}
+
+let cos = fn(x) {
+    let result = 1.0
+    let term = 1.0
+    for i in range(1, 20) {
+        term = -term * x * x / float((2 * i - 1) * (2 * i))
+        result = result + term
+    }
+    return result
+}

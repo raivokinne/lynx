@@ -129,6 +129,7 @@ export const Docs: React.FC = () => {
 				<div className="max-w-6xl mx-auto px-4 h-12 flex items-center justify-between">
 					<div className="flex items-center gap-4">
 						<Link to="/" className="flex items-center gap-2 hover:text-white transition-colors">
+							<img src="/logo.png" alt="logo" className="w-5 h-5" />
 							<span className="text-sm font-bold">lynx</span>
 						</Link>
 						<Link
@@ -152,9 +153,9 @@ export const Docs: React.FC = () => {
 				</div>
 			</header>
 
-			<div className="pt-12 flex">
-				<aside className="fixed left-0 top-12 bottom-0 w-56 bg-black border-r border-neutral-800 flex flex-col">
-					<div className="p-3 border-b border-neutral-800">
+			<div className="pt-12 flex h-[calc(100vh-3rem)]">
+				<aside className="w-56 bg-black border-r border-neutral-800 flex flex-col overflow-hidden">
+					<div className="p-3 border-b border-neutral-800 shrink-0">
 						<div className="mb-3">
 							<LanguageSelector isDarkMode={true} />
 						</div>
@@ -177,8 +178,8 @@ export const Docs: React.FC = () => {
 					/>
 				</aside>
 
-				<main className="ml-56 flex-1 overflow-y-auto">
-					<div className="p-6 max-w-4xl">{renderContent()}</div>
+				<main className="flex-1 overflow-y-auto">
+					<div className="p-6">{renderContent()}</div>
 				</main>
 			</div>
 		</div>

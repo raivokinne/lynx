@@ -1,0 +1,272 @@
+let fmt = @module()
+
+fmt.sprintf = fn(format, args) {
+    let result = ""
+    let argIdx = 0
+    let i = 0
+    while i < len(format) {
+        if format[i] == "%" and i + 1 < len(format) {
+            let spec = format[i + 1]
+            if spec == "%" {
+                result = result + "%"
+                i = i + 2
+            } else if spec == "s" {
+                if argIdx < len(args) {
+                    result = result + str(args[argIdx])
+                    argIdx = argIdx + 1
+                }
+                i = i + 2
+            } else if spec == "d" or spec == "i" {
+                if argIdx < len(args) {
+                    result = result + str(int(args[argIdx]))
+                    argIdx = argIdx + 1
+                }
+                i = i + 2
+            } else if spec == "f" {
+                if argIdx < len(args) {
+                    result = result + str(args[argIdx])
+                    argIdx = argIdx + 1
+                }
+                i = i + 2
+            } else if spec == "x" {
+                if argIdx < len(args) {
+                    result = result + fmt.hex(int(args[argIdx]))
+                    argIdx = argIdx + 1
+                }
+                i = i + 2
+            } else if spec == "X" {
+                if argIdx < len(args) {
+                    result = result + fmt.hexUpper(int(args[argIdx]))
+                    argIdx = argIdx + 1
+                }
+                i = i + 2
+            } else if spec == "o" {
+                if argIdx < len(args) {
+                    result = result + fmt.oct(int(args[argIdx]))
+                    argIdx = argIdx + 1
+                }
+                i = i + 2
+            } else if spec == "b" {
+                if argIdx < len(args) {
+                    result = result + fmt.bin(int(args[argIdx]))
+                    argIdx = argIdx + 1
+                }
+                i = i + 2
+            } else if spec == "c" {
+                if argIdx < len(args) {
+                    result = result + str(int(args[argIdx]))
+                    argIdx = argIdx + 1
+                }
+                i = i + 2
+            } else if spec == "e" {
+                if argIdx < len(args) {
+                    result = result + fmt.sci(int(args[argIdx]))
+                    argIdx = argIdx + 1
+                }
+                i = i + 2
+            } else if spec == "E" {
+                if argIdx < len(args) {
+                    result = result + fmt.sciUpper(int(args[argIdx]))
+                    argIdx = argIdx + 1
+                }
+                i = i + 2
+            } else if spec == "t" {
+                if argIdx < len(args) {
+                    result = result + str(args[argIdx])
+                    argIdx = argIdx + 1
+                }
+                i = i + 2
+            } else {
+                result = result + format[i]
+                i = i + 1
+            }
+        } else {
+            result = result + format[i]
+            i = i + 1
+        }
+    }
+    return result
+}
+
+fmt.print = fn(format, args) {
+    println(fmt.sprintf(format, args))
+}
+
+fmt.println = fn(format, args) {
+    println(fmt.sprintf(format, args))
+}
+
+fmt.hex = fn(n) {
+    let hex = "0123456789abcdef"
+    if n == 0 {
+        return "0"
+    }
+    let result = ""
+    let num = n
+    if num < 0 {
+        num = -num
+    }
+    while num > 0 {
+        result = hex[num % 16] + result
+        num = num / 16
+    }
+    if n < 0 {
+        result = "-" + result
+    }
+    return result
+}
+
+fmt.hexUpper = fn(n) {
+    let hex = "0123456789ABCDEF"
+    if n == 0 {
+        return "0"
+    }
+    let result = ""
+    let num = n
+    if num < 0 {
+        num = -num
+    }
+    while num > 0 {
+        result = hex[num % 16] + result
+        num = num / 16
+    }
+    if n < 0 {
+        result = "-" + result
+    }
+    return result
+}
+
+fmt.oct = fn(n) {
+    if n == 0 {
+        return "0"
+    }
+    let result = ""
+    let num = n
+    if num < 0 {
+        num = -num
+    }
+    while num > 0 {
+        result = str(num % 8) + result
+        num = num / 8
+    }
+    if n < 0 {
+        result = "-" + result
+    }
+    return result
+}
+
+fmt.bin = fn(n) {
+    if n == 0 {
+        return "0"
+    }
+    let result = ""
+    let num = n
+    if num < 0 {
+        num = -num
+    }
+    while num > 0 {
+        result = str(num % 2) + result
+        num = num / 2
+    }
+    if n < 0 {
+        result = "-" + result
+    }
+    return result
+}
+
+fmt.sci = fn(n) {
+    return str(n)
+}
+
+fmt.sciUpper = fn(n) {
+    return str(n)
+}
+
+fmt.padLeft = fn(s, width, char) {
+    if char == null {
+        char = " "
+    }
+    let result = ""
+    let padding = width - len(s)
+    for i in range(0, padding) {
+        result = result + char
+    }
+    return result + s
+}
+
+fmt.padRight = fn(s, width, char) {
+    if char == null {
+        char = " "
+    }
+    let result = s
+    let padding = width - len(s)
+    for i in range(0, padding) {
+        result = result + char
+    }
+    return result
+}
+
+fmt.center = fn(s, width, char) {
+    if char == null {
+        char = " "
+    }
+    let padding = width - len(s)
+    let left = int(padding / 2)
+    let right = padding - left
+    let result = ""
+    for i in range(0, left) {
+        result = result + char
+    }
+    result = result + s
+    for i in range(0, right) {
+        result = result + char
+    }
+    return result
+}
+
+fmt.trunc = fn(s, width) {
+    if len(s) <= width {
+        return s
+    }
+    return s[:width]
+}
+
+fmt.wrap = fn(s, width) {
+    let lines = []
+    let words = []
+    let current = ""
+    for char in s {
+        if char == " " {
+            if current != "" {
+                words = words + [current]
+                current = ""
+            }
+        } else {
+            current = current + char
+        }
+    }
+    if current != "" {
+        words = words + [current]
+    }
+    current = ""
+    for word in words {
+        if len(current) + len(word) + 1 > width {
+            if current != "" {
+                lines = lines + [current]
+                current = word
+            } else {
+                lines = lines + [word]
+            }
+        } else {
+            if current == "" {
+                current = word
+            } else {
+                current = current + " " + word
+            }
+        }
+    }
+    if current != "" {
+        lines = lines + [current]
+    }
+    return lines
+}
