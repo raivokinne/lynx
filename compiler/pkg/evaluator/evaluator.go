@@ -219,6 +219,9 @@ func evalPropertyAssignment(obj object.Object, prop string, val object.Object) o
 	case *object.Instance:
 		obj.Attributes[prop] = val
 		return val
+	case *object.Module:
+		obj.Env.Set(prop, val, false)
+		return val
 	default:
 		return newError("property assignment only supported on objects and instances, got %T", obj)
 	}
@@ -1311,14 +1314,28 @@ func applyMethod(obj object.Object, method string, args []object.Object) object.
 }
 
 func evalModuleMethod(obj *object.Module, method string, args []object.Object) object.Object {
-	val, ok := obj.Env.Get(method)
-	if !ok {
-		return newError("module has no method: %s", method)
+	var fn *object.Function
+	var ok bool
+
+	if obj.Members != nil {
+		val, hasMember := obj.Members[method]
+		if hasMember {
+			fn, ok = val.(*object.Function)
+			if !ok {
+				return newError("%s is not callable", method)
+			}
+		}
 	}
 
-	fn, ok := val.(*object.Function)
-	if !ok {
-		return newError("%s is not callable", method)
+	if fn == nil {
+		val, hasMember := obj.Env.Get(method)
+		if !hasMember {
+			return newError("module has no method: %s", method)
+		}
+		fn, ok = val.(*object.Function)
+		if !ok {
+			return newError("%s is not callable", method)
+		}
 	}
 
 	return applyFunction(fn, args)
@@ -1501,14 +1518,18 @@ func evalPropertyAccess(obj object.Object, property string) object.Object {
 }
 
 func evalModulePropertyAccess(obj *object.Module, property string) object.Object {
-	if obj.Members == nil {
-		return newError("module has no members")
+	if obj.Members != nil {
+		member, ok := obj.Members[property]
+		if !ok {
+			return newError("module does not have member: %s", property)
+		}
+		return member
 	}
-	member, ok := obj.Members[property]
+	val, ok := obj.Env.Get(property)
 	if !ok {
-		return newError("module does not have member: %s", property)
+		return newError("module has no member: %s", property)
 	}
-	return member
+	return val
 }
 
 func evalArrayPropertyAccess(obj *object.Array, property string) object.Object {
@@ -1668,6 +1689,12 @@ func evalWhile(node *ast.While, env *object.Env) object.Object {
 func evalModuleLoad(node *ast.ModuleLoad, env *object.Env) object.Object {
 	name := node.Name.String()
 
+	if name == "" || name == "module" {
+		newEnv := env.NewEnclosedEnv()
+		modObj := &object.Module{Name: "anonymous", Env: newEnv}
+		return setModuleInEnv(modObj, name, node.Members, env)
+	}
+
 	if mod, ok := moduleCache[name]; ok {
 		return setModuleInEnv(mod, name, node.Members, env)
 	}
@@ -1675,6 +1702,13 @@ func evalModuleLoad(node *ast.ModuleLoad, env *object.Env) object.Object {
 	modEnv := env.NewEnclosedEnv()
 	if err := loadModule(name, modEnv); err != nil {
 		return newError("%s", err.Error())
+	}
+
+	if storedMod, ok := modEnv.Get(name); ok {
+		if moduleObj, ok := storedMod.(*object.Module); ok {
+			moduleCache[name] = moduleObj
+			return setModuleInEnv(moduleObj, name, node.Members, env)
+		}
 	}
 
 	modObj := &object.Module{Name: name, Env: modEnv}
