@@ -116,6 +116,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
 	p.registerPrefix(token.NULL, p.parseNull)
 	p.registerPrefix(token.SELF, p.parseSelf)
+	p.registerPrefix(token.AT, p.parseAtExpression)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -235,7 +236,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.BREAK:
 		return p.parseBreakStatement()
 	case token.AT:
-		return p.parseAtExpression()
+		return p.parseAtExpression().(ast.Statement)
 	case token.SWITCH:
 		return p.parseSwitchStatement()
 	case token.ERROR:
@@ -503,15 +504,15 @@ func (p *Parser) parseDefaultCase() *ast.Case {
 	}
 }
 
-func (p *Parser) parseAtExpression() ast.Statement {
-	stmt := &ast.ModuleLoad{Token: p.curToken}
+func (p *Parser) parseAtExpression() ast.Expression {
+	expr := &ast.ModuleLoad{Token: p.curToken}
 	p.nextToken()
 
-	stmt.Name = p.parseIdentifier()
+	expr.Name = p.parseIdentifier()
 
 	if p.peekTokenIs(token.LPAREN) {
 		p.nextToken()
-		stmt.Members = p.parseIdentifierList()
+		expr.Members = p.parseIdentifierList()
 		if !p.expectPeek(token.RPAREN) {
 			p.addError(
 				"SyntaxError",
@@ -520,14 +521,13 @@ func (p *Parser) parseAtExpression() ast.Statement {
 			return nil
 		}
 	}
-	return stmt
+	return expr
 }
 
 func (p *Parser) parseIdentifierList() []*ast.Identifier {
 	identifiers := []*ast.Identifier{}
 
 	if p.peekTokenIs(token.RPAREN) {
-		p.nextToken()
 		return identifiers
 	}
 

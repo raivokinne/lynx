@@ -479,6 +479,7 @@ type ModuleLoad struct {
 }
 
 func (ml *ModuleLoad) statementNode()       {}
+func (ml *ModuleLoad) expressionNode()     {}
 func (ml *ModuleLoad) TokenLiteral() string { return ml.Token.Literal }
 func (ml *ModuleLoad) String() string {
 	var out bytes.Buffer
