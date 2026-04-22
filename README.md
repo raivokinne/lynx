@@ -20,7 +20,7 @@ Or download pre-built binaries from the [releases page](https://github.com/raivo
 
 ## Documentation
 
-See [lynxlang.dev/docs](https://lynxlang.sites/docs) for full documentation.
+See [lynxlang.sites/docs](https://lynxlang.sites/docs) for full documentation.
 
 ## License
 
