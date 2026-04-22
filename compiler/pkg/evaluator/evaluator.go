@@ -392,15 +392,20 @@ var operatorMap = map[TypePair]map[string]OperatorHandler{
 		"==":  evalBooleanEqual,
 		"!=":  evalBooleanNotEqual,
 	},
-	{object.BOOLEAN_OBJ, object.INTEGER_OBJ}: {
+{object.BOOLEAN_OBJ, object.INTEGER_OBJ}: {
 		"and": evalBooleanIntegerAnd,
 		"or":  evalBooleanIntegerOr,
-		"==":  evalBooleanIntegerEqual,
-		"!=":  evalBooleanIntegerNotEqual,
+		"==": evalBooleanIntegerEqual,
+		"!=": evalBooleanIntegerNotEqual,
 		">":   evalBooleanIntegerGreater,
 		"<":   evalBooleanIntegerLess,
 		">=":  evalBooleanIntegerGreaterEqual,
 		"<=":  evalBooleanIntegerLessEqual,
+	},
+	{object.ARRAY_OBJ, object.ARRAY_OBJ}: {
+		"+": evalArrayConcat,
+		"==": evalArrayEqual,
+		"!=": evalArrayNotEqual,
 	},
 	{object.INTEGER_OBJ, object.BOOLEAN_OBJ}: {
 		"and": evalIntegerBooleanAnd,
@@ -972,6 +977,37 @@ func evalStringConcat(left, right object.Object) object.Object {
 	leftVal := left.(*object.String).Value
 	rightVal := right.(*object.String).Value
 	return &object.String{Value: leftVal + rightVal}
+}
+
+func evalArrayConcat(left, right object.Object) object.Object {
+	leftArr := left.(*object.Array)
+	rightArr := right.(*object.Array)
+	elements := make([]object.Object, 0, len(leftArr.Elements)+len(rightArr.Elements))
+	elements = append(elements, leftArr.Elements...)
+	elements = append(elements, rightArr.Elements...)
+	return &object.Array{Elements: elements}
+}
+
+func evalArrayEqual(left, right object.Object) object.Object {
+	leftArr := left.(*object.Array)
+	rightArr := right.(*object.Array)
+	if len(leftArr.Elements) != len(rightArr.Elements) {
+		return FALSE
+	}
+	for i, leftElem := range leftArr.Elements {
+		if !objectsEqual(leftElem, rightArr.Elements[i]) {
+			return FALSE
+		}
+	}
+	return TRUE
+}
+
+func evalArrayNotEqual(left, right object.Object) object.Object {
+	result := evalArrayEqual(left, right)
+	if result == TRUE {
+		return FALSE
+	}
+	return TRUE
 }
 
 func evalStringEqual(left, right object.Object) object.Object {

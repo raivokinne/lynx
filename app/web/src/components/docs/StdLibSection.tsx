@@ -19,6 +19,7 @@ export const StdLibSection = ({ isDarkMode }: StdLibSectionProps) => {
 @math
 @json
 @crypto
+@array
 
 // use module functions
 math.sqrt(16)  // 4.0
@@ -127,8 +128,61 @@ let uuid = crypto.uuid()             // uuid string
 
 // hex encoding
 let encoded = crypto.hexEncode([104, 105])  // "6869"
-let decoded = crypto.hexDecode("6869")     // [104, 105]`}
-				</CodeBlock>
+let decoded = crypto.hexDecode("6869")     // [104, 105]`}</CodeBlock>
+			</div>
+
+			<div>
+				<h3 className="text-xs font-mono mb-2 text-neutral-400">@array</h3>
+				<CodeBlock isDarkMode={isDarkMode}>
+					{`let nums = [1, 2, 3, 4, 5]
+
+// transform
+let doubled = array.map(nums, fn(x) { return x * 2 })
+// [2, 4, 6, 8, 10]
+
+// filter
+let evens = array.filter(nums, fn(x) { return x % 2 == 0 })
+// [2, 4]
+
+// reduce/fold
+let sum = array.reduce(nums, fn(acc, x) { return acc + x }, 0)
+// 15
+
+// find
+let found = array.find(nums, fn(x) { return x > 3 })
+// 4
+
+// check values
+array.some(nums, fn(x) { return x > 4 })  // true
+array.every(nums, fn(x) { return x > 0 }) // true
+array.includes(nums, 3)  // true
+
+// index operations
+array.indexOf(nums, 3)    // 2
+array.lastIndexOf(nums, 3) // 2
+
+// combine
+array.flatMap([1, 2], fn(x) { return [x, x] })
+// [1, 1, 2, 2]
+
+// organize
+array.chunk([1, 2, 3, 4, 5], 2)
+// [[1, 2], [3, 4], [5]]
+
+array.groupBy([1, 2, 3], fn(x) { return x % 2 })
+// {0: [2], 1: [1, 3]}
+
+array.partition([1, 2, 3, 4], fn(x) { return x % 2 == 0 })
+// [[2, 4], [1, 3]]
+
+// utilities
+array.min(nums)  // 1
+array.max(nums)  // 5
+array.sum(nums)   // 15
+array.unique([1, 2, 1, 3])  // [1, 2, 3]
+array.reverse([1, 2, 3])  // [3, 2, 1]
+array.empty([])  // true
+array.size(nums) // 5`}</CodeBlock>
 			</div>
 		</div>
 	);

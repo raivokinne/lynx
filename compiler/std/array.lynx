@@ -1,0 +1,345 @@
+let array = @module()
+
+array.map = fn(arr, transform) {
+    let result = []
+    for item in arr {
+        result = result + [transform(item)]
+    }
+    return result
+}
+
+array.filter = fn(arr, predicate) {
+    let result = []
+    for item in arr {
+        if predicate(item) {
+            result = result + [item]
+        }
+    }
+    return result
+}
+
+array.reduce = fn(arr, reducer, initial) {
+    let acc = initial
+    for item in arr {
+        acc = reducer(acc, item)
+    }
+    return acc
+}
+
+array.fold = fn(arr, reducer, initial) {
+    return array.reduce(arr, reducer, initial)
+}
+
+array.forEach = fn(arr, callback) {
+    for item in arr {
+        callback(item)
+    }
+}
+
+array.some = fn(arr, predicate) {
+    for item in arr {
+        if predicate(item) {
+            return true
+        }
+    }
+    return false
+}
+
+array.every = fn(arr, predicate) {
+    for item in arr {
+        if !predicate(item) {
+            return false
+        }
+    }
+    return true
+}
+
+array.none = fn(arr, predicate) {
+    for item in arr {
+        if predicate(item) {
+            return false
+        }
+    }
+    return true
+}
+
+array.find = fn(arr, predicate) {
+    for item in arr {
+        if predicate(item) {
+            return item
+        }
+    }
+    return null
+}
+
+array.findIndex = fn(arr, predicate) {
+    for i in range(0, len(arr)) {
+        if predicate(arr[i]) {
+            return i
+        }
+    }
+    return null
+}
+
+array.indexOf = fn(arr, target) {
+    for i in range(0, len(arr)) {
+        if arr[i] == target {
+            return i
+        }
+    }
+    return null
+}
+
+array.lastIndexOf = fn(arr, target) {
+    let result = null
+    for i in range(0, len(arr)) {
+        if arr[i] == target {
+            result = i
+        }
+    }
+    return result
+}
+
+array.includes = fn(arr, target) {
+    return array.indexOf(arr, target) != null
+}
+
+array.flatMap = fn(arr, transform) {
+    let result = []
+    for item in arr {
+        let mapped = transform(item)
+        for val in mapped {
+            result = result + [val]
+        }
+    }
+    return result
+}
+
+array.flatten = fn(arr) {
+    let result = []
+    for item in arr {
+        if type(item) == "array" {
+            for val in item {
+                result = result + [val]
+            }
+        } else {
+            result = result + [item]
+        }
+    }
+    return result
+}
+
+array.chunk = fn(arr, size) {
+    let result = []
+    let current = []
+    for item in arr {
+        current = current + [item]
+        if len(current) == size {
+            result = result + [current]
+            current = []
+        }
+    }
+    if len(current) > 0 {
+        result = result + [current]
+    }
+    return result
+}
+
+array.slice = fn(arr, start, end) {
+    let result = []
+    let count = end - start
+    for i in range(0, count) {
+        result = result + [arr[start + i]]
+    }
+    return result
+}
+
+array.take = fn(arr, n) {
+    let result = []
+    for i in range(0, n) {
+        if i >= len(arr) {
+            break
+        }
+        result = result + [arr[i]]
+    }
+    return result
+}
+
+array.skip = fn(arr, n) {
+    let result = []
+    for i in range(n, len(arr)) {
+        result = result + [arr[i]]
+    }
+    return result
+}
+
+array.takeWhile = fn(arr, predicate) {
+    let result = []
+    for item in arr {
+        if predicate(item) {
+            result = result + [item]
+        } else {
+            break
+        }
+    }
+    return result
+}
+
+array.skipWhile = fn(arr, predicate) {
+    let result = []
+    let skipping = true
+    for item in arr {
+        if skipping and predicate(item) {
+            continue
+        }
+        skipping = false
+        result = result + [item]
+    }
+    return result
+}
+
+array.zip = fn(a, b) {
+    let result = []
+    let lenA = len(a)
+    let lenB = len(b)
+    let maxLen = lenA
+    if lenB < maxLen {
+        maxLen = lenB
+    }
+    for i in range(0, maxLen) {
+        result = result + [[a[i], b[i]]]
+    }
+    return result
+}
+
+array.enumerate = fn(arr) {
+    let result = []
+    for i in range(0, len(arr)) {
+        result = result + [[i, arr[i]]]
+    }
+    return result
+}
+
+array.sum = fn(arr) {
+    let total = 0
+    for item in arr {
+        total = total + item
+    }
+    return total
+}
+
+array.product = fn(arr) {
+    let total = 1
+    for item in arr {
+        total = total * item
+    }
+    return total
+}
+
+array.join = fn(arr, sep) {
+    let result = ""
+    for i in range(0, len(arr)) {
+        if i > 0 {
+            result = result + sep
+        }
+        result = result + str(arr[i])
+    }
+    return result
+}
+
+array.unique = fn(arr) {
+    let result = []
+    let seen = {}
+    for item in arr {
+        if seen[item] == null {
+            seen[item] = true
+            result = result + [item]
+        }
+    }
+    return result
+}
+
+array.duplicates = fn(arr) {
+    let result = []
+    let seen = {}
+    let dupes = {}
+    for item in arr {
+        if seen[item] != null {
+            dupes[item] = true
+        }
+        seen[item] = true
+    }
+    for item in arr {
+        if dupes[item] != null and array.indexOf(result, item) == null {
+            result = result + [item]
+        }
+    }
+    return result
+}
+
+array.groupBy = fn(arr, keyFn) {
+    let result = {}
+    for item in arr {
+        let key = keyFn(item)
+        if result[key] == null {
+            result[key] = []
+        }
+        result[key] = result[key] + [item]
+    }
+    return result
+}
+
+array.partition = fn(arr, predicate) {
+    let pass = []
+    let fail = []
+    for item in arr {
+        if predicate(item) {
+            pass = pass + [item]
+        } else {
+            fail = fail + [item]
+        }
+    }
+    return [pass, fail]
+}
+
+array.reverse = fn(arr) {
+    let result = []
+    for i in range(len(arr) - 1, -1, -1) {
+        result = result + [arr[i]]
+    }
+    return result
+}
+
+array.min = fn(arr) {
+    if len(arr) == 0 {
+        return null
+    }
+    let minVal = arr[0]
+    for item in arr {
+        if item < minVal {
+            minVal = item
+        }
+    }
+    return minVal
+}
+
+array.max = fn(arr) {
+    if len(arr) == 0 {
+        return null
+    }
+    let maxVal = arr[0]
+    for item in arr {
+        if item > maxVal {
+            maxVal = item
+        }
+    }
+    return maxVal
+}
+
+array.empty = fn(arr) {
+    return len(arr) == 0
+}
+
+array.size = fn(arr) {
+    return len(arr)
+}
