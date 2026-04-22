@@ -80,7 +80,7 @@ func RegisterBuiltins() {
 
 func builtinType(args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return newError("wrong number of arguments. got=%d, want=1", len(args))
+		return newError("wrong number of arguments. got %d, expected 1", len(args))
 	}
 
 	obj := args[0]
@@ -119,7 +119,7 @@ func builtinType(args ...object.Object) object.Object {
 
 func builtinCopy(args ...object.Object) object.Object {
 	if len(args) != 2 {
-		return newError("wrong number of arguments. got=%d, want=2", len(args))
+		return newError("wrong number of arguments. got %d, expected 2", len(args))
 	}
 
 	destArr, ok := args[0].(*object.Array)
@@ -143,7 +143,7 @@ func builtinCopy(args ...object.Object) object.Object {
 
 func builtinStr(args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return newError("wrong number of arguments. got=%d, want=1", len(args))
+		return newError("wrong number of arguments. got %d, expected 1", len(args))
 	}
 
 	switch arg := args[0].(type) {
@@ -165,7 +165,7 @@ func builtinStr(args ...object.Object) object.Object {
 
 func builtinInt(args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return newError("wrong number of arguments. got=%d, want=1", len(args))
+		return newError("wrong number of arguments. got %d, expected 1", len(args))
 	}
 
 	switch arg := args[0].(type) {
@@ -195,7 +195,7 @@ func builtinInt(args ...object.Object) object.Object {
 
 func builtinFloat(args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return newError("wrong number of arguments. got=%d, want=1", len(args))
+		return newError("wrong number of arguments. got %d, expected 1", len(args))
 	}
 
 	switch arg := args[0].(type) {
@@ -236,7 +236,7 @@ func builtinReadLine(args ...object.Object) object.Object {
 
 func builtinSleep(args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return newError("wrong number of arguments. got=%d, want=1", len(args))
+		return newError("wrong number of arguments. got %d, expected 1", len(args))
 	}
 	switch arg := args[0].(type) {
 	case *object.Integer:
@@ -265,7 +265,7 @@ func builtinRead(args ...object.Object) object.Object {
 
 func builtinWrite(args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return newError("wrong number of arguments. got=%d, want=1", len(args))
+		return newError("wrong number of arguments. got %d, expected 1", len(args))
 	}
 	switch arg := args[0].(type) {
 	case *object.String:
@@ -278,7 +278,7 @@ func builtinWrite(args ...object.Object) object.Object {
 
 func builtinLen(args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return newError("wrong number of arguments. got=%d, want=1", len(args))
+		return newError("wrong number of arguments. got %d, expected 1", len(args))
 	}
 	switch arg := args[0].(type) {
 	case *object.Array:
@@ -294,7 +294,7 @@ func builtinLen(args ...object.Object) object.Object {
 
 func builtinRange(args ...object.Object) object.Object {
 	if len(args) != 2 {
-		return newError("wrong number of arguments. got=%d, want=2", len(args))
+		return newError("wrong number of arguments. got %d, expected 2", len(args))
 	}
 	start, ok1 := args[0].(*object.Integer)
 	end, ok2 := args[1].(*object.Integer)

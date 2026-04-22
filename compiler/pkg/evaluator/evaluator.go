@@ -266,7 +266,7 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
 	case "$":
 		return evalSquarePrefixOperatorExpression(right)
 	default:
-		return newError("unknown operator: %s%s", operator, right.Type())
+		return newError("can't use %s before a %s value", operator, right.Type())
 	}
 }
 
@@ -443,7 +443,7 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 		return nativeBoolToBooleanObject(left != right)
 	}
 
-	return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	return newError("can't use %s %q %s", left.Type(), operator, right.Type())
 }
 
 func evalInOperator(left, right object.Object) object.Object {
@@ -1154,7 +1154,7 @@ func evalIdentifier(node *ast.Identifier, env *object.Env) object.Object {
 		return builtin
 	}
 
-	return newError("identifier not found: %s", node.Value)
+	return newError("%q is not defined", node.Value)
 }
 
 func evalExpressions(exps []ast.Expression, env *object.Env) []object.Object {

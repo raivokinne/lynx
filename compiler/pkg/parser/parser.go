@@ -62,7 +62,10 @@ type ParseError struct {
 }
 
 func (pe ParseError) String() string {
-	return fmt.Sprintf("Parser error at line %d, column %d: %s: %s", pe.Line, pe.Column, pe.Type, pe.Message)
+	if pe.Column > 0 {
+		return fmt.Sprintf("%s at line %d, column %d: %s", pe.Type, pe.Line, pe.Column, pe.Message)
+	}
+	return fmt.Sprintf("%s at line %d: %s", pe.Type, pe.Line, pe.Message)
 }
 
 type (
@@ -166,7 +169,7 @@ func (p *Parser) addError(errorType, message string) {
 }
 
 func (p *Parser) peekError(expected token.TokenType) {
-	message := fmt.Sprintf("Expected '%s', got '%s'", expected, p.peekToken.Literal)
+	message := fmt.Sprintf("expected %q, got %q", expected, p.peekToken.Literal)
 	p.addError("SyntaxError", message)
 }
 
