@@ -26,7 +26,7 @@ export const Home: React.FC = () => {
 		deleteCode,
 		updateCode,
 	} = useCodeManagement(user?.id);
-	const { output, error, isRunning, executeCode, clearOutput } =
+	const { output, error, isRunning, cooldownEnd, executeCode, clearOutput } =
 		useCodeExecution();
 
 	const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -39,6 +39,8 @@ export const Home: React.FC = () => {
 	const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
 	const [showSettings, setShowSettings] = useState<boolean>(false);
 	const [saveTitle, setSaveTitle] = useState<string>("");
+
+	const isOnCooldown = cooldownEnd !== null && cooldownEnd > Date.now();
 
 	useEffect(() => {
 		localStorage.setItem("darkMode", isDarkMode.toString());
@@ -100,6 +102,7 @@ export const Home: React.FC = () => {
 					isDarkMode={isDarkMode}
 					isRunning={isRunning}
 					canRun={code.trim().length > 0}
+					isOnCooldown={isOnCooldown}
 					onRunCode={handleExecuteCode}
 					onSave={() => {
 						setSaveTitle(currentCodeTitle);
