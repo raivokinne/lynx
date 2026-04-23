@@ -2,28 +2,23 @@ import express, { json } from "express";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import { existsSync, mkdirSync } from "fs";
-import { cleanupTempFiles } from "./utils.js";
-import { initDb, closeDb } from "./db.js";
-import "dotenv/config";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+
+import config from "./src/config/index.js";
+import { initDb, closeDb } from "./src/db/connection.js";
+import { cleanupTempFiles } from "./src/utils/compiler.js";
 import logger from "./logger.js";
-import router from "./router.js";
+import apiRouter from "./src/routes/api.js";
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 
 app.set("trust proxy", 1);
 
 function validateCorsOrigins(origins) {
-  if (!origins) {
-    return ["http://localhost:3000", "http://localhost:5173"];
-  }
+  if (!origins) return ["http://localhost:3000", "http://localhost:5173"];
 
-  const allowedOrigins = Array.isArray(origins)
-    ? origins
-    : origins.split(",").map((o) => o.trim());
-
+  const allowedOrigins = Array.isArray(origins) ? origins : origins.split(",").map((o) => o.trim());
   const validOrigins = allowedOrigins.filter((origin) => {
     try {
       new URL(origin);
@@ -37,38 +32,16 @@ function validateCorsOrigins(origins) {
   return validOrigins.length > 0 ? validOrigins : ["http://localhost:3000"];
 }
 
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: {
-    success: false,
-    error: "Too many authentication attempts, please try again later",
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+const authLimiter = rateLimit(config.rateLimit.auth);
+const generalLimiter = rateLimit(config.rateLimit.general);
 
-const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: {
-    success: false,
-    error: "Too many requests, please try again later",
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  skipSuccessfulRequests: true,
-});
-
-app.use(
-  cors({
-    origin: validateCorsOrigins(process.env.CORS_ORIGINS),
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    maxAge: 86400,
-  }),
-);
+app.use(cors({
+  origin: validateCorsOrigins(config.cors.origins),
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  maxAge: 86400,
+}));
 
 app.use(generalLimiter);
 app.use("/api/auth/login", authLimiter);
@@ -79,18 +52,10 @@ app.use((req, res, next) => {
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("X-XSS-Protection", "1; mode=block");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.setHeader(
-    "Permissions-Policy",
-    "geolocation=(), microphone=(), camera=()",
-  );
 
-  if (process.env.NODE_ENV === "production") {
-    res.setHeader(
-      "Strict-Transport-Security",
-      "max-age=31536000; includeSubDomains; preload",
-    );
+  if (config.env === "production") {
+    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   }
-
   next();
 });
 
@@ -100,9 +65,7 @@ app.use((req, res, next) => {
   const start = Date.now();
   res.on("finish", () => {
     const duration = Date.now() - start;
-    logger.info(
-      `${req.method} ${req.originalUrl} ${res.statusCode} - ${duration}ms`,
-    );
+    logger.info(`${req.method} ${req.originalUrl} ${res.statusCode} - ${duration}ms`);
   });
   next();
 });
@@ -110,20 +73,15 @@ app.use((req, res, next) => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Server configuration constants
-export const CONFIG = {
-  COMPILER_PATH: join(__dirname, "build", "lynx"),
-  FILE_EXTENSION: ".lynx",
-  EXECUTION_TIMEOUT: 10_000,
-  MAX_FILE_SIZE: 1024 * 1024,
-  TEMP_DIR: join(__dirname, "temp"),
-};
+config.compiler.path = config.compiler.path || join(__dirname, "build", "lynx");
+config.compiler.tempDir = join(__dirname, "temp");
+config.compiler.fileExtension = ".lynx";
 
-if (!existsSync(CONFIG.TEMP_DIR)) {
-  mkdirSync(CONFIG.TEMP_DIR, { recursive: true });
+if (!existsSync(config.compiler.tempDir)) {
+  mkdirSync(config.compiler.tempDir, { recursive: true });
 }
 
-app.use("/api", router);
+app.use("/api", apiRouter);
 
 app.use((_req, res) => {
   res.status(404).json({ success: false, error: "Endpoint not found" });
@@ -132,57 +90,82 @@ app.use((_req, res) => {
 function sanitizeError(error) {
   const errorMessage = error?.message ?? String(error);
 
-  if (process.env.NODE_ENV === "production") {
+  if (config.env === "production") {
     const sanitized = errorMessage
       .replace(/\/[^\s]+/g, "[PATH]")
       .replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, "[IP]")
       .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[EMAIL]")
       .replace(/password[=:]\s*[^\s,}]+/gi, "password=[REDACTED]")
-      .replace(/token[=:]\s*[^\s,}]+/gi, "token=[REDACTED]")
-      .replace(/secret[=:]\s*[^\s,}]+/gi, "secret=[REDACTED]");
+      .replace(/token[=:]\s*[^\s,}]+/gi, "token=[REDACTED]");
 
-    return sanitized.length > 200
-      ? sanitized.substring(0, 200) + "..."
-      : sanitized;
+    return sanitized.length > 200 ? sanitized.substring(0, 200) + "..." : sanitized;
   }
 
   return errorMessage;
 }
 
 app.use((err, req, res, next) => {
-  if (process.env.NODE_ENV !== "production") {
+  if (config.env !== "production") {
     console.error("Unhandled error:", err?.message ?? err);
   }
 
   const sanitizedError = sanitizeError(err);
-  const isDevelopment = process.env.NODE_ENV !== "production";
-
   res.status(500).json({
     success: false,
-    error: isDevelopment ? sanitizedError : "Internal server error",
-    ...(isDevelopment && { stack: err?.stack }),
+    error: config.env === "production" ? "Internal server error" : sanitizedError,
+    ...(config.env !== "production" && { stack: err?.stack }),
   });
 });
 
-initDb()
+async function seedDemoUser() {
+  const db = await import("./src/db/connection.js");
+  const { db: database } = db;
+  const bcrypt = await import("bcrypt");
+  const { v4: uuidv4 } = await import("uuid");
+
+  const username = "demo";
+  const password = "Demo@123";
+
+  try {
+    const existing = await database.query("SELECT id FROM users WHERE username = $1", [username]);
+    if (existing.rows.length > 0) {
+      console.log("Demo user already exists");
+      return;
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+    const userId = uuidv4();
+
+    await database.query(
+      "INSERT INTO users (id, username, password) VALUES ($1, $2, $3)",
+      [userId, username, hashed],
+    );
+
+    console.log("Demo user created: demo / Demo@123");
+  } catch (error) {
+    console.error("Seed error:", error.message);
+  }
+}
+
+initDb(config)
+  .then(() => seedDemoUser())
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Compiler server running on port ${PORT}`);
-      console.log(`Temp directory: ${CONFIG.TEMP_DIR}`);
-      console.log(`Compiler path: ${CONFIG.COMPILER_PATH}`);
-      console.log(`Execution timeout: ${CONFIG.EXECUTION_TIMEOUT}ms`);
+    app.listen(config.port, () => {
+      console.log(`Server running on port ${config.port}`);
+      console.log(`Temp directory: ${config.compiler.tempDir}`);
+      console.log(`Compiler path: ${config.compiler.path}`);
       cleanupTempFiles();
       setInterval(cleanupTempFiles, 30 * 60 * 1000);
     });
   })
   .catch((err) => {
-    console.error("Failed to initialize database:", err);
+    console.error("Failed to initialize:", err);
     process.exit(1);
   });
 
 async function shutdown(signal) {
   try {
-    console.log(`Shutting down server... (${signal})`);
+    console.log(`Shutting down... (${signal})`);
     cleanupTempFiles();
     await closeDb();
   } finally {
