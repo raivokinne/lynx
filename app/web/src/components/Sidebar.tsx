@@ -1,11 +1,11 @@
 import React from "react";
 import { Settings } from "lucide-react";
 
-// Sidebar with run button and settings access
 interface SidebarProps {
   isDarkMode: boolean;
   isRunning: boolean;
   canRun: boolean;
+  isOnCooldown: boolean;
   onRunCode: () => void;
   onSave: () => void;
   onSettings: () => void;
@@ -15,6 +15,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isDarkMode,
   isRunning,
   canRun,
+  isOnCooldown,
   onRunCode,
   onSettings,
 }) => (
@@ -23,13 +24,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   >
     <button
       onClick={onRunCode}
-      disabled={!canRun || isRunning}
+      disabled={!canRun || isRunning || isOnCooldown}
       className={`p-1.5 transition-colors font-mono text-xs ${isDarkMode ? "hover:bg-neutral-800 text-neutral-400" : "hover:bg-neutral-300 text-neutral-600"} disabled:opacity-30`}
-      title="Run code"
+      title={isOnCooldown ? "Cooldown active" : "Run code"}
     >
       {isRunning ? (
         <div className="animate-spin h-5 w-5 border border-current border-t-transparent" />
-      ) : canRun ? (
+      ) : canRun && !isOnCooldown ? (
         <span
           className={
             isDarkMode ? "text-amber-400 text-2xl" : "text-amber-600 text-2xl"
