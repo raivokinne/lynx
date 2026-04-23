@@ -99,8 +99,8 @@ export const codeApi = {
           code: data.code.code,
           language: data.code.language,
           description: data.code.description,
-          createdAt: data.code.created_at,
-          updatedAt: data.code.updated_at,
+          createdAt: data.code.createdAt,
+          updatedAt: data.code.updatedAt,
         };
       }
 

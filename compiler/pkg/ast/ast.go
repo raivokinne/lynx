@@ -31,6 +31,21 @@ type ExpressionStatement struct {
 	Expression Expression
 }
 
+func (expr *ExpressionStatement) statementNode() {}
+
+func (expr *ExpressionStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(expr.Token.Literal)
+	out.WriteString(expr.Expression.String())
+
+	return out.String()
+}
+
+func (expr *ExpressionStatement) TokenLiteral() string {
+	return expr.Token.Literal
+}
+
 // Program is the root AST node containing all statements
 type Program struct {
 	Statements []Statement
@@ -427,7 +442,6 @@ type While struct {
 	Token     token.Token
 	Condition Expression
 	Body      *BlockStatement
-
 }
 
 func (w *While) statementNode()       {}
@@ -472,7 +486,7 @@ type ModuleLoad struct {
 }
 
 func (ml *ModuleLoad) statementNode()       {}
-func (ml *ModuleLoad) expressionNode()     {}
+func (ml *ModuleLoad) expressionNode()      {}
 func (ml *ModuleLoad) TokenLiteral() string { return ml.Token.Literal }
 func (ml *ModuleLoad) String() string {
 	var out bytes.Buffer
@@ -584,7 +598,7 @@ type ErrorStatement struct {
 }
 
 func (es *ErrorStatement) statementNode()       {}
-func (es *ErrorStatement) expressionNode()     {}
+func (es *ErrorStatement) expressionNode()      {}
 func (es *ErrorStatement) TokenLiteral() string { return es.Token.Literal }
 func (es *ErrorStatement) String() string {
 	var out bytes.Buffer

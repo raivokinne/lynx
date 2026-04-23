@@ -46,15 +46,21 @@ export const useCodeManagement = (userId?: string) => {
 	}, [userId, loadSavedCodes]);
 
 	const saveCode = async (title: string): Promise<boolean> => {
-		if (!userId || !title.trim()) return false;
+		if (!userId || !title.trim()) {
+			setError("Title is required");
+			return false;
+		}
+
+		if (!code || !code.trim()) {
+			setError("Code cannot be empty");
+			return false;
+		}
 
 		try {
 			setLoading(true);
 			setError(null);
 
 			const result = await codeApi.saveCode(title.trim(), code);
-
-			if (!code) alert("No code to save");
 
 			if (result.success && result.id) {
 				const newCode: SavedCode = {

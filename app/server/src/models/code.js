@@ -29,25 +29,47 @@ export const Code = {
       "SELECT * FROM codes WHERE id = $1 AND user_id = $2",
       [id, userId],
     );
-    return result.rows[0] || null;
+    if (!result.rows[0]) return null;
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      title: row.title,
+      code: row.code,
+      language: row.language,
+      description: row.description,
+      createdAt: row.create_at,
+      updatedAt: row.update_at,
+    };
   },
 
-  // Find all codes for a user
+// Find all codes for a user
   async findAllByUserId(userId) {
     const result = await db.query(
-      "SELECT id, title, created_at, updated_at FROM codes WHERE user_id = $1 ORDER BY updated_at DESC",
+      "SELECT id, title, code, create_at, update_at FROM codes WHERE user_id = $1 AND is_deleted = false ORDER BY update_at DESC",
       [userId],
     );
-    return result.rows;
+    return result.rows.map(row => ({
+      id: row.id,
+      title: row.title,
+      code: row.code,
+      createdAt: row.create_at,
+      updatedAt: row.update_at,
+    }));
   },
 
   // Find soft-deleted codes for a user
   async findDeletedByUserId(userId) {
     const result = await db.query(
-      "SELECT id, title, language, description, created_at, updated_at FROM codes WHERE user_id = $1 AND is_deleted = true ORDER BY updated_at DESC",
+      "SELECT id, title, language, description, create_at, update_at FROM codes WHERE user_id = $1 AND is_deleted = true ORDER BY update_at DESC",
       [userId],
     );
-    return result.rows;
+    return result.rows.map(row => ({
+      id: row.id,
+      title: row.title,
+      code: row.code,
+      createdAt: row.create_at,
+      updatedAt: row.update_at,
+    }));
   },
 
   // Permanently delete code
