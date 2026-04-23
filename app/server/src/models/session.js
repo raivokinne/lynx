@@ -3,13 +3,15 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import config from "../config/index.js";
 
+// Session model - handles user session management and JWT tokens
 export const Session = {
+  // Create new session with JWT token
   async create(userId, { ip, userAgent } = {}) {
     const id = uuidv4();
     const token = jwt.sign({ id: userId, sessionId: id }, config.jwt.secret, {
       expiresIn: config.jwt.expiresIn,
     });
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);  // 24 hours
 
     await db.query(
       `INSERT INTO sessions (id, user_id, token, expires_at, ip_address, user_agent)

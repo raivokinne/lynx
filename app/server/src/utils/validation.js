@@ -1,4 +1,6 @@
-// Input validation utilities
+// Input validation utilities - reusable validators for request data
+
+// Built-in validator functions
 export const validators = {
   required: (value, fieldName) => {
     if (value === undefined || value === null || value === "") {

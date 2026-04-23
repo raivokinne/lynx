@@ -1,5 +1,8 @@
 import { Session } from "../models/session.js";
+import jwt from "jsonwebtoken";
+import config from "../config/index.js";
 
+// Session validation query
 const SESSION_QUERY = `
   SELECT s.id, s.user_id, s.expires_at, u.username
   FROM sessions s
@@ -7,6 +10,7 @@ const SESSION_QUERY = `
   WHERE s.id = $1 AND s.token = $2 AND s.expires_at > NOW()
 `;
 
+// Extract Bearer token from Authorization header
 const extractBearerToken = (req) => {
   const auth = req.headers.authorization;
   if (!auth?.startsWith("Bearer ")) return null;
@@ -14,9 +18,10 @@ const extractBearerToken = (req) => {
   return token || null;
 };
 
+// Verify JWT token and extract payload
 const verifyToken = (token) => {
   try {
-    return require("jsonwebtoken").verify(token, require("../config/index.js").jwt.secret);
+    return jwt.verify(token, config.jwt.secret);
   } catch (error) {
     if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
       return null;
@@ -25,6 +30,7 @@ const verifyToken = (token) => {
   }
 };
 
+// Authentication middleware - validates JWT and session
 export const authenticateToken = async (req, res, next) => {
   try {
     const token = extractBearerToken(req);
@@ -44,10 +50,16 @@ export const authenticateToken = async (req, res, next) => {
       });
     }
 
-    const { rows } = await Session.validate(token);
+    const session = await Session.validate(token);
+    if (!session) {
+      return res.status(401).json({
+        success: false,
+        error: "Invalid or expired session",
+      });
+    }
+
     await Session.updateLastActivity(decoded.sessionId);
 
-    const session = rows[0];
     req.user = {
       id: session.user_id,
       username: session.username,

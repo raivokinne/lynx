@@ -1,9 +1,11 @@
 import pkg from "pg";
 const { Pool } = pkg;
 
+// PostgreSQL connection pool singleton
 let poolInstance = null;
 let initPromise = null;
 
+// Get database pool instance - throws if not initialized
 export const getPool = () => {
   if (!poolInstance) {
     throw new Error("Database not initialized. Call initDb() first.");
@@ -11,10 +13,12 @@ export const getPool = () => {
   return poolInstance;
 };
 
+// Database query helper - wraps pool queries
 export const db = {
   query: (...args) => poolInstance.query(...args),
 };
 
+// Initialize database connection and create tables
 export async function initDb(config) {
   if (initPromise) {
     return initPromise;
@@ -24,6 +28,7 @@ export async function initDb(config) {
     try {
       console.log("Initializing database connection...");
 
+      // Create connection pool with config settings
       poolInstance = new Pool({
         host: config.db.host,
         port: config.db.port,
@@ -34,9 +39,11 @@ export async function initDb(config) {
         ...config.db.pool,
       });
 
+      // Verify connection works
       const result = await poolInstance.query("SELECT NOW()");
       console.log("Database connected:", result.rows[0].now);
 
+      // Create all required tables
       await createTables(poolInstance);
       console.log("Database initialized with all tables");
 
