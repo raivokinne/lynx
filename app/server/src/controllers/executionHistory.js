@@ -1,6 +1,20 @@
+/**
+ * Execution history controller
+ * Handles logging and retrieving code execution history
+ */
 import { db } from "../db/connection.js";
 import { v4 as uuidv4 } from "uuid";
 
+/**
+ * Log a code execution to database
+ * @param {string} userId - User ID
+ * @param {string|null} codeId - Code ID
+ * @param {boolean} success - Whether execution was successful
+ * @param {string|null} output - Execution output
+ * @param {string|null} error - Error message if failed
+ * @param {number} executionTime - Execution time in milliseconds
+ * @returns {Promise<string>} Execution log ID
+ */
 export const logExecution = async (userId, codeId, success, output, error, executionTime) => {
   try {
     const id = uuidv4();
@@ -15,6 +29,12 @@ export const logExecution = async (userId, codeId, success, output, error, execu
   }
 };
 
+/**
+ * Get execution history for a specific code
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with history and total count, or error
+ */
 export const getCodeExecutionHistory = async (req, res) => {
   try {
     const { codeId } = req.params;
@@ -43,6 +63,12 @@ export const getCodeExecutionHistory = async (req, res) => {
   }
 };
 
+/**
+ * Get execution history for current user across all codes
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with history and total count, or error
+ */
 export const getUserExecutionHistory = async (req, res) => {
   try {
     const { limit = 50, offset = 0 } = req.query;
@@ -73,6 +99,12 @@ export const getUserExecutionHistory = async (req, res) => {
   }
 };
 
+/**
+ * Get execution statistics for a specific code
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with stats, or error
+ */
 export const getCodeExecutionStats = async (req, res) => {
   try {
     const { codeId } = req.params;
@@ -96,6 +128,12 @@ export const getCodeExecutionStats = async (req, res) => {
   }
 };
 
+/**
+ * Get execution statistics for current user
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with stats and daily stats, or error
+ */
 export const getUserExecutionStats = async (req, res) => {
   try {
     const result = await db.query(
@@ -125,6 +163,12 @@ export const getUserExecutionStats = async (req, res) => {
   }
 };
 
+/**
+ * Get a single execution record by ID
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with execution data, or error
+ */
 export const getExecution = async (req, res) => {
   try {
     const { executionId } = req.params;
@@ -148,6 +192,12 @@ export const getExecution = async (req, res) => {
   }
 };
 
+/**
+ * Delete execution history for a specific code
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success message with deleted count, or error
+ */
 export const deleteCodeExecutionHistory = async (req, res) => {
   try {
     const { codeId } = req.params;

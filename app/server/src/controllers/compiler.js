@@ -1,3 +1,7 @@
+/**
+ * Compiler controller
+ * Handles code compilation and execution with rate limiting
+ */
 import { existsSync, unlinkSync, writeFileSync, mkdirSync } from "fs";
 import { join, resolve } from "path";
 import { randomBytes } from "crypto";
@@ -8,7 +12,7 @@ import { logExecution } from "./executionHistory.js";
 const executionCounts = new Map();
 const MAX_LOG_OUTPUT = 10_000;
 
-// Clean up old rate limit entries
+// Clean up old rate limit entries (runs every 60 seconds)
 setInterval(() => {
   const now = Date.now();
   for (const [key] of executionCounts) {
@@ -17,6 +21,12 @@ setInterval(() => {
   }
 }, 60_000);
 
+/**
+ * Execute Lynx code by compiling and running it
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with output, or error
+ */
 export const compilerController = async (req, res) => {
   let tempFilePath = null;
   const startTime = Date.now();

@@ -1,6 +1,16 @@
+/**
+ * Code controller
+ * Handles saving, updating, retrieving, listing, and deleting user code
+ */
 import { Code } from "../models/code.js";
 import { createVersion } from "./version.js";
 
+/**
+ * Save new code entry
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with code ID, or error
+ */
 export const saveCode = async (req, res) => {
   try {
     const { title, code } = req.body;
@@ -29,6 +39,12 @@ export const saveCode = async (req, res) => {
   }
 };
 
+/**
+ * Update existing code entry
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with updated code ID, or error
+ */
 export const updateCode = async (req, res) => {
   try {
     const { id, title, code } = req.body;
@@ -67,6 +83,12 @@ export const updateCode = async (req, res) => {
   }
 };
 
+/**
+ * List all code entries for current user
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with array of codes, or error
+ */
 export const listCode = async (req, res) => {
   try {
     const codes = await Code.findAllByUserId(req.user.id);
@@ -80,6 +102,12 @@ export const listCode = async (req, res) => {
   }
 };
 
+/**
+ * Get single code entry by ID
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with code data, or error
+ */
 export const getCode = async (req, res) => {
   try {
     const { id } = req.params;
@@ -102,6 +130,12 @@ export const getCode = async (req, res) => {
   }
 };
 
+/**
+ * Soft delete (mark as deleted) a code entry
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success message or error
+ */
 export const deleteCode = async (req, res) => {
   try {
     const { id } = req.params;
@@ -124,6 +158,12 @@ export const deleteCode = async (req, res) => {
   }
 };
 
+/**
+ * Restore a previously deleted code entry
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success message or error
+ */
 export const restoreCode = async (req, res) => {
   try {
     const { id } = req.params;
@@ -146,6 +186,12 @@ export const restoreCode = async (req, res) => {
   }
 };
 
+/**
+ * Get all soft-deleted code entries for current user
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with array of deleted codes, or error
+ */
 export const getDeletedCodes = async (req, res) => {
   try {
     const codes = await Code.findDeletedByUserId(req.user.id);

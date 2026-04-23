@@ -1,7 +1,18 @@
+/**
+ * Version controller
+ * Handles code versioning and history
+ */
 import { Code } from "../models/code.js";
 import { db } from "../db/connection.js";
 import { v4 as uuidv4 } from "uuid";
 
+/**
+ * Create a new version of code (internal helper)
+ * @param {string} codeId - Code ID
+ * @param {string} code - Code content
+ * @param {string} title - Code title
+ * @returns {Promise<Object>} Created version info
+ */
 const createVersion = async (codeId, code, title) => {
   try {
     const versionResult = await db.query(
@@ -24,8 +35,12 @@ const createVersion = async (codeId, code, title) => {
   }
 };
 
-export { createVersion };
-
+/**
+ * Get all versions for a code
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with array of versions, or error
+ */
 export const getVersions = async (req, res) => {
   try {
     const { codeId } = req.params;
@@ -51,6 +66,12 @@ export const getVersions = async (req, res) => {
   }
 };
 
+/**
+ * Get a specific version of code
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with version data, or error
+ */
 export const getVersion = async (req, res) => {
   try {
     const { codeId, versionNumber } = req.params;
@@ -83,6 +104,12 @@ export const getVersion = async (req, res) => {
   }
 };
 
+/**
+ * Restore code to a specific version
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success message or error
+ */
 export const restoreVersion = async (req, res) => {
   try {
     const { codeId, versionNumber } = req.params;
@@ -122,6 +149,12 @@ export const restoreVersion = async (req, res) => {
   }
 };
 
+/**
+ * Compare two versions of code
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with both versions, or error
+ */
 export const compareVersions = async (req, res) => {
   try {
     const { codeId } = req.params;
@@ -164,6 +197,12 @@ export const compareVersions = async (req, res) => {
   }
 };
 
+/**
+ * Clean up old versions, keeping only the most recent ones
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success message with deleted count, or error
+ */
 export const cleanupOldVersions = async (req, res) => {
   try {
     const { codeId } = req.params;

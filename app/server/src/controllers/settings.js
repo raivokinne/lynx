@@ -1,3 +1,7 @@
+/**
+ * Settings controller
+ * Handles user preferences and editor settings
+ */
 import { db } from "../db/connection.js";
 import { v4 as uuidv4 } from "uuid";
 
@@ -13,6 +17,12 @@ const defaultSettings = {
   readOnly: false,
 };
 
+/**
+ * Get user settings or default if not set
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with settings, or error
+ */
 export const getSettings = async (req, res) => {
   try {
     const result = await db.query(
@@ -34,6 +44,12 @@ export const getSettings = async (req, res) => {
   }
 };
 
+/**
+ * Save user settings
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success message or error
+ */
 export const saveSettings = async (req, res) => {
   try {
     const { settings } = req.body;
@@ -62,6 +78,12 @@ export const saveSettings = async (req, res) => {
   }
 };
 
+/**
+ * Delete user settings (reset to defaults)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success message or error
+ */
 export const deleteSettings = async (req, res) => {
   try {
     await db.query("DELETE FROM user_settings WHERE user_id = $1", [req.user.id]);

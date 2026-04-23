@@ -1,5 +1,15 @@
+/**
+ * Session controller
+ * Handles user session management
+ */
 import { Session } from "../models/session.js";
 
+/**
+ * Get all sessions for current user
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with array of sessions, or error
+ */
 export const getUserSessions = async (req, res) => {
   try {
     const sessions = await Session.findByUserId(req.user.id);
@@ -12,6 +22,12 @@ export const getUserSessions = async (req, res) => {
   }
 };
 
+/**
+ * Revoke a specific session
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success message or error
+ */
 export const revokeSession = async (req, res) => {
   try {
     const { sessionId } = req.params;
@@ -31,6 +47,12 @@ export const revokeSession = async (req, res) => {
   }
 };
 
+/**
+ * Revoke all sessions except the current one
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success message or error
+ */
 export const revokeAllSessions = async (req, res) => {
   try {
     await Session.deleteAllExcept(req.user.id, req.user.sessionId);
