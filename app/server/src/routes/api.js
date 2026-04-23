@@ -54,7 +54,7 @@ router.get("/history/user/stats", authenticateToken, historyController.getUserEx
 router.get("/history/:executionId", authenticateToken, historyController.getExecution);
 router.delete("/history/code/:codeId", authenticateToken, historyController.deleteCodeExecutionHistory);
 
-// Compiler route - execute Lynx code
+// Compiler route - allows anonymous (unauthenticated) execution
 router.post("/compile", compilerController);
 
 // Settings routes - user preferences

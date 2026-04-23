@@ -46,6 +46,8 @@ export const config = {
   // Lynx compiler settings
   compiler: {
     path: process.env.COMPILER_PATH || null,
+    fileExtension: process.env.COMPILER_FILE_EXT || ".lynx",
+    tempDir: process.env.COMPILER_TEMP_DIR || null,
     timeout: 10000,          // Execution timeout in ms
     maxFileSize: 1024 * 1024,  // 1MB max file size
     maxOutputSize: 100000,    // Max output buffer size

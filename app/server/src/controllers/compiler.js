@@ -54,13 +54,22 @@ export const compilerController = async (req, res) => {
     const absoluteTempDir = resolve(config.compiler.tempDir);
     const userTempDir = join(absoluteTempDir, sessionId);
 
-    if (!existsSync(userTempDir)) {
-      mkdirSync(userTempDir, { recursive: true, mode: 0o700 });
+    // Check path traversal BEFORE creating any files/directories
+    const resolvedUserDir = resolve(userTempDir);
+    if (!resolvedUserDir.startsWith(absoluteTempDir + "/")) {
+      throw new Error("Invalid directory path");
     }
 
-    tempFilePath = join(userTempDir, filename);
+    // Now safe to create directory
+    if (!existsSync(resolvedUserDir)) {
+      mkdirSync(resolvedUserDir, { recursive: true, mode: 0o700 });
+    }
 
-    if (!resolve(tempFilePath).startsWith(absoluteTempDir)) {
+    tempFilePath = join(resolvedUserDir, filename);
+    const resolvedFilePath = resolve(tempFilePath);
+
+    // Double-check the file path is within temp directory
+    if (!resolvedFilePath.startsWith(absoluteTempDir + "/")) {
       throw new Error("Invalid file path");
     }
 

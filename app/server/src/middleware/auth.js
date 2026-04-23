@@ -1,4 +1,6 @@
 import { Session } from "../models/session.js";
+import jwt from "jsonwebtoken";
+import config from "../config/index.js";
 
 // Session validation query
 const SESSION_QUERY = `
@@ -19,7 +21,7 @@ const extractBearerToken = (req) => {
 // Verify JWT token and extract payload
 const verifyToken = (token) => {
   try {
-    return require("jsonwebtoken").verify(token, require("../config/index.js").jwt.secret);
+    return jwt.verify(token, config.jwt.secret);
   } catch (error) {
     if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
       return null;
@@ -48,10 +50,16 @@ export const authenticateToken = async (req, res, next) => {
       });
     }
 
-    const { rows } = await Session.validate(token);
+    const session = await Session.validate(token);
+    if (!session) {
+      return res.status(401).json({
+        success: false,
+        error: "Invalid or expired session",
+      });
+    }
+
     await Session.updateLastActivity(decoded.sessionId);
 
-    const session = rows[0];
     req.user = {
       id: session.user_id,
       username: session.username,
