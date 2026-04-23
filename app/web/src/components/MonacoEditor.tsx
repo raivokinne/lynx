@@ -6,6 +6,7 @@ import { getDefaultEditorOptions } from "../config/editor";
 import EditorError from "./EditorError";
 import EditorLoading from "./EditorLoading";
 
+// Monaco editor wrapper with Lynx language support
 const MonacoEditor: React.FC<MonacoEditorProps> = ({
   value = "",
   onChange,

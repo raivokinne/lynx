@@ -1,0 +1,72 @@
+import { db } from "../connection.js";
+import { v4 as uuidv4 } from "uuid";
+
+export const Code = {
+  async create(userId, { title, code, language = "lynx", description = null }) {
+    const id = uuidv4();
+    await db.query(
+      "INSERT INTO codes (id, user_id, title, code, language, description) VALUES ($1, $2, $3, $4, $5, $6)",
+      [id, userId, title || "Untitled", code, language, description],
+    );
+    return { id };
+  },
+
+  async update(id, userId, { title, code }) {
+    const result = await db.query(
+      `UPDATE codes SET title = COALESCE($1, title), code = $2, updated_at = CURRENT_TIMESTAMP 
+       WHERE id = $3 AND user_id = $4 RETURNING *`,
+      [title, code, id, userId],
+    );
+    return result.rows[0] || null;
+  },
+
+  async findById(id, userId) {
+    const result = await db.query(
+      "SELECT * FROM codes WHERE id = $1 AND user_id = $2",
+      [id, userId],
+    );
+    return result.rows[0] || null;
+  },
+
+  async findAllByUserId(userId) {
+    const result = await db.query(
+      "SELECT id, title, created_at, updated_at FROM codes WHERE user_id = $1 ORDER BY updated_at DESC",
+      [userId],
+    );
+    return result.rows;
+  },
+
+  async findDeletedByUserId(userId) {
+    const result = await db.query(
+      "SELECT id, title, language, description, created_at, updated_at FROM codes WHERE user_id = $1 AND is_deleted = true ORDER BY updated_at DESC",
+      [userId],
+    );
+    return result.rows;
+  },
+
+  async delete(id, userId) {
+    const result = await db.query(
+      "DELETE FROM codes WHERE id = $1 AND user_id = $2",
+      [id, userId],
+    );
+    return result.rowCount > 0;
+  },
+
+  async softDelete(id, userId) {
+    const result = await db.query(
+      "UPDATE codes SET is_deleted = true WHERE id = $1 AND user_id = $2",
+      [id, userId],
+    );
+    return result.rowCount > 0;
+  },
+
+  async restore(id, userId) {
+    const result = await db.query(
+      "UPDATE codes SET is_deleted = false WHERE id = $1 AND user_id = $2 AND is_deleted = true",
+      [id, userId],
+    );
+    return result.rowCount > 0;
+  },
+};
+
+export default Code;

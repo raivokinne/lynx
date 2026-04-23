@@ -7,38 +7,31 @@ import (
 	"lynx/pkg/token"
 )
 
+// Node is the base interface for all AST nodes
 type Node interface {
 	TokenLiteral() string
 	String() string
 }
 
+// Statement is the base interface for statements
 type Statement interface {
 	Node
 	statementNode()
 }
 
+// Expression is the base interface for expressions
 type Expression interface {
 	Node
 	expressionNode()
 }
 
+// ExpressionStatement holds a single expression
 type ExpressionStatement struct {
 	Token      token.Token
 	Expression Expression
 }
 
-func (es *ExpressionStatement) statementNode() {}
-func (es *ExpressionStatement) TokenLiteral() string {
-	return es.Token.Literal
-}
-
-func (es *ExpressionStatement) String() string {
-	if es.Expression != nil {
-		return es.Expression.String()
-	}
-	return ""
-}
-
+// Program is the root AST node containing all statements
 type Program struct {
 	Statements []Statement
 }

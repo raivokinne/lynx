@@ -1,7 +1,9 @@
 package token
 
+// Token type identifier
 type TokenType string
 
+// Token with source position info
 type Token struct {
 	Type    TokenType
 	Literal string
@@ -9,6 +11,7 @@ type Token struct {
 	Column  int
 }
 
+// Token type constants
 const (
 	ILLEGAL = "ILLEGAL"
 	EOF     = "EOF"
@@ -37,10 +40,10 @@ const (
 	LTE = "<="
 	GTE = ">="
 
-	PIPE = "|>"
+	PIPE = "|>"  // Pipeline operator
 
-	AND = "and"
-	OR  = "or"
+	AND = "and" // Logical AND
+	OR  = "or"  // Logical OR
 
 	CONCAT = "++"
 
@@ -85,6 +88,7 @@ const (
 	SELF     = "SELF"
 )
 
+// Keyword lookup table
 var keywords = map[string]TokenType{
 	"fn":       FUNCTION,
 	"let":      LET,

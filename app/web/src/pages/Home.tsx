@@ -11,6 +11,7 @@ import { Settings } from "../components/Settings";
 import type { SavedCode } from "../types/types";
 import { useSettings } from "../hooks/useSettings";
 
+// Main code editor page with execution and file management
 export const Home: React.FC = () => {
 	const { user, logout } = useAuth();
 	const { editorSettings, updateAllSettings, registerCustomTheme } =

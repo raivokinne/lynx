@@ -14,14 +14,17 @@ import (
 	"strings"
 )
 
+// Built-in boolean constants
 var (
 	NULL  = &object.Null{}
 	TRUE  = &object.Boolean{Value: true}
 	FALSE = &object.Boolean{Value: false}
 )
 
+// Module cache for imports
 var moduleCache = make(map[string]object.Object)
 
+// Eval evaluates an AST node in the given environment
 func Eval(node ast.Node, env *object.Env) object.Object {
 	switch node := node.(type) {
 	case *ast.Program:
@@ -392,18 +395,18 @@ var operatorMap = map[TypePair]map[string]OperatorHandler{
 		"==":  evalBooleanEqual,
 		"!=":  evalBooleanNotEqual,
 	},
-{object.BOOLEAN_OBJ, object.INTEGER_OBJ}: {
+	{object.BOOLEAN_OBJ, object.INTEGER_OBJ}: {
 		"and": evalBooleanIntegerAnd,
 		"or":  evalBooleanIntegerOr,
-		"==": evalBooleanIntegerEqual,
-		"!=": evalBooleanIntegerNotEqual,
+		"==":  evalBooleanIntegerEqual,
+		"!=":  evalBooleanIntegerNotEqual,
 		">":   evalBooleanIntegerGreater,
 		"<":   evalBooleanIntegerLess,
 		">=":  evalBooleanIntegerGreaterEqual,
 		"<=":  evalBooleanIntegerLessEqual,
 	},
 	{object.ARRAY_OBJ, object.ARRAY_OBJ}: {
-		"+": evalArrayConcat,
+		"+":  evalArrayConcat,
 		"==": evalArrayEqual,
 		"!=": evalArrayNotEqual,
 	},

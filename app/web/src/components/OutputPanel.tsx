@@ -1,6 +1,7 @@
 import React from "react";
 import { Terminal, AlertCircle } from "lucide-react";
 
+// Output display panel for code execution results
 interface OutputPanelProps {
 	isDarkMode: boolean;
 	output: string;

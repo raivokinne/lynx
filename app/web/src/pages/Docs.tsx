@@ -22,6 +22,7 @@ import { ComparisonsSection } from "../components/docs/ComparisonsSection";
 import { BuiltinsSection } from "../components/docs/BuiltinsSection";
 import { useSearchableContent } from "../hooks/useSearchableContent";
 
+// Documentation page with search and language selection
 export const Docs: React.FC = () => {
   const [activeSection, setActiveSection] = useState("overview");
   const [searchQuery, setSearchQuery] = useState("");

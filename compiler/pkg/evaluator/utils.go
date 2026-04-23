@@ -4,6 +4,7 @@ import (
 	"lynx/pkg/object"
 )
 
+// ApplyFunction calls a function with the given arguments
 func ApplyFunction(fn object.Object, args []object.Object) object.Object {
 	switch fn := fn.(type) {
 	case *object.Function:

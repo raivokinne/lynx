@@ -8,6 +8,8 @@ import (
 	"testing"
 )
 
+// Test helper functions for validating evaluator output types
+
 func testFloatObject(t *testing.T, obj object.Object, expected float64) bool {
 	result, ok := obj.(*object.Float)
 	if !ok {

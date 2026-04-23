@@ -1,6 +1,7 @@
 import { API_BASE } from "../types/constants";
 import type { SavedCode, ResponseCode } from "../types/types";
 
+// API client for code CRUD operations
 export const codeApi = {
   saveCode: async (
     title: string,

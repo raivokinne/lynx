@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { API_BASE } from "../types/constants";
 
+// Hook for executing Lynx code via the API
 export const useCodeExecution = () => {
 	const [output, setOutput] = useState<string>("");
 	const [error, setError] = useState<string>("");

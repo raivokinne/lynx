@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { SavedCode } from "../types/types";
 import { codeApi } from "../api/code";
 
+// Hook for managing saved codes (CRUD operations)
 export const useCodeManagement = (userId?: string) => {
 	const [savedCodes, setSavedCodes] = useState<SavedCode[]>([]);
 	const [code, setCode] = useState<string>("");

@@ -3,6 +3,7 @@ import type { User } from "../types/types";
 import { AuthContext } from "../contexts/AuthContext";
 import { API_BASE } from "../types/constants";
 
+// Auth context provider for login, register, logout
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {

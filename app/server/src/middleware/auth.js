@@ -1,21 +1,12 @@
-import jwt from "jsonwebtoken";
-import { db } from "./db.js";
-
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-  console.error("FATAL: JWT_SECRET environment variable is required");
-  process.exit(1);
-}
+import { Session } from "../models/session.js";
 
 const SESSION_QUERY = `
   SELECT s.id, s.user_id, s.expires_at, u.username
-  FROM   sessions s
-  JOIN   users    u ON s.user_id = u.id
-  WHERE  s.id         = $1
-    AND  s.token      = $2
-    AND  s.expires_at > NOW()
+  FROM sessions s
+  JOIN users u ON s.user_id = u.id
+  WHERE s.id = $1 AND s.token = $2 AND s.expires_at > NOW()
 `;
+
 const extractBearerToken = (req) => {
   const auth = req.headers.authorization;
   if (!auth?.startsWith("Bearer ")) return null;
@@ -25,14 +16,9 @@ const extractBearerToken = (req) => {
 
 const verifyToken = (token) => {
   try {
-    return (
-      jwt.verify(token, JWT_SECRET)
-    );
+    return require("jsonwebtoken").verify(token, require("../config/index.js").jwt.secret);
   } catch (error) {
-    if (
-      error.name === "JsonWebTokenError" ||
-      error.name === "TokenExpiredError"
-    ) {
+    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
       return null;
     }
     throw error;
@@ -51,7 +37,6 @@ export const authenticateToken = async (req, res, next) => {
     }
 
     const decoded = verifyToken(token);
-
     if (!decoded) {
       return res.status(401).json({
         success: false,
@@ -59,18 +44,13 @@ export const authenticateToken = async (req, res, next) => {
       });
     }
 
-    const { rows } = await db.query(SESSION_QUERY, [decoded.sessionId, token]);
+    const { rows } = await Session.validate(token);
+    await Session.updateLastActivity(decoded.sessionId);
 
-    if (rows.length === 0) {
-      return res.status(401).json({
-        success: false,
-        error: "Invalid or expired session",
-      });
-    }
-
+    const session = rows[0];
     req.user = {
-      id: decoded.id,
-      username: rows[0].username,
+      id: session.user_id,
+      username: session.username,
       sessionId: decoded.sessionId,
     };
 
@@ -79,10 +59,8 @@ export const authenticateToken = async (req, res, next) => {
     if (process.env.NODE_ENV !== "production") {
       console.error("Auth middleware error:", error?.message ?? error);
     }
-
-    return res.status(500).json({
-      success: false,
-      error: "Authentication failed",
-    });
+    return res.status(500).json({ success: false, error: "Authentication failed" });
   }
 };
+
+export default { authenticateToken };

@@ -18,6 +18,37 @@ go build -o lynx .
 
 Or download pre-built binaries from the [releases page](https://github.com/raivokinne/lynx/releases).
 
+## Quick Start
+
+Try your first Lynx program:
+
+```bash
+./lynx ../examples/hello_world.lynx
+```
+
+See the [examples](./examples) directory for more demo programs.
+
+## Web IDE
+
+Run the web-based code editor:
+
+```bash
+cd lynx/app/server
+npm install
+npm start
+```
+
+Then open http://localhost:3000 in your browser.
+
+### Demo Account
+
+You can try the web IDE without registering:
+
+- **Username:** demo
+- **Password:** Demo@123
+
+Or create your own account via the registration page.
+
 ## Documentation
 
 See [lynxlang.site/docs](https://lynxlang.site/docs) for full documentation.

@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// Env holds variable bindings and tracks constants
 type Env struct {
 	store  map[string]Object
 	consts map[string]bool
@@ -11,6 +12,7 @@ type Env struct {
 	Dir    string
 }
 
+// New creates a new environment with the given directory for module resolution
 func New(dir string) *Env {
 	return &Env{
 		store:  make(map[string]Object),

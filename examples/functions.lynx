@@ -1,0 +1,32 @@
+// Functions in Lynx
+
+// Named function
+fn add(a, b) {
+    return a + b
+}
+
+// Arrow function (implicit return)
+fn multiply(a, b) => a * b
+
+// Higher-order function
+fn apply(a, b, fn) {
+    return fn(a, b)
+}
+
+let result = apply(5, 3, add)
+println("5 + 3 = ", result)
+
+let result2 = apply(4, 7, multiply)
+println("4 * 7 = ", result2)
+
+// Closures
+fn makeAdder(x) {
+    fn(y) { x + y }
+}
+
+let add5 = makeAdder(5)
+println("5 + 10 = ", add5(10))
+
+// Function as value
+let fnRef = fn(x) { x * 2 }
+println("Ref: ", fnRef(6))

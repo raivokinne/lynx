@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 )
 
+// Lynx interpreter entry point - reads and executes .lynx source files
 func main() {
 	args := os.Args[1:]
 

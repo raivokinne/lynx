@@ -2,6 +2,7 @@ import React from "react";
 import { User, LogOut, Book } from "lucide-react";
 import { useNavigate, Link } from "react-router";
 
+// Top navigation bar with logo, user info, and authentication links
 interface HeaderProps {
 	isDarkMode: boolean;
 	username?: string;

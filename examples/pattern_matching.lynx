@@ -1,0 +1,48 @@
+// Pattern Matching in Lynx
+
+// Match expression
+fn describe(value) {
+    match value {
+        case 1 => "one"
+        case 2 => "two"
+        case n if n > 10 => "big number"
+        case n => "other: " ++ str(n)
+    }
+}
+
+println(describe(1))
+println(describe(5))
+println(describe(15))
+
+// Match on types
+fn getType(value) {
+    match value {
+        case x if type(x) == "INTEGER" => "number"
+        case x if type(x) == "STRING" => "string"
+        case x if type(x) == "BOOLEAN" => "boolean"
+        case x if type(x) == "ARRAY" => "array"
+        case _ => "unknown"
+    }
+}
+
+println(getType(42))
+println(getType("hello"))
+println(getType(true))
+
+// Destructure arrays
+let pair = [1, 2]
+match pair {
+    case [a, b] => println("First: ", a, ", Second: ", b)
+}
+
+// Default handling
+fn handle(value) {
+    match value {
+        case "success" => "OK"
+        case "error" => "Error occurred"
+        case _ => "Unknown"
+    }
+}
+
+println(handle("success"))
+println(handle("unknown"))

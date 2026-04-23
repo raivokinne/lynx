@@ -7,6 +7,7 @@ import { Eye, EyeOff, LogIn, AlertCircle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { Link, useLocation, Navigate } from "react-router";
 
+// Login page component
 export default function Login() {
   const [formData, setFormData] = useState({
     username: "",

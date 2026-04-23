@@ -21,8 +21,10 @@ import (
 	"time"
 )
 
+// Built-in function registry
 var builtins = map[string]*object.Builtin{}
 
+// RegisterBuiltins loads all built-in functions into the registry
 func RegisterBuiltins() {
 	builtins["println"] = &object.Builtin{Fn: builtinPrint}
 	builtins["len"] = &object.Builtin{Fn: builtinLen}
