@@ -166,7 +166,7 @@ export const Landing: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="font-bold">lynx</span>
           </div>
-          <p>© 2024 lynx programming language</p>
+          <p>© 2026 lynx programming language</p>
         </div>
       </footer>
     </div>
