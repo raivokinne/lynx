@@ -33,12 +33,15 @@ See the [examples](./examples) directory for more demo programs.
 Run the web-based code editor:
 
 ```bash
+cd lynx/app/web 
+npm install 
+npm run dev
 cd lynx/app/server
 npm install
 npm start
 ```
 
-Then open http://localhost:3000 in your browser.
+Then open http://localhost:5173 in your browser.
 
 ### Demo Account
 
