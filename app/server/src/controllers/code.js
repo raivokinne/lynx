@@ -139,7 +139,14 @@ export const getCode = async (req, res) => {
 export const deleteCode = async (req, res) => {
   try {
     const { id } = req.params;
-    const deleted = await Code.softDelete(id, req.user.id);
+    const permanent = req.query.permanent === "true";
+
+    let deleted;
+    if (permanent) {
+      deleted = await Code.delete(id, req.user.id);
+    } else {
+      deleted = await Code.softDelete(id, req.user.id);
+    }
 
     if (!deleted) {
       return res.status(404).json({
@@ -148,7 +155,10 @@ export const deleteCode = async (req, res) => {
       });
     }
 
-    res.json({ success: true, message: "Code deleted successfully" });
+    res.json({
+      success: true,
+      message: permanent ? "Code permanently deleted" : "Code deleted successfully"
+    });
   } catch (error) {
     console.error("Delete code error:", error?.message ?? error);
     res.status(500).json({

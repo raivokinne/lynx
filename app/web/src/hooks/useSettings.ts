@@ -135,11 +135,12 @@ export const useSettings = (userId?: string) => {
         const style = document.createElement("style");
         style.id = `theme-${theme.id}`;
         style.textContent = theme.css;
-        document.head.appendChild(style);
-      }
+document.head.appendChild(style);
+    }
 
-      console.log("Custom theme registered:", theme.id);
-    } catch (error) {
+    // eslint-disable-next-line no-console
+    console.debug("Custom theme registered:", theme.id);
+  } catch (error) {
       console.error("Failed to register custom theme:", error);
       throw error;
     }
@@ -204,7 +205,8 @@ export const useSettings = (userId?: string) => {
           (newSettings as any)[key] = value;
         }
 
-        console.log("Settings updated:", key, value, newSettings);
+        // eslint-disable-next-line no-console
+        console.debug("Settings updated:", key, value);
 
         if (key === "customThemes" && (window as any).monaco) {
           value.forEach(registerCustomTheme);

@@ -158,7 +158,8 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
 				document.head.appendChild(style);
 			}
 
-			console.log("Preview theme registered:", `preview-${currentTheme.id}`);
+			// eslint-disable-next-line no-console
+			console.debug("Preview theme registered:", `preview-${currentTheme.id}`);
 		} catch (error) {
 			console.error("Failed to register preview theme:", error);
 		}

@@ -92,7 +92,8 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
 			registerCustomTheme(theme);
 		}
 
-		console.log("Theme saved:", theme.name);
+		// eslint-disable-next-line no-console
+		console.debug("Theme saved:", theme.name);
 	};
 
 	const handleDeleteTheme = (themeId: string) => {
