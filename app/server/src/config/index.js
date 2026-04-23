@@ -38,7 +38,7 @@ export const config = {
 
   // Rate limiting configuration (milliseconds, max requests)
   rateLimit: {
-    auth: { windowMs: 15 * 60 * 1000, max: 5 },
+    auth: { windowMs: 15 * 60 * 1000, max: 50 },
     general: { windowMs: 15 * 60 * 1000, max: 100 },
     compiler: { windowMs: 60 * 1000, max: 10 },
   },

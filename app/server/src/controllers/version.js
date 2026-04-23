@@ -35,6 +35,8 @@ const createVersion = async (codeId, code, title) => {
   }
 };
 
+export { createVersion };
+
 /**
  * Get all versions for a code
  * @param {Object} req - Express request object
