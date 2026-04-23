@@ -264,3 +264,17 @@
 2026-04-23 21:46:36 [info]: POST /api/settings 200 - 22ms
 2026-04-23 21:46:37 [info]: POST /api/settings 200 - 6ms
 2026-04-23 21:46:39 [info]: POST /api/settings 200 - 7ms
+2026-04-23 21:48:03 [info]: POST /api/auth/logout 200 - 30ms
+2026-04-23 21:48:04 [info]: GET /api/auth/profile 401 - 0ms
+2026-04-23 21:48:04 [info]: GET /api/auth/profile 401 - 0ms
+2026-04-23 21:48:09 [info]: POST /api/compile 500 - 80ms
+2026-04-23 21:48:13 [info]: POST /api/compile 500 - 61ms
+2026-04-23 21:48:17 [info]: POST /api/compile 500 - 74ms
+2026-04-23 21:48:21 [info]: POST /api/compile 500 - 64ms
+2026-04-23 21:48:24 [info]: POST /api/compile 500 - 71ms
+2026-04-23 21:48:29 [info]: POST /api/compile 500 - 64ms
+2026-04-23 21:48:32 [info]: POST /api/compile 500 - 58ms
+2026-04-23 21:50:54 [info]: POST /api/compile 500 - 70ms
+2026-04-23 21:50:57 [info]: POST /api/compile 500 - 64ms
+2026-04-23 21:51:01 [info]: POST /api/compile 500 - 51ms
+2026-04-23 21:51:06 [info]: POST /api/compile 500 - 67ms
