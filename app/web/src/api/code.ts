@@ -134,7 +134,7 @@ export const codeApi = {
       const data = await response.json();
       return data;
     } catch {
-      console.error("Restore code error:", error);
+      showToast.error("Restore code error");
       return { success: false, error: "Network error" };
     }
   },

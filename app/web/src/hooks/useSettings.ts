@@ -189,9 +189,6 @@ export const useSettings = (userId?: string) => {
       }
     } catch {
       showToast.error("Failed to load settings");
-      setError(
-        error instanceof Error ? error.message : "Failed to load settings",
-      );
       setEditorSettings(defaultSettings);
     } finally {
       setLoading(false);
@@ -213,8 +210,6 @@ export const useSettings = (userId?: string) => {
           (newSettings as any)[key] = value;
         }
 
-        
-
         if (key === "customThemes" && (window as any).monaco) {
           value.forEach(registerCustomTheme);
         }
@@ -223,8 +218,8 @@ export const useSettings = (userId?: string) => {
           try {
             (window as any).monaco.editor.setTheme(value);
           } catch {
-        showToast.error("Failed to apply theme");
-      }
+            showToast.error("Failed to apply theme");
+          }
         }
 
         if (!userId) {
@@ -265,9 +260,6 @@ export const useSettings = (userId?: string) => {
       }
     } catch {
       showToast.error("Failed to save settings");
-      setError(
-        error instanceof Error ? error.message : "Failed to save settings",
-      );
       return false;
     } finally {
       setLoading(false);
@@ -331,9 +323,6 @@ export const useSettings = (userId?: string) => {
       }
     } catch {
       showToast.error("Failed to reset settings");
-      setError(
-        error instanceof Error ? error.message : "Failed to reset settings",
-      );
       return false;
     } finally {
       setLoading(false);

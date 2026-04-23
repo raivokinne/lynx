@@ -5,6 +5,7 @@ import { useMonacoLoader } from "../hooks/useMonacoLoader";
 import { getDefaultEditorOptions } from "../config/editor";
 import EditorError from "./EditorError";
 import EditorLoading from "./EditorLoading";
+import { showToast } from "../utils/toast";
 
 // Monaco editor wrapper with Lynx language support
 const MonacoEditor: React.FC<MonacoEditorProps> = ({

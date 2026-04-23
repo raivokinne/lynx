@@ -2,22 +2,24 @@ import { useTranslation } from "../../hooks/useTranslation";
 import { CodeBlock } from "./CodeBlock";
 
 interface LanguageSectionProps {
-	isDarkMode: boolean;
+  isDarkMode: boolean;
 }
 
 export const LanguageSection = ({ isDarkMode }: LanguageSectionProps) => {
-	const { t } = useTranslation();
+  const { t } = useTranslation();
 
-	return (
-		<div className="space-y-4">
-			<h2 className="text-sm font-mono mb-3 text-neutral-300">{t("language.title")}</h2>
+  return (
+    <div className="space-y-4">
+      <h2 className="text-sm font-mono mb-3 text-neutral-300">
+        {t("language.title")}
+      </h2>
 
-			<div>
-				<h3 className="text-xs font-mono mb-2 text-neutral-400">
-					{t("language.variables")}
-				</h3>
-				<CodeBlock isDarkMode={isDarkMode}>
-					{`// mutable variables
+      <div>
+        <h3 className="text-xs font-mono mb-2 text-neutral-400">
+          {t("language.variables")}
+        </h3>
+        <CodeBlock isDarkMode={isDarkMode}>
+          {`// mutable variables
 let name = "lynx"
 let version = 1.0
 
@@ -28,15 +30,15 @@ const MAX_USERS = 100
 // type inference works automatically
 let numbers = [1, 2, 3, 4, 5]
 let user = {"name": "alice", "age": 30}`}
-				</CodeBlock>
-			</div>
+        </CodeBlock>
+      </div>
 
-			<div>
-				<h3 className="text-xs font-mono mb-2 text-neutral-400">
-					{t("language.functions")}
-				</h3>
-				<CodeBlock isDarkMode={isDarkMode}>
-					{`// basic function
+      <div>
+        <h3 className="text-xs font-mono mb-2 text-neutral-400">
+          {t("language.functions")}
+        </h3>
+        <CodeBlock isDarkMode={isDarkMode}>
+          {`// basic function
 let greet = fn(name) {
     return "hello, " ++ name ++ "!"
 }
@@ -53,15 +55,15 @@ let applyTwice = fn(f, x) {
 
 // arrow syntax
 let double = fn(x) { x * 2 }`}
-				</CodeBlock>
-			</div>
+        </CodeBlock>
+      </div>
 
-			<div>
-				<h3 className="text-xs font-mono mb-2 text-neutral-400">
-					{t("language.classes")}
-				</h3>
-				<CodeBlock isDarkMode={isDarkMode}>
-					{`// define a class
+      <div>
+        <h3 className="text-xs font-mono mb-2 text-neutral-400">
+          {t("language.classes")}
+        </h3>
+        <CodeBlock isDarkMode={isDarkMode}>
+          {`// define a class
 class animal {
     let init = fn(name, age) {
         self.name = name
@@ -85,20 +87,18 @@ class dog(animal) {
         return self.name ++ " says: woof!"
     }
 }`}
-				</CodeBlock>
-			</div>
+        </CodeBlock>
+      </div>
 
-			<div>
-				<h3 className="text-xs font-mono mb-2 text-neutral-400">
-					{t("language.controlFlow")}
-				</h3>
-				<CodeBlock isDarkMode={isDarkMode}>
-					{`// if-else statements
+      <div>
+        <h3 className="text-xs font-mono mb-2 text-neutral-400">
+          {t("language.controlFlow")}
+        </h3>
+        <CodeBlock isDarkMode={isDarkMode}>
+          {`// if-else statements
 let x = 0
 if x > 0 {
     println("positive")
-} else if x < 0 {
-    println("negative")
 } else {
     println("zero")
 }
@@ -126,15 +126,15 @@ for i in range(0, 100) {
     if i > 10 { break }
     println(i)
 }`}
-				</CodeBlock>
-			</div>
+        </CodeBlock>
+      </div>
 
-			<div>
-				<h3 className="text-xs font-mono mb-2 text-neutral-400">
-					{t("language.switch")}
-				</h3>
-				<CodeBlock isDarkMode={isDarkMode}>
-					{`let processGrade = fn(grade) {
+      <div>
+        <h3 className="text-xs font-mono mb-2 text-neutral-400">
+          {t("language.switch")}
+        </h3>
+        <CodeBlock isDarkMode={isDarkMode}>
+          {`let processGrade = fn(grade) {
     switch grade {
         case "A": { return 4.0 }
         case "B": { return 3.0 }
@@ -152,17 +152,19 @@ let describe = fn(value) {
         default: "unknown"
     }
 }`}
-				</CodeBlock>
-			</div>
+        </CodeBlock>
+      </div>
 
-			<div>
-				<h3 className="text-xs font-mono mb-2 text-neutral-400">
-					{t("language.dataStructures")}
-				</h3>
+      <div>
+        <h3 className="text-xs font-mono mb-2 text-neutral-400">
+          {t("language.dataStructures")}
+        </h3>
 
-				<h4 className="text-xs font-mono mb-1 text-neutral-500">{t("language.arrays")}:</h4>
-				<CodeBlock isDarkMode={isDarkMode}>
-					{`let numbers = [1, 2, 3, 4, 5]
+        <h4 className="text-xs font-mono mb-1 text-neutral-500">
+          {t("language.arrays")}:
+        </h4>
+        <CodeBlock isDarkMode={isDarkMode}>
+          {`let numbers = [1, 2, 3, 4, 5]
 
 // array methods
 let extended = numbers.push(6)     // add element
@@ -176,11 +178,13 @@ let hasThree = contains(numbers, 3)
 let first = numbers[0]
 let last = numbers[-1]
 let slice = numbers[1:3]`}
-				</CodeBlock>
+        </CodeBlock>
 
-				<h4 className="text-xs font-mono mb-1 mt-3 text-neutral-500">{t("language.objects")}:</h4>
-				<CodeBlock isDarkMode={isDarkMode}>
-					{`let person = {
+        <h4 className="text-xs font-mono mb-1 mt-3 text-neutral-500">
+          {t("language.objects")}:
+        </h4>
+        <CodeBlock isDarkMode={isDarkMode}>
+          {`let person = {
     "name": "alice",
     "age": 30,
     "city": "nyc"
@@ -194,11 +198,13 @@ let age = person.age
 let updated = person.set("age", 31)
 let removed = person.delete("city")
 let hasCity = person.contains("city")`}
-				</CodeBlock>
+        </CodeBlock>
 
-				<h4 className="text-xs font-mono mb-1 mt-3 text-neutral-500">{t("language.tuples")}:</h4>
-				<CodeBlock isDarkMode={isDarkMode}>
-					{`let coordinates = (10, 20)
+        <h4 className="text-xs font-mono mb-1 mt-3 text-neutral-500">
+          {t("language.tuples")}:
+        </h4>
+        <CodeBlock isDarkMode={isDarkMode}>
+          {`let coordinates = (10, 20)
 let person = ("alice", 30, true)
 
 // destructuring
@@ -207,15 +213,15 @@ let (name, age, active) = person
 
 // access by index
 let first = coordinates[0]`}
-				</CodeBlock>
-			</div>
+        </CodeBlock>
+      </div>
 
-			<div>
-				<h3 className="text-xs font-mono mb-2 text-neutral-400">
-					{t("language.pipelines")}
-				</h3>
-				<CodeBlock isDarkMode={isDarkMode}>
-					{`@iter
+      <div>
+        <h3 className="text-xs font-mono mb-2 text-neutral-400">
+          {t("language.pipelines")}
+        </h3>
+        <CodeBlock isDarkMode={isDarkMode}>
+          {`@iter
 
 let numbers = [1, 2, 3, 4, 5]
 
@@ -227,15 +233,15 @@ let result = numbers
 
 // chaining in traditional style
 let result2 = iter.filter(iter.map(numbers, fn(x) { x * 2 }), fn(x) { x > 2 })`}
-				</CodeBlock>
-			</div>
+        </CodeBlock>
+      </div>
 
-			<div>
-				<h3 className="text-xs font-mono mb-2 text-neutral-400">
-					{t("language.errors")}
-				</h3>
-				<CodeBlock isDarkMode={isDarkMode}>
-					{`let divide = fn(a, b) {
+      <div>
+        <h3 className="text-xs font-mono mb-2 text-neutral-400">
+          {t("language.errors")}
+        </h3>
+        <CodeBlock isDarkMode={isDarkMode}>
+          {`let divide = fn(a, b) {
     if b == 0 {
         error "division by zero"
     }
@@ -261,8 +267,8 @@ let processData = fn(data) {
         return null
     }
 }`}
-				</CodeBlock>
-			</div>
-		</div>
-	);
+        </CodeBlock>
+      </div>
+    </div>
+  );
 };
