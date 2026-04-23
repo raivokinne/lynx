@@ -69,6 +69,7 @@ async function createTables(pool) {
       last_login TIMESTAMP,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP`,
     `CREATE TABLE IF NOT EXISTS codes (
       id TEXT PRIMARY KEY,
       user_id TEXT,
