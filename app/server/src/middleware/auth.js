@@ -1,5 +1,6 @@
 import { Session } from "../models/session.js";
 
+// Session validation query
 const SESSION_QUERY = `
   SELECT s.id, s.user_id, s.expires_at, u.username
   FROM sessions s
@@ -7,6 +8,7 @@ const SESSION_QUERY = `
   WHERE s.id = $1 AND s.token = $2 AND s.expires_at > NOW()
 `;
 
+// Extract Bearer token from Authorization header
 const extractBearerToken = (req) => {
   const auth = req.headers.authorization;
   if (!auth?.startsWith("Bearer ")) return null;
@@ -14,6 +16,7 @@ const extractBearerToken = (req) => {
   return token || null;
 };
 
+// Verify JWT token and extract payload
 const verifyToken = (token) => {
   try {
     return require("jsonwebtoken").verify(token, require("../config/index.js").jwt.secret);
@@ -25,6 +28,7 @@ const verifyToken = (token) => {
   }
 };
 
+// Authentication middleware - validates JWT and session
 export const authenticateToken = async (req, res, next) => {
   try {
     const token = extractBearerToken(req);

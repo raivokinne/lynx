@@ -1,9 +1,11 @@
 import { User } from "../models/user.js";
 import { Session } from "../models/session.js";
 
+// Input validation patterns
 const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
 const PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,20}$/;
 
+// Register new user handler
 export const register = async (req, res) => {
   try {
     const { username, password, confirmPassword } = req.body;
