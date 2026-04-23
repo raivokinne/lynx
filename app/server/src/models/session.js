@@ -1,7 +1,7 @@
-import { db } from "../connection.js";
+import { db } from "../db/connection.js";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
-import config from "../../config/index.js";
+import config from "../config/index.js";
 
 export const Session = {
   async create(userId, { ip, userAgent } = {}) {

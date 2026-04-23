@@ -2,7 +2,7 @@ import { existsSync, unlinkSync, writeFileSync, mkdirSync } from "fs";
 import { join, resolve } from "path";
 import { randomBytes } from "crypto";
 import { validateCode, sanitizeSessionId, executeCompiler } from "../utils/compiler.js";
-import config from "../../config/index.js";
+import config from "../config/index.js";
 import { logExecution } from "./executionHistory.js";
 
 const executionCounts = new Map();

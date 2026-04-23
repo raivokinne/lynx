@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 import { readdirSync, rmdirSync, statSync, unlinkSync, existsSync } from "fs";
 import { join, resolve } from "path";
-import config from "../../config/index.js";
+import config from "../config/index.js";
 
 const MAX_OUTPUT_SIZE = 100_000;
 
