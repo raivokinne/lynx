@@ -31,9 +31,8 @@ export const useLynxLanguage = () => {
 			getLynxLanguageConfiguration(),
 		);
 
-		// eslint-disable-next-line no-console
-		console.debug("Lynx language registered with enhanced features");
-	}, []);
+		 
+		}, []);
 
 	return { registerLynxLanguage };
 };

@@ -117,3 +117,164 @@
 2026-04-23 12:25:55 [info]: GET /api/codes?limit=50&offset=0 500 - 19ms
 2026-04-23 12:25:55 [info]: GET /api/settings 304 - 14ms
 2026-04-23 12:26:03 [info]: POST /api/settings 200 - 8ms
+2026-04-23 12:31:50 [info]: GET /api/auth/profile 304 - 40ms
+2026-04-23 12:31:50 [info]: GET /api/auth/profile 304 - 15ms
+2026-04-23 12:31:50 [info]: GET /api/settings 200 - 5ms
+2026-04-23 12:31:50 [error]: List code error:
+2026-04-23 12:31:50 [info]: GET /api/codes?limit=50&offset=0 500 - 21ms
+2026-04-23 12:38:16 [info]: GET /api/auth/profile 304 - 24ms
+2026-04-23 12:38:16 [info]: GET /api/auth/profile 304 - 9ms
+2026-04-23 12:38:16 [error]: List code error:
+2026-04-23 12:38:16 [info]: GET /api/codes?limit=50&offset=0 500 - 7ms
+2026-04-23 12:38:16 [info]: GET /api/settings 304 - 21ms
+2026-04-23 12:47:50 [info]: POST /api/auth/logout 200 - 54ms
+2026-04-23 12:47:50 [info]: GET /api/auth/profile 401 - 4ms
+2026-04-23 12:47:50 [info]: GET /api/auth/profile 401 - 0ms
+2026-04-23 12:48:00 [info]: POST /api/auth/register 200 - 115ms
+2026-04-23 12:48:02 [error]: List code error:
+2026-04-23 12:48:02 [info]: GET /api/codes?limit=50&offset=0 500 - 51ms
+2026-04-23 12:48:02 [info]: GET /api/settings 304 - 79ms
+2026-04-23 12:48:02 [info]: GET /api/settings 304 - 3ms
+2026-04-23 12:48:02 [error]: List code error:
+2026-04-23 12:48:02 [info]: GET /api/codes?limit=50&offset=0 500 - 34ms
+2026-04-23 12:48:05 [info]: GET /api/auth/profile 200 - 6ms
+2026-04-23 12:48:05 [info]: GET /api/auth/profile 304 - 3ms
+2026-04-23 12:48:05 [error]: List code error:
+2026-04-23 12:48:05 [info]: GET /api/codes?limit=50&offset=0 500 - 8ms
+2026-04-23 12:48:05 [info]: GET /api/settings 304 - 57ms
+2026-04-23 12:48:12 [info]: POST /api/settings 200 - 11ms
+2026-04-23 12:48:14 [info]: POST /api/settings 200 - 5ms
+2026-04-23 21:35:26 [info]: Initializing database connection...
+2026-04-23 21:35:26 [info]: Database connected:
+2026-04-23 21:35:26 [info]: Database initialized with all tables
+2026-04-23 21:35:26 [info]: Demo user already exists
+2026-04-23 21:35:26 [info]: Server running on port 3001
+2026-04-23 21:35:26 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-23 21:35:26 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-23 21:35:34 [info]: GET /api/auth/profile 304 - 13ms
+2026-04-23 21:35:34 [info]: GET /api/auth/profile 304 - 2ms
+2026-04-23 21:35:38 [info]: GET /api/settings 200 - 17ms
+2026-04-23 21:35:38 [info]: GET /api/settings 304 - 9ms
+2026-04-23 21:35:38 [error]: List code error:
+2026-04-23 21:35:38 [info]: GET /api/codes?limit=50&offset=0 500 - 66ms
+2026-04-23 21:35:38 [error]: List code error:
+2026-04-23 21:35:38 [info]: GET /api/codes?limit=50&offset=0 500 - 2ms
+2026-04-23 21:35:42 [info]: GET /api/auth/profile 304 - 17ms
+2026-04-23 21:35:42 [info]: GET /api/auth/profile 304 - 4ms
+2026-04-23 21:35:42 [error]: List code error:
+2026-04-23 21:35:42 [info]: GET /api/codes?limit=50&offset=0 500 - 21ms
+2026-04-23 21:35:42 [info]: GET /api/settings 304 - 26ms
+2026-04-23 21:36:28 [info]: GET /api/settings 304 - 40ms
+2026-04-23 21:36:28 [error]: List code error:
+2026-04-23 21:36:28 [info]: GET /api/codes?limit=50&offset=0 500 - 44ms
+2026-04-23 21:36:30 [error]: List code error:
+2026-04-23 21:36:30 [info]: GET /api/codes?limit=50&offset=0 500 - 3ms
+2026-04-23 21:36:30 [info]: GET /api/settings 304 - 10ms
+2026-04-23 21:36:32 [error]: List code error:
+2026-04-23 21:36:32 [info]: GET /api/codes?limit=50&offset=0 500 - 5ms
+2026-04-23 21:36:32 [info]: GET /api/settings 304 - 10ms
+2026-04-23 21:36:44 [error]: List code error:
+2026-04-23 21:36:44 [info]: GET /api/codes?limit=50&offset=0 500 - 7ms
+2026-04-23 21:36:44 [info]: GET /api/settings 304 - 16ms
+2026-04-23 21:36:48 [error]: List code error:
+2026-04-23 21:36:48 [info]: GET /api/codes?limit=50&offset=0 500 - 9ms
+2026-04-23 21:36:48 [info]: GET /api/settings 304 - 14ms
+2026-04-23 21:36:51 [error]: List code error:
+2026-04-23 21:36:51 [info]: GET /api/codes?limit=50&offset=0 500 - 6ms
+2026-04-23 21:36:51 [info]: GET /api/settings 304 - 12ms
+2026-04-23 21:37:01 [error]: List code error:
+2026-04-23 21:37:01 [info]: GET /api/codes?limit=50&offset=0 500 - 4ms
+2026-04-23 21:37:01 [info]: GET /api/settings 304 - 12ms
+2026-04-23 21:37:04 [error]: List code error:
+2026-04-23 21:37:04 [info]: GET /api/codes?limit=50&offset=0 500 - 3ms
+2026-04-23 21:37:04 [info]: GET /api/settings 304 - 10ms
+2026-04-23 21:37:08 [error]: List code error:
+2026-04-23 21:37:08 [info]: GET /api/codes?limit=50&offset=0 500 - 7ms
+2026-04-23 21:37:08 [info]: GET /api/settings 304 - 26ms
+2026-04-23 21:37:15 [error]: List code error:
+2026-04-23 21:37:15 [info]: GET /api/codes?limit=50&offset=0 500 - 2ms
+2026-04-23 21:37:15 [info]: GET /api/settings 304 - 11ms
+2026-04-23 21:37:34 [error]: List code error:
+2026-04-23 21:37:34 [info]: GET /api/codes?limit=50&offset=0 500 - 10ms
+2026-04-23 21:37:34 [info]: GET /api/settings 304 - 19ms
+2026-04-23 21:37:38 [error]: List code error:
+2026-04-23 21:37:38 [info]: GET /api/codes?limit=50&offset=0 500 - 7ms
+2026-04-23 21:37:38 [info]: GET /api/settings 304 - 16ms
+2026-04-23 21:37:41 [error]: List code error:
+2026-04-23 21:37:41 [info]: GET /api/codes?limit=50&offset=0 500 - 4ms
+2026-04-23 21:37:41 [info]: GET /api/settings 304 - 10ms
+2026-04-23 21:37:46 [error]: List code error:
+2026-04-23 21:37:46 [info]: GET /api/codes?limit=50&offset=0 500 - 5ms
+2026-04-23 21:37:46 [info]: GET /api/settings 304 - 19ms
+2026-04-23 21:37:52 [error]: List code error:
+2026-04-23 21:37:52 [info]: GET /api/codes?limit=50&offset=0 500 - 10ms
+2026-04-23 21:37:52 [info]: GET /api/settings 304 - 16ms
+2026-04-23 21:38:02 [error]: List code error:
+2026-04-23 21:38:02 [info]: GET /api/codes?limit=50&offset=0 500 - 6ms
+2026-04-23 21:38:02 [info]: GET /api/settings 304 - 17ms
+2026-04-23 21:38:09 [error]: List code error:
+2026-04-23 21:38:09 [info]: GET /api/codes?limit=50&offset=0 500 - 4ms
+2026-04-23 21:38:09 [info]: GET /api/settings 304 - 13ms
+2026-04-23 21:38:16 [error]: List code error:
+2026-04-23 21:38:16 [info]: GET /api/codes?limit=50&offset=0 500 - 10ms
+2026-04-23 21:38:16 [info]: GET /api/settings 304 - 17ms
+2026-04-23 21:38:22 [error]: List code error:
+2026-04-23 21:38:22 [info]: GET /api/codes?limit=50&offset=0 500 - 4ms
+2026-04-23 21:38:22 [info]: GET /api/settings 304 - 16ms
+2026-04-23 21:38:27 [error]: List code error:
+2026-04-23 21:38:27 [info]: GET /api/codes?limit=50&offset=0 500 - 5ms
+2026-04-23 21:38:27 [info]: GET /api/settings 304 - 13ms
+2026-04-23 21:38:32 [error]: List code error:
+2026-04-23 21:38:32 [info]: GET /api/codes?limit=50&offset=0 500 - 9ms
+2026-04-23 21:38:32 [info]: GET /api/settings 304 - 16ms
+2026-04-23 21:38:38 [error]: List code error:
+2026-04-23 21:38:38 [info]: GET /api/codes?limit=50&offset=0 500 - 4ms
+2026-04-23 21:38:38 [info]: GET /api/settings 304 - 9ms
+2026-04-23 21:39:32 [info]: GET /api/settings 304 - 51ms
+2026-04-23 21:39:32 [error]: List code error:
+2026-04-23 21:39:32 [info]: GET /api/codes?limit=50&offset=0 500 - 61ms
+2026-04-23 21:39:32 [info]: GET /api/settings 304 - 1ms
+2026-04-23 21:39:32 [error]: List code error:
+2026-04-23 21:39:32 [info]: GET /api/codes?limit=50&offset=0 500 - 9ms
+2026-04-23 21:42:00 [info]: GET /api/settings 304 - 16ms
+2026-04-23 21:42:00 [error]: List code error:
+2026-04-23 21:42:00 [info]: GET /api/codes?limit=50&offset=0 500 - 32ms
+2026-04-23 21:42:00 [info]: GET /api/settings 304 - 3ms
+2026-04-23 21:42:00 [error]: List code error:
+2026-04-23 21:42:00 [info]: GET /api/codes?limit=50&offset=0 500 - 9ms
+2026-04-23 21:42:05 [info]: POST /api/settings 200 - 16ms
+2026-04-23 21:42:09 [info]: POST /api/settings 200 - 3ms
+2026-04-23 21:43:16 [info]: GET /api/settings 200 - 49ms
+2026-04-23 21:43:16 [error]: List code error:
+2026-04-23 21:43:16 [info]: GET /api/codes?limit=50&offset=0 500 - 26ms
+2026-04-23 21:44:10 [info]: POST /api/compile 500 - 67ms
+2026-04-23 21:44:15 [info]: POST /api/compile 500 - 81ms
+2026-04-23 21:44:19 [info]: POST /api/compile 500 - 81ms
+2026-04-23 21:44:22 [info]: POST /api/compile 500 - 64ms
+2026-04-23 21:44:38 [info]: POST /api/settings 200 - 37ms
+2026-04-23 21:45:53 [error]: List code error:
+2026-04-23 21:45:53 [info]: GET /api/codes?limit=50&offset=0 500 - 20ms
+2026-04-23 21:45:53 [info]: GET /api/settings 200 - 25ms
+2026-04-23 21:45:58 [error]: List code error:
+2026-04-23 21:45:58 [info]: GET /api/codes?limit=50&offset=0 500 - 13ms
+2026-04-23 21:45:58 [info]: GET /api/settings 304 - 23ms
+2026-04-23 21:46:29 [info]: GET /api/settings 304 - 21ms
+2026-04-23 21:46:29 [error]: List code error:
+2026-04-23 21:46:29 [info]: GET /api/codes?limit=50&offset=0 500 - 30ms
+2026-04-23 21:46:36 [info]: POST /api/settings 200 - 22ms
+2026-04-23 21:46:37 [info]: POST /api/settings 200 - 6ms
+2026-04-23 21:46:39 [info]: POST /api/settings 200 - 7ms
+2026-04-23 21:48:03 [info]: POST /api/auth/logout 200 - 30ms
+2026-04-23 21:48:04 [info]: GET /api/auth/profile 401 - 0ms
+2026-04-23 21:48:04 [info]: GET /api/auth/profile 401 - 0ms
+2026-04-23 21:48:09 [info]: POST /api/compile 500 - 80ms
+2026-04-23 21:48:13 [info]: POST /api/compile 500 - 61ms
+2026-04-23 21:48:17 [info]: POST /api/compile 500 - 74ms
+2026-04-23 21:48:21 [info]: POST /api/compile 500 - 64ms
+2026-04-23 21:48:24 [info]: POST /api/compile 500 - 71ms
+2026-04-23 21:48:29 [info]: POST /api/compile 500 - 64ms
+2026-04-23 21:48:32 [info]: POST /api/compile 500 - 58ms
+2026-04-23 21:50:54 [info]: POST /api/compile 500 - 70ms
+2026-04-23 21:50:57 [info]: POST /api/compile 500 - 64ms
+2026-04-23 21:51:01 [info]: POST /api/compile 500 - 51ms
+2026-04-23 21:51:06 [info]: POST /api/compile 500 - 67ms

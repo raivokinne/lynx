@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Palette, Plus, Trash2, Edit, Eye } from "lucide-react";
 import { ThemeEditor } from "./ThemeEditor";
 import type { EditorSettings, CustomTheme } from "../types/types";
+import { showToast } from "../utils/toast";
 
 interface ThemeManagementProps {
 	editorSettings: EditorSettings;
@@ -42,16 +43,16 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
 			setTimeout(() => {
 				try {
 					(window as any).monaco.editor.setTheme(themeId);
-				} catch (error) {
-					console.error("Failed to apply theme:", error);
+				} catch {
+					showToast.error("Failed to apply theme");
 				}
 			}, 100);
 		} else if ((window as any).monaco) {
 			setTimeout(() => {
 				try {
 					(window as any).monaco.editor.setTheme(themeId);
-				} catch (error) {
-					console.error("Failed to apply theme:", error);
+				} catch {
+					showToast.error("Failed to apply theme");
 				}
 			}, 100);
 		}
@@ -91,9 +92,6 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
 		if ((window as any).monaco) {
 			registerCustomTheme(theme);
 		}
-
-		// eslint-disable-next-line no-console
-		console.debug("Theme saved:", theme.name);
 	};
 
 	const handleDeleteTheme = (themeId: string) => {
@@ -111,6 +109,8 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
 				theme:
 					editorSettings.theme === themeId ? "vs-dark" : editorSettings.theme,
 			});
+
+			showToast.success("Theme deleted");
 		}
 	};
 
@@ -120,8 +120,8 @@ export const ThemeManagement: React.FC<ThemeManagementProps> = ({
 			setTimeout(() => {
 				try {
 					(window as any).monaco.editor.setTheme(theme.id);
-				} catch (error) {
-					console.error("Failed to preview theme:", error);
+				} catch {
+					showToast.error("Failed to preview theme");
 				}
 			}, 100);
 		}

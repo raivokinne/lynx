@@ -3,14 +3,6 @@ import jwt from "jsonwebtoken";
 import config from "../config/index.js";
 import logger from "../../logger.js";
 
-// Session validation query
-const SESSION_QUERY = `
-  SELECT s.id, s.user_id, s.expires_at, u.username
-  FROM sessions s
-  JOIN users u ON s.user_id = u.id
-  WHERE s.id = $1 AND s.token = $2 AND s.expires_at > NOW()
-`;
-
 // Extract Bearer token from Authorization header
 const extractBearerToken = (req) => {
   const auth = req.headers.authorization;

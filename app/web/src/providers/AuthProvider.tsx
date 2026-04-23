@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { User } from "../types/types";
 import { AuthContext } from "../contexts/AuthContext";
 import { API_BASE } from "../types/constants";
+import { showToast } from "../utils/toast";
 
 // Auth context provider for login, register, logout
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -98,8 +99,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 					error: data.error || "Registration failed",
 				};
 			}
-		} catch (error) {
-			console.error("Registration error:", error);
+		} catch {
+			showToast.error("Network error. Please try again.");
 			return {
 				success: false,
 				error: "Network error. Please try again.",
