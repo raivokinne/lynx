@@ -1,3 +1,7 @@
+/**
+ * Sharing controller
+ * Handles code sharing (public/private links)
+ */
 import { Code } from "../models/code.js";
 import { db } from "../db/connection.js";
 import { v4 as uuidv4 } from "uuid";
@@ -5,6 +9,12 @@ import crypto from "crypto";
 
 const generateShareToken = () => crypto.randomBytes(16).toString("hex");
 
+/**
+ * Share code with a public or private link
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with share token, or error
+ */
 export const shareCode = async (req, res) => {
   try {
     const { codeId, isPublic, expiresInDays } = req.body;
@@ -54,6 +64,12 @@ export const shareCode = async (req, res) => {
   }
 };
 
+/**
+ * Get shared code by token (public access)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with code data, or error
+ */
 export const getSharedCode = async (req, res) => {
   try {
     const { token } = req.params;
@@ -88,6 +104,12 @@ export const getSharedCode = async (req, res) => {
   }
 };
 
+/**
+ * Get all share links for a code
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with array of shares, or error
+ */
 export const getCodeShares = async (req, res) => {
   try {
     const { codeId } = req.params;
@@ -113,6 +135,12 @@ export const getCodeShares = async (req, res) => {
   }
 };
 
+/**
+ * Update share settings (visibility, expiration)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success message or error
+ */
 export const updateShare = async (req, res) => {
   try {
     const { token } = req.params;
@@ -149,6 +177,12 @@ export const updateShare = async (req, res) => {
   }
 };
 
+/**
+ * Revoke a share link
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success message or error
+ */
 export const revokeShare = async (req, res) => {
   try {
     const { token } = req.params;
@@ -174,6 +208,12 @@ export const revokeShare = async (req, res) => {
   }
 };
 
+/**
+ * Get all public shared codes
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with array of public codes, or error
+ */
 export const getPublicShares = async (req, res) => {
   try {
     const { limit = 20, offset = 0 } = req.query;

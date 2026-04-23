@@ -1,3 +1,7 @@
+/**
+ * Authentication controller
+ * Handles user registration, login, logout, and profile retrieval
+ */
 import { User } from "../models/user.js";
 import { Session } from "../models/session.js";
 
@@ -5,7 +9,12 @@ import { Session } from "../models/session.js";
 const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
 const PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,20}$/;
 
-// Register new user handler
+/**
+ * Register a new user
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with token and user data, or error
+ */
 export const register = async (req, res) => {
   try {
     const { username, password, confirmPassword } = req.body;
@@ -72,6 +81,12 @@ export const register = async (req, res) => {
   }
 };
 
+/**
+ * Authenticate user and create session
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with token and user data, or error
+ */
 export const login = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -117,6 +132,12 @@ export const login = async (req, res) => {
   }
 };
 
+/**
+ * Logout current user and delete session
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success message or error
+ */
 export const logout = async (req, res) => {
   try {
     await Session.delete(req.user.sessionId, req.user.id);
@@ -129,6 +150,12 @@ export const logout = async (req, res) => {
   }
 };
 
+/**
+ * Get current user's profile
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {JSON} Success response with user data, or error
+ */
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
