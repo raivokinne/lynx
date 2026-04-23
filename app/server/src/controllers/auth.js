@@ -125,9 +125,7 @@ export const login = async (req, res) => {
       user: { id: user.id, username: user.username },
     });
   } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("Login error:", error);
-    }
+    console.error("Login error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Login failed" });
   }
 };
