@@ -30,11 +30,7 @@ export const Session = {
          WHERE s.id = $1 AND s.expires_at > NOW() AND u.is_active = true`,
         [decoded.sessionId],
       );
-      const session = result.rows[0];
-      if (session && session.token === token) {
-        return session;
-      }
-      return null;
+      return result.rows[0] || null;
     } catch {
       return null;
     }

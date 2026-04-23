@@ -8,6 +8,7 @@ import { randomBytes } from "crypto";
 import { validateCode, sanitizeSessionId, executeCompiler } from "../utils/compiler.js";
 import config from "../config/index.js";
 import { logExecution } from "./executionHistory.js";
+import logger from "../../logger.js";
 
 const executionCounts = new Map();
 const MAX_LOG_OUTPUT = 10_000;
@@ -124,7 +125,7 @@ export const compilerController = async (req, res) => {
       try {
         unlinkSync(tempFilePath);
       } catch (e) {
-        console.error("Error cleaning up temp file:", e?.message);
+        logger.error("Error cleaning up temp file:", e?.message);
       }
     }
   }

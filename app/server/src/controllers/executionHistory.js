@@ -4,6 +4,7 @@
  */
 import { db } from "../db/connection.js";
 import { v4 as uuidv4 } from "uuid";
+import logger from "../../logger.js";
 
 /**
  * Log a code execution to database
@@ -25,7 +26,7 @@ export const logExecution = async (userId, codeId, success, output, error, execu
     );
     return id;
   } catch (error) {
-    console.error("Log execution error:", error?.message ?? error);
+    logger.error("Log execution error:", error?.message ?? error);
   }
 };
 
@@ -58,7 +59,7 @@ export const getCodeExecutionHistory = async (req, res) => {
       total: parseInt(countResult.rows[0].total),
     });
   } catch (error) {
-    console.error("Get code execution history error:", error?.message ?? error);
+    logger.error("Get code execution history error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to fetch execution history" });
   }
 };
@@ -94,7 +95,7 @@ export const getUserExecutionHistory = async (req, res) => {
       total: parseInt(countResult.rows[0].total),
     });
   } catch (error) {
-    console.error("Get user execution history error:", error?.message ?? error);
+    logger.error("Get user execution history error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to fetch execution history" });
   }
 };
@@ -123,7 +124,7 @@ export const getCodeExecutionStats = async (req, res) => {
 
     res.json({ success: true, stats: result.rows[0] });
   } catch (error) {
-    console.error("Get execution stats error:", error?.message ?? error);
+    logger.error("Get execution stats error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to fetch execution statistics" });
   }
 };
@@ -158,7 +159,7 @@ export const getUserExecutionStats = async (req, res) => {
 
     res.json({ success: true, stats: result.rows[0], dailyStats: dailyStats.rows });
   } catch (error) {
-    console.error("Get user execution stats error:", error?.message ?? error);
+    logger.error("Get user execution stats error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to fetch execution statistics" });
   }
 };
@@ -187,7 +188,7 @@ export const getExecution = async (req, res) => {
 
     res.json({ success: true, execution: result.rows[0] });
   } catch (error) {
-    console.error("Get execution error:", error?.message ?? error);
+    logger.error("Get execution error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to fetch execution record" });
   }
 };
@@ -213,7 +214,7 @@ export const deleteCodeExecutionHistory = async (req, res) => {
       deletedCount: result.rowCount,
     });
   } catch (error) {
-    console.error("Delete execution history error:", error?.message ?? error);
+    logger.error("Delete execution history error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to delete execution history" });
   }
 };

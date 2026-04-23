@@ -12,38 +12,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	useEffect(() => {
 		const initAuth = async () => {
-			const token = localStorage.getItem("token");
-			if (token) {
-				try {
-					const payload = JSON.parse(atob(token.split(".")[1]));
+			try {
+				const response = await fetch(`${API_BASE}/auth/profile`, {
+					credentials: "include",
+				});
 
-					if (payload.exp * 1000 > Date.now()) {
-						const response = await fetch(`${API_BASE}/auth/profile`, {
-							headers: {
-								Authorization: `Bearer ${token}`,
-							},
+				if (response.ok) {
+					const data = await response.json();
+					if (data.success) {
+						setUser({
+							id: data.user.id,
+							username: data.user.username,
 						});
-
-						if (response.ok) {
-							const data = await response.json();
-							if (data.success) {
-								setUser({
-									id: data.user.id,
-									username: data.user.username,
-								});
-							} else {
-								localStorage.removeItem("token");
-							}
-						} else {
-							localStorage.removeItem("token");
-						}
-					} else {
-						localStorage.removeItem("token");
 					}
-				} catch (error) {
-					console.error("Auth initialization error:", error);
-					localStorage.removeItem("token");
 				}
+			} catch {
+				// Not authenticated
 			}
 			setIsLoading(false);
 		};
@@ -58,13 +42,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 				headers: {
 					"Content-Type": "application/json",
 				},
+				credentials: "include",
 				body: JSON.stringify({ username, password }),
 			});
 
 			const data = await response.json();
 
-			if (data.success && data.token) {
-				localStorage.setItem("token", data.token);
+			if (data.success && data.user) {
 				setUser({
 					id: data.user.id,
 					username: data.user.username,
@@ -96,19 +80,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 				headers: {
 					"Content-Type": "application/json",
 				},
+				credentials: "include",
 				body: JSON.stringify({ username, password, confirmPassword }),
 			});
 
 			const data = await response.json();
 
-			if (data.success) {
-				if (data.token) {
-					localStorage.setItem("token", data.token);
-					setUser({
-						id: data.user.id,
-						username: data.user.username,
-					});
-				}
+			if (data.success && data.user) {
+				setUser({
+					id: data.user.id,
+					username: data.user.username,
+				});
 				return { success: true };
 			} else {
 				return {
@@ -126,22 +108,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 	};
 
 	const logout = async () => {
-		const token = localStorage.getItem("token");
-
-		if (token) {
-			try {
-				await fetch(`${API_BASE}/auth/logout`, {
-					method: "POST",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-			} catch (error) {
-				console.error("Logout error:", error);
-			}
+		try {
+			await fetch(`${API_BASE}/auth/logout`, {
+				method: "POST",
+				credentials: "include",
+			});
+		} catch {
+			// Ignore errors
 		}
 
-		localStorage.removeItem("token");
 		setUser(null);
 
 		window.location.href = "/";

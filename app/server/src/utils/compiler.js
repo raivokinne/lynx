@@ -2,6 +2,7 @@ import { spawn } from "child_process";
 import { readdirSync, rmdirSync, statSync, unlinkSync, existsSync } from "fs";
 import { join, resolve } from "path";
 import config from "../config/index.js";
+import logger from "../../logger.js";
 
 const MAX_OUTPUT_SIZE = 100_000;
 
@@ -39,7 +40,7 @@ export const cleanupTempFiles = () => {
             const remaining = readdirSync(filePath);
             if (remaining.length === 0) rmdirSync(filePath);
           } catch (err) {
-            console.error(`Dir cleanup error ${file}:`, err.message);
+            logger.error(`Dir cleanup error ${file}:`, err.message);
           }
         } else {
           unlinkSync(filePath);
@@ -47,7 +48,7 @@ export const cleanupTempFiles = () => {
       }
     }
   } catch (error) {
-    console.error("Error cleaning up temp files:", error?.message ?? error);
+    logger.error("Error cleaning up temp files:", error?.message ?? error);
   }
 };
 
@@ -134,7 +135,7 @@ export const executeCompiler = (filePath) => {
         }, 5000);
       } catch (e) {
         if (process.env.NODE_ENV !== "production") {
-          console.error("Failed to kill child:", e.message);
+          logger.error("Failed to kill child:", e.message);
         }
       }
     };

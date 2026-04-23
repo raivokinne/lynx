@@ -4,10 +4,21 @@
  */
 import { User } from "../models/user.js";
 import { Session } from "../models/session.js";
+import logger from "../../logger.js";
+import config from "../config/index.js";
 
 // Input validation patterns
 const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
-const PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,20}$/;
+const PASSWORD_REGEX =
+  /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,20}$/;
+
+const setAuthCookie = (res, token) => {
+  res.cookie("auth_token", token, config.cookie);
+};
+
+const clearAuthCookie = (res) => {
+  res.cookie("auth_token", "", { ...config.cookie, maxAge: 0 });
+};
 
 /**
  * Register a new user
@@ -36,7 +47,8 @@ export const register = async (req, res) => {
     if (!USERNAME_REGEX.test(username)) {
       return res.status(400).json({
         success: false,
-        error: "Username may only contain letters, numbers, hyphens, and underscores",
+        error:
+          "Username may only contain letters, numbers, hyphens, and underscores",
       });
     }
 
@@ -50,7 +62,8 @@ export const register = async (req, res) => {
     if (!PASSWORD_REGEX.test(password)) {
       return res.status(400).json({
         success: false,
-        error: "Password must be 8-20 characters with uppercase, lowercase, number, and special character",
+        error:
+          "Password must be 8-20 characters with uppercase, lowercase, number, and special character",
       });
     }
 
@@ -67,15 +80,15 @@ export const register = async (req, res) => {
     const userAgent = req.headers["user-agent"];
     const { token } = await Session.create(user.id, { ip, userAgent });
 
+    setAuthCookie(res, token);
     res.json({
       success: true,
       message: "User registered successfully",
-      token,
       user: { id: user.id, username: user.username },
     });
   } catch (error) {
     if (process.env.NODE_ENV !== "production") {
-      console.error("Register error:", error);
+      logger.error("Register error:", error);
     }
     res.status(400).json({ success: false, error: "Registration failed" });
   }
@@ -119,13 +132,13 @@ export const login = async (req, res) => {
     const userAgent = req.headers["user-agent"];
     const { token } = await Session.create(user.id, { ip, userAgent });
 
+    setAuthCookie(res, token);
     res.json({
       success: true,
-      token,
       user: { id: user.id, username: user.username },
     });
   } catch (error) {
-    console.error("Login error:", error?.message ?? error);
+    logger.error("Login error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Login failed" });
   }
 };
@@ -139,10 +152,11 @@ export const login = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     await Session.delete(req.user.sessionId, req.user.id);
+    clearAuthCookie(res);
     res.json({ success: true, message: "Logged out successfully" });
   } catch (error) {
     if (process.env.NODE_ENV !== "production") {
-      console.error("Logout error:", error);
+      logger.error("Logout error:", error);
     }
     res.status(500).json({ success: false, error: "Logout failed" });
   }
@@ -166,7 +180,7 @@ export const getProfile = async (req, res) => {
     res.json({ success: true, user });
   } catch (error) {
     if (process.env.NODE_ENV !== "production") {
-      console.error("Get profile error:", error);
+      logger.error("Get profile error:", error);
     }
     res.status(500).json({
       success: false,

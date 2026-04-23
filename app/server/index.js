@@ -1,4 +1,5 @@
 import express, { json } from "express";
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import { existsSync, mkdirSync } from "fs";
@@ -14,8 +15,9 @@ import apiRouter from "./src/routes/api.js";
 const app = express();
 
 app.set("trust proxy", 1);
+app.use(cookieParser());
 
-function validateCorsOrigins(origins) {
+function validateOrigins(origins) {
   if (!origins) return ["http://localhost:3000", "http://localhost:5173"];
 
   const allowedOrigins = Array.isArray(origins) ? origins : origins.split(",").map((o) => o.trim());
@@ -36,7 +38,15 @@ const authLimiter = rateLimit(config.rateLimit.auth);
 const generalLimiter = rateLimit(config.rateLimit.general);
 
 app.use(cors({
-  origin: validateCorsOrigins(config.cors.origins),
+  origin: (origin, callback) => {
+    const validOrigins = validateOrigins(config.cors.origins);
+    if (!origin || validOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      logger.warn(`CORS rejected origin: ${origin}`);
+      callback(null, false);
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],

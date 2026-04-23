@@ -14,8 +14,8 @@ export const codeApi = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
+        credentials: "include",
         body: JSON.stringify({ title, code, language, description }),
       });
 
@@ -39,8 +39,8 @@ export const codeApi = {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
+        credentials: "include",
         body: JSON.stringify({ id, title, code, language, description }),
       });
       const data = await response.json();
@@ -58,9 +58,7 @@ export const codeApi = {
       params.append("offset", offset.toString());
 
       const response = await fetch(`${API_BASE}/codes?${params}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -85,9 +83,7 @@ export const codeApi = {
   loadCode: async (id: string) => {
     try {
       const response = await fetch(`${API_BASE}/codes/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -116,9 +112,7 @@ export const codeApi = {
       const params = permanent ? "?permanent=true" : "";
       const response = await fetch(`${API_BASE}/codes/${id}${params}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -133,9 +127,7 @@ export const codeApi = {
     try {
       const response = await fetch(`${API_BASE}/codes/${id}/restore`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -149,9 +141,7 @@ export const codeApi = {
   getDeletedCodes: async () => {
     try {
       const response = await fetch(`${API_BASE}/codes/deleted/list`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        credentials: "include",
       });
 
       const data: ResponseCode = await response.json();

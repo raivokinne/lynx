@@ -4,6 +4,7 @@
  */
 import { Code } from "../models/code.js";
 import { createVersion } from "./version.js";
+import logger from "../../logger.js";
 
 /**
  * Save new code entry
@@ -31,7 +32,7 @@ export const saveCode = async (req, res) => {
       id,
     });
   } catch (error) {
-    console.error("Save code error:", error?.message ?? error);
+    logger.error("Save code error:", error?.message ?? error);
     res.status(500).json({
       success: false,
       error: "Failed to save code",
@@ -75,7 +76,7 @@ export const updateCode = async (req, res) => {
       id: updated.id,
     });
   } catch (error) {
-    console.error("Update code error:", error?.message ?? error);
+    logger.error("Update code error:", error?.message ?? error);
     res.status(500).json({
       success: false,
       error: "Failed to update code",
@@ -94,7 +95,7 @@ export const listCode = async (req, res) => {
     const codes = await Code.findAllByUserId(req.user.id);
     res.json({ success: true, codes });
   } catch (error) {
-    console.error("List code error:", error?.message ?? error);
+    logger.error("List code error:", error?.message ?? error);
     res.status(500).json({
       success: false,
       error: "Failed to fetch codes",
@@ -122,7 +123,7 @@ export const getCode = async (req, res) => {
 
     res.json({ success: true, code });
   } catch (error) {
-    console.error("Get code error:", error?.message ?? error);
+    logger.error("Get code error:", error?.message ?? error);
     res.status(500).json({
       success: false,
       error: "Failed to fetch code",
@@ -160,7 +161,7 @@ export const deleteCode = async (req, res) => {
       message: permanent ? "Code permanently deleted" : "Code deleted successfully"
     });
   } catch (error) {
-    console.error("Delete code error:", error?.message ?? error);
+    logger.error("Delete code error:", error?.message ?? error);
     res.status(500).json({
       success: false,
       error: "Failed to delete code",
@@ -188,7 +189,7 @@ export const restoreCode = async (req, res) => {
 
     res.json({ success: true, message: "Code restored successfully" });
   } catch (error) {
-    console.error("Restore code error:", error?.message ?? error);
+    logger.error("Restore code error:", error?.message ?? error);
     res.status(500).json({
       success: false,
       error: "Failed to restore code",
@@ -207,7 +208,7 @@ export const getDeletedCodes = async (req, res) => {
     const codes = await Code.findDeletedByUserId(req.user.id);
     res.json({ success: true, codes });
   } catch (error) {
-    console.error("Get deleted codes error:", error?.message ?? error);
+    logger.error("Get deleted codes error:", error?.message ?? error);
     res.status(500).json({
       success: false,
       error: "Failed to fetch deleted codes",

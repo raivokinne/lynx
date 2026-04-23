@@ -5,6 +5,15 @@ export const config = {
   // Server settings
   port: process.env.PORT || 3001,
   env: process.env.NODE_ENV || "development",
+
+  // Cookie settings
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : false,
+    maxAge: 24 * 60 * 60 * 1000,
+    path: "/",
+  },
   
   // Database connection settings
   db: {
@@ -61,7 +70,7 @@ export const config = {
 
 // Validate required environment variables at startup
 if (!config.jwt.secret) {
-  console.error("FATAL: JWT_SECRET environment variable is required");
+  process.stderr.write("FATAL: JWT_SECRET environment variable is required\n");
   process.exit(1);
 }
 
