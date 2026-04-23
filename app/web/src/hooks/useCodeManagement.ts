@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { SavedCode } from "../types/types";
 import { codeApi } from "../api/code";
+import { showToast } from "../utils/toast";
 
 // Hook for managing saved codes (CRUD operations)
 export const useCodeManagement = (userId?: string) => {
@@ -32,7 +33,7 @@ export const useCodeManagement = (userId?: string) => {
 				setError(result.error || "Failed to load codes");
 			}
 		} catch (error) {
-			console.error("Error loading saved codes:", error);
+			showToast.error("Failed to load saved codes");
 			setError(error instanceof Error ? error.message : "Failed to load codes");
 		} finally {
 			setLoading(false);
@@ -82,7 +83,7 @@ export const useCodeManagement = (userId?: string) => {
 				return false;
 			}
 		} catch (error) {
-			console.error("Error saving code:", error);
+			showToast.error("Failed to save code");
 			setError(error instanceof Error ? error.message : "Failed to save code");
 			return false;
 		} finally {
@@ -112,7 +113,7 @@ export const useCodeManagement = (userId?: string) => {
 				setError(result.error || "Failed to load code");
 			}
 		} catch (error) {
-			console.error("Error loading code:", error);
+			showToast.error("Failed to load code");
 			setError(error instanceof Error ? error.message : "Failed to load code");
 		} finally {
 			setLoading(false);
@@ -187,7 +188,7 @@ export const useCodeManagement = (userId?: string) => {
 				return false;
 			}
 		} catch (error) {
-			console.error("Error updating code:", error);
+			showToast.error("Failed to update code");
 			setError(
 				error instanceof Error ? error.message : "Failed to update code",
 			);

@@ -7,11 +7,9 @@ import { join, resolve } from "path";
 import { randomBytes } from "crypto";
 import { validateCode, sanitizeSessionId, executeCompiler } from "../utils/compiler.js";
 import config from "../config/index.js";
-import { logExecution } from "./executionHistory.js";
 import logger from "../../logger.js";
 
 const executionCounts = new Map();
-const MAX_LOG_OUTPUT = 10_000;
 
 // Clean up old rate limit entries (runs every 60 seconds)
 setInterval(() => {
@@ -110,17 +108,6 @@ export const compilerController = async (req, res) => {
       });
     }
   } finally {
-    if (req.user) {
-      await logExecution(
-        req.user.id,
-        req.body.codeId || null,
-        success,
-        output?.slice(0, MAX_LOG_OUTPUT),
-        error?.slice(0, MAX_LOG_OUTPUT),
-        Date.now() - startTime,
-      );
-    }
-
     if (tempFilePath && existsSync(tempFilePath)) {
       try {
         unlinkSync(tempFilePath);

@@ -63,7 +63,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
       setTimeout(() => editorRef.current?.focus(), 100);
       setIsEditorReady(true);
     } catch (err: any) {
-      console.error("Error initializing Monaco Editor:", err);
+      showToast.error("Failed to initialize Monaco Editor");
       setError(err?.message || String(err));
     }
   }, [
@@ -125,7 +125,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
       if (editorRef.current) {
         try {
           editorRef.current.dispose();
-        } catch (e) {
+        } catch {
           // ignore
         }
         editorRef.current = null;

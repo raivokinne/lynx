@@ -9,7 +9,7 @@ export const User = {
     const hashed = await bcrypt.hash(password, 10);
     const id = uuidv4();
     await db.query(
-      "INSERT INTO users (id, username, password) VALUES ($1, $2, $3)",
+      "INSERT INTO users (id, username, password, is_active) VALUES ($1, $2, $3, true)",
       [id, username, hashed],
     );
     return { id, username };

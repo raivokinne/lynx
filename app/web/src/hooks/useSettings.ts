@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { EditorSettings } from "../types/types";
 import { settingsAPI } from "../api/settings";
 import type { CustomTheme } from "../types/types";
+import { showToast } from "../utils/toast";
 
 const LOCAL_STORAGE_SETTINGS_KEY = "editor_settings";
 
@@ -21,7 +22,8 @@ const defaultSettings: EditorSettings = {
 
 // Hook for managing editor settings (load, save, reset)
 export const useSettings = (userId?: string) => {
-  const [editorSettings, setEditorSettings] = useState<EditorSettings>(defaultSettings);
+  const [editorSettings, setEditorSettings] =
+    useState<EditorSettings>(defaultSettings);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
@@ -33,17 +35,20 @@ export const useSettings = (userId?: string) => {
         const parsed = JSON.parse(saved);
         return { ...defaultSettings, ...parsed };
       }
-    } catch (error) {
-      console.error("Error loading settings from localStorage:", error);
+    } catch {
+      showToast.error("Failed to load settings from localStorage");
     }
     return defaultSettings;
   };
 
   const saveToLocalStorage = (settings: EditorSettings) => {
     try {
-      localStorage.setItem(LOCAL_STORAGE_SETTINGS_KEY, JSON.stringify(settings));
-    } catch (error) {
-      console.error("Error saving settings to localStorage:", error);
+      localStorage.setItem(
+        LOCAL_STORAGE_SETTINGS_KEY,
+        JSON.stringify(settings),
+      );
+    } catch {
+      showToast.error("Failed to save settings to localStorage");
     }
   };
 
@@ -115,7 +120,8 @@ export const useSettings = (userId?: string) => {
           "editor.background": theme.colors?.background || "#1e1e1e",
           "editor.foreground": theme.colors?.foreground || "#d4d4d4",
           "editor.selectionBackground": theme.colors?.selection || "#264f78",
-          "editor.lineHighlightBackground": theme.colors?.lineHighlight || "#2d2d30",
+          "editor.lineHighlightBackground":
+            theme.colors?.lineHighlight || "#2d2d30",
           "editorCursor.foreground": theme.colors?.cursor || "#ffffff",
           "editorWhitespace.foreground": theme.colors?.whitespace || "#404040",
           "editorLineNumber.foreground": "#858585",
@@ -135,13 +141,10 @@ export const useSettings = (userId?: string) => {
         const style = document.createElement("style");
         style.id = `theme-${theme.id}`;
         style.textContent = theme.css;
-document.head.appendChild(style);
-    }
-
-    // eslint-disable-next-line no-console
-    console.debug("Custom theme registered:", theme.id);
-  } catch (error) {
-      console.error("Failed to register custom theme:", error);
+        document.head.appendChild(style);
+      }
+    } catch {
+      showToast.error("Failed to register custom theme");
       throw error;
     }
   }, []);
@@ -150,7 +153,10 @@ document.head.appendChild(style);
     if (!userId) {
       const localSettings = loadFromLocalStorage();
 
-      if (localSettings.customThemes && localSettings.customThemes.length === 0) {
+      if (
+        localSettings.customThemes &&
+        localSettings.customThemes.length === 0
+      ) {
         localSettings.customThemes = [createDemoTheme()];
       }
 
@@ -181,9 +187,11 @@ document.head.appendChild(style);
         setError(result.error || "Failed to load settings");
         setEditorSettings(defaultSettings);
       }
-    } catch (error) {
-      console.error("Error loading settings:", error);
-      setError(error instanceof Error ? error.message : "Failed to load settings");
+    } catch {
+      showToast.error("Failed to load settings");
+      setError(
+        error instanceof Error ? error.message : "Failed to load settings",
+      );
       setEditorSettings(defaultSettings);
     } finally {
       setLoading(false);
@@ -205,8 +213,7 @@ document.head.appendChild(style);
           (newSettings as any)[key] = value;
         }
 
-        // eslint-disable-next-line no-console
-        console.debug("Settings updated:", key, value);
+        
 
         if (key === "customThemes" && (window as any).monaco) {
           value.forEach(registerCustomTheme);
@@ -215,9 +222,9 @@ document.head.appendChild(style);
         if (key === "theme" && (window as any).monaco) {
           try {
             (window as any).monaco.editor.setTheme(value);
-          } catch (error) {
-            console.error("Failed to apply theme:", error);
-          }
+          } catch {
+        showToast.error("Failed to apply theme");
+      }
         }
 
         if (!userId) {
@@ -238,6 +245,7 @@ document.head.appendChild(style);
     if (!userId) {
       saveToLocalStorage(editorSettings);
       setHasUnsavedChanges(false);
+      showToast.success("Settings saved");
       return true;
     }
 
@@ -249,14 +257,17 @@ document.head.appendChild(style);
 
       if (result.success) {
         setHasUnsavedChanges(false);
+        showToast.success("Settings saved");
         return true;
       } else {
         setError(result.error || "Failed to save settings");
         return false;
       }
-    } catch (error) {
-      console.error("Error saving settings:", error);
-      setError(error instanceof Error ? error.message : "Failed to save settings");
+    } catch {
+      showToast.error("Failed to save settings");
+      setError(
+        error instanceof Error ? error.message : "Failed to save settings",
+      );
       return false;
     } finally {
       setLoading(false);
@@ -274,8 +285,8 @@ document.head.appendChild(style);
       if ((window as any).monaco && newSettings.theme) {
         try {
           (window as any).monaco.editor.setTheme(newSettings.theme);
-        } catch (error) {
-          console.error("Failed to apply theme:", error);
+        } catch {
+          showToast.error("Failed to apply theme");
         }
       }
 
@@ -299,6 +310,7 @@ document.head.appendChild(style);
       setEditorSettings(resetSettings);
       saveToLocalStorage(resetSettings);
       setHasUnsavedChanges(false);
+      showToast.success("Settings reset");
       return true;
     }
 
@@ -311,14 +323,17 @@ document.head.appendChild(style);
       if (result.success) {
         setEditorSettings(defaultSettings);
         setHasUnsavedChanges(false);
+        showToast.success("Settings reset");
         return true;
       } else {
         setError(result.error || "Failed to reset settings");
         return false;
       }
-    } catch (error) {
-      console.error("Error resetting settings:", error);
-      setError(error instanceof Error ? error.message : "Failed to reset settings");
+    } catch {
+      showToast.error("Failed to reset settings");
+      setError(
+        error instanceof Error ? error.message : "Failed to reset settings",
+      );
       return false;
     } finally {
       setLoading(false);
@@ -334,8 +349,8 @@ document.head.appendChild(style);
           customThemes: [createDemoTheme()],
         });
         setHasUnsavedChanges(false);
-      } catch (error) {
-        console.error("Error clearing localStorage:", error);
+      } catch {
+        showToast.error("Failed to clear localStorage");
       }
     }
   }, [userId]);
@@ -359,7 +374,7 @@ document.head.appendChild(style);
         const validatedSettings = { ...defaultSettings, ...settingsData };
         updateAllSettings(validatedSettings);
         return true;
-      } catch (error) {
+      } catch {
         console.error("Error importing settings:", error);
         setError("Failed to import settings");
         return false;

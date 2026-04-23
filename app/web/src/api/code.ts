@@ -1,5 +1,6 @@
 import { API_BASE } from "../types/constants";
 import type { SavedCode, ResponseCode } from "../types/types";
+import { showToast } from "../utils/toast";
 
 // API client for code CRUD operations
 export const codeApi = {
@@ -21,8 +22,8 @@ export const codeApi = {
 
       const data = await response.json();
       return data;
-    } catch (error) {
-      console.error("Save code error:", error);
+    } catch {
+      showToast.error("Failed to save code");
       return { success: false, error: "Network error" };
     }
   },
@@ -45,8 +46,8 @@ export const codeApi = {
       });
       const data = await response.json();
       return data;
-    } catch (error) {
-      console.error("Update code error:", error);
+    } catch {
+      showToast.error("Failed to update code");
       return { success: false, error: "Network error" };
     }
   },
@@ -74,8 +75,8 @@ export const codeApi = {
       }
 
       return data;
-    } catch (error) {
-      console.error("Load codes error:", error);
+    } catch {
+      showToast.error("Failed to load codes");
       return { success: false, error: "Network error" };
     }
   },
@@ -101,8 +102,8 @@ export const codeApi = {
       }
 
       return data;
-    } catch (error) {
-      console.error("Load code error:", error);
+    } catch {
+      showToast.error("Failed to load code");
       return { success: false, error: "Network error" };
     }
   },
@@ -117,8 +118,8 @@ export const codeApi = {
 
       const data = await response.json();
       return data;
-    } catch (error) {
-      console.error("Delete code error:", error);
+    } catch {
+      showToast.error("Failed to delete code");
       return { success: false, error: "Network error" };
     }
   },
@@ -132,7 +133,7 @@ export const codeApi = {
 
       const data = await response.json();
       return data;
-    } catch (error) {
+    } catch {
       console.error("Restore code error:", error);
       return { success: false, error: "Network error" };
     }
@@ -157,8 +158,8 @@ export const codeApi = {
       }
 
       return data;
-    } catch (error) {
-      console.error("Get deleted codes error:", error);
+    } catch {
+      showToast.error("Failed to get deleted codes");
       return { success: false, error: "Network error" };
     }
   },

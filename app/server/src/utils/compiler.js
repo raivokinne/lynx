@@ -159,7 +159,7 @@ export const executeCompiler = (filePath) => {
         reject(new Error("Execution timed out"));
       });
     }, config.compiler.timeout);
-
+    
     child.stdout?.on("data", (data) => {
       stdout += data.toString();
       if (totalOutput() > MAX_OUTPUT_SIZE) {

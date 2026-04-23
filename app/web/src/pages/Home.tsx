@@ -56,7 +56,7 @@ export const Home: React.FC = () => {
 	};
 
 	const handleExecuteCode = () => {
-		executeCode(code);
+		executeCode(code, !!user);
 	};
 
 	const handleToggleDarkMode = () => {

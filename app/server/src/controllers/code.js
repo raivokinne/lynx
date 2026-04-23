@@ -3,8 +3,21 @@
  * Handles saving, updating, retrieving, listing, and deleting user code
  */
 import { Code } from "../models/code.js";
-import { createVersion } from "./version.js";
+import { db } from "../db/connection.js";
+import { v4 as uuidv4 } from "uuid";
 import logger from "../../logger.js";
+
+const createVersion = async (codeId, code, title) => {
+  const versionResult = await db.query(
+    `SELECT COALESCE(MAX(version_number), 0) as max_version FROM code_versions WHERE code_id = $1`,
+    [codeId],
+  );
+  const nextVersion = versionResult.rows[0].max_version + 1;
+  await db.query(
+    `INSERT INTO code_versions (id, code_id, code, title, version_number) VALUES ($1, $2, $3, $4, $5)`,
+    [uuidv4(), codeId, code, title, nextVersion],
+  );
+};
 
 /**
  * Save new code entry

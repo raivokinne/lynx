@@ -51,4 +51,3 @@ export const normalizeEditorSettings = (raw: any): EditorSettings => {
   };
 };
 
-export const getAuthToken = () => localStorage.getItem("token");
