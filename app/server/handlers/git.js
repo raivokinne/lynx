@@ -3,8 +3,10 @@ import * as git from "isomorphic-git";
 import http from "isomorphic-git/http/node";
 import path from "path";
 
+// Base path for git repositories
 const REPO_PATH = "../repos/";
 
+// Initialize a new git repository
 export const gitInit = async (req, res) => {
 	try {
 		const { dir } = req.body;

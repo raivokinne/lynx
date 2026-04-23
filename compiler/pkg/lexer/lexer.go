@@ -7,12 +7,14 @@ import (
 	"unicode/utf8"
 )
 
+// Source code position for error reporting
 type Position struct {
 	Line   int
 	Column int
 	Offset int
 }
 
+// Lexer error with position context
 type LexError struct {
 	Position Position
 	Message  string
@@ -24,6 +26,7 @@ func (le LexError) String() string {
 		le.Position.Line, le.Position.Column, le.Message)
 }
 
+// Lexer tokenizes Lynx source code
 type Lexer struct {
 	input        string
 	position     int
@@ -34,6 +37,7 @@ type Lexer struct {
 	errors       []LexError
 }
 
+// New creates a lexer from source code string
 func New(input string) *Lexer {
 	l := &Lexer{
 		input:  input,

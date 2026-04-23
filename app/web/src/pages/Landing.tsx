@@ -1,6 +1,7 @@
 import { ArrowRight, Github } from "lucide-react";
 import { Link } from "react-router-dom";
 
+// Landing page showcasing Lynx language features
 const codeExample = `let numbers = [1, 2, 3, 4, 5]
 let result = numbers
     |> filter(fn(x) { x > 2 })

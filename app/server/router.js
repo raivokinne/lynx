@@ -1,14 +1,17 @@
 import express from "express";
 import { authenticateToken } from "./middleware.js";
 
+// Auth handlers
 import { register, login, logout, getProfile } from "./handlers/auth.js";
 
+// Session management
 import {
 	getUserSessions,
 	revokeSession,
 	revokeAllSessions,
 } from "./handlers/session.js";
 
+// Code CRUD handlers
 import {
 	saveCode,
 	updateCode,
@@ -19,6 +22,7 @@ import {
 	getDeletedCodes,
 } from "./handlers/code.js";
 
+// Sharing handlers
 import {
 	shareCode,
 	getSharedCode,
@@ -28,6 +32,7 @@ import {
 	getPublicShares,
 } from "./handlers/sharing.js";
 
+// Version history handlers
 import {
 	getVersions,
 	getVersion,
@@ -36,6 +41,7 @@ import {
 	cleanupOldVersions,
 } from "./handlers/version.js";
 
+// Execution history handlers
 import {
 	getCodeExecutionHistory,
 	getUserExecutionHistory,
@@ -45,8 +51,10 @@ import {
 	deleteCodeExecutionHistory,
 } from "./handlers/executionHistory.js";
 
+// Code compiler
 import { compiler } from "./handlers/compiler.js";
 
+// Settings handlers
 import {
 	getSettings,
 	saveSettings,

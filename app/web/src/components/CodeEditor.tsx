@@ -5,6 +5,7 @@ import type { EditorSettings, SavedCode } from "../types/types";
 import { SaveDialog } from "./SaveDialog";
 import { useAuth } from "../hooks/useAuth";
 
+// Code editor component with Monaco and file tabs
 interface CodeEditorProps {
   isDarkMode: boolean;
   code: string;

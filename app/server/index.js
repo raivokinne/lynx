@@ -110,6 +110,7 @@ app.use((req, res, next) => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Server configuration constants
 export const CONFIG = {
   COMPILER_PATH: join(__dirname, "build", "lynx"),
   FILE_EXTENSION: ".lynx",

@@ -16,6 +16,7 @@ const SESSION_QUERY = `
     AND  s.token      = $2
     AND  s.expires_at > NOW()
 `;
+// Extract JWT token from Authorization header
 const extractBearerToken = (req) => {
   const auth = req.headers.authorization;
   if (!auth?.startsWith("Bearer ")) return null;

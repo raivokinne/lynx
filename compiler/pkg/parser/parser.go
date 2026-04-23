@@ -8,6 +8,7 @@ import (
 	"strconv"
 )
 
+// Operator precedence levels (higher = binds tighter)
 const (
 	_ int = iota
 	LOWEST
@@ -18,7 +19,7 @@ const (
 	LESSEQ      // <=
 	GREATEREQ   // >=
 	CONCAT      // ++
-	SQUARE      // _/
+	SQUARE      // $/
 	AND         // and
 	OR          // or
 	SUM         // +
@@ -28,6 +29,7 @@ const (
 	CALL   // myFunction(X)
 )
 
+// Precedence map for infix operators
 var precedences = map[token.TokenType]int{
 	token.EQ:       EQUALS,
 	token.NOT_EQ:   EQUALS,

@@ -19,6 +19,7 @@ const defaultSettings: EditorSettings = {
   readOnly: false,
 };
 
+// Hook for managing editor settings (load, save, reset)
 export const useSettings = (userId?: string) => {
   const [editorSettings, setEditorSettings] = useState<EditorSettings>(defaultSettings);
   const [loading, setLoading] = useState<boolean>(false);

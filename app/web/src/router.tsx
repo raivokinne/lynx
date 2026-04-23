@@ -6,6 +6,7 @@ import Share from "./pages/Share";
 import Landing from "./pages/Landing";
 import Docs from "./pages/Docs";
 
+// Application routes configuration
 const router = createBrowserRouter([
   {
     path: "/",

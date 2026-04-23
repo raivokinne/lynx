@@ -9,7 +9,8 @@ export const getSettings = async (req, res) => {
 		);
 
 		if (result.rows.length === 0) {
-			const defaultSettings = {
+			// Default editor settings for new users
+const defaultSettings = {
 				themeDark: "hc-black",
 				themeLight: "vs",
 				fontSize: 14,

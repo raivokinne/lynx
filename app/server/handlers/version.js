@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { db } from "../db.js";
 
+// Create new version of code for versioning history
 export const createVersion = async (codeId, code, title) => {
 	try {
 		const versionResult = await db.query(

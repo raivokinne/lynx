@@ -7,6 +7,7 @@ import { Eye, EyeOff, UserPlus, AlertCircle, CheckCircle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { Link } from "react-router";
 
+// Registration page component
 export default function Register() {
   const [formData, setFormData] = useState({
     username: "",

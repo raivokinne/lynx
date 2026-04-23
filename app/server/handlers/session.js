@@ -15,7 +15,7 @@ export const createSession = async (userId, ip, userAgent) => {
     expiresIn: "24h",
   });
 
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours session lifetime
 
   await db.query(
     `INSERT INTO sessions (id, user_id, token, expires_at, ip_address, user_agent)

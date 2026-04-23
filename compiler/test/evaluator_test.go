@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// TestEvaluatorIntegerArithmetic tests basic integer operations
 func TestEvaluatorIntegerArithmetic(t *testing.T) {
 	tests := []struct {
 		input    string

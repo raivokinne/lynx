@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import crypto from "crypto";
 import { db } from "../db.js";
 
+// Generate a secure random token for sharing
 const generateShareToken = () => {
 	return crypto.randomBytes(16).toString("hex");
 };

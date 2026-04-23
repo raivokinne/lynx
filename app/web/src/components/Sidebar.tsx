@@ -1,6 +1,7 @@
 import React from "react";
 import { Settings } from "lucide-react";
 
+// Sidebar with run button and settings access
 interface SidebarProps {
   isDarkMode: boolean;
   isRunning: boolean;

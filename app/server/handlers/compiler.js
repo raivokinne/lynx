@@ -10,10 +10,12 @@ const executionCounts = new Map();
 const MAX_EXECUTIONS_PER_MINUTE = 10;
 const MAX_LOG_OUTPUT = 10_000;
 
+// Clean up old rate limit entries every minute
 setInterval(() => {
     const now = Date.now();
     for (const [key] of executionCounts) {
         const keyTime = parseInt(key.split("::")[1]);
+        // Remove entries older than 2 minutes
         if (now - keyTime * 60000 > 120_000) executionCounts.delete(key);
     }
 }, 60_000);

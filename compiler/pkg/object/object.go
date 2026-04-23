@@ -7,13 +7,16 @@ import (
 	"strings"
 )
 
+// ObjectType represents the runtime type of an object
 type ObjectType string
 
+// Object is the interface for all runtime values
 type Object interface {
 	Type() ObjectType
 	Inspect() string
 }
 
+// Object type constants
 const (
 	INTEGER_OBJ   = "INTEGER"
 	FLOAT_OBJ     = "FLOAT"
@@ -35,6 +38,7 @@ const (
 	INSTANCE_OBJ  = "INSTANCE"
 )
 
+// Float represents a floating-point number
 type Float struct {
 	Value float64
 }

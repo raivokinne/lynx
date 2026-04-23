@@ -18,6 +18,7 @@ export async function initDb() {
         return initPromise;
     }
 
+    // Returns cached promise if already initializing
     initPromise = (async () => {
         try {
             console.log("Initializing database connection...");
@@ -25,6 +26,7 @@ export async function initDb() {
             const sslConfig =
                 process.env.NODE_ENV === "production"
                     ? {
+                          // Configure SSL only in production for security
                           rejectUnauthorized:
                               process.env.DB_SSL_REJECT_UNAUTHORIZED !==
                               "false",

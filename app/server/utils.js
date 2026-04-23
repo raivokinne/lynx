@@ -5,6 +5,7 @@ import { CONFIG } from "./index.js";
 
 const MAX_OUTPUT_SIZE = 100_000;
 
+// Sanitize session ID to prevent directory traversal attacks
 export function sanitizeSessionId(sessionId) {
   if (!sessionId || typeof sessionId !== "string") {
     return "anonymous";
@@ -12,6 +13,7 @@ export function sanitizeSessionId(sessionId) {
   return sessionId.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 50) || "anonymous";
 }
 
+// Remove temp files older than 1 hour to preserve disk space
 export function cleanupTempFiles() {
   try {
     const tempDir = resolve(CONFIG.TEMP_DIR);
@@ -60,6 +62,7 @@ export function cleanupTempFiles() {
   }
 }
 
+// Validate code with security checks to prevent unsafe patterns
 export function validateCode(code, options = {}) {
   const {
     maxSize = CONFIG.MAX_FILE_SIZE,
@@ -110,6 +113,7 @@ export function validateCode(code, options = {}) {
 }
 
 function validateCodeSecurity(code) {
+  // Block dangerous patterns that could compromise server security
   const dangerousPatterns = [
     { pattern: /eval\s*\(/gi, name: "eval()" },
     { pattern: /Function\s*\(/gi, name: "Function constructor" },
