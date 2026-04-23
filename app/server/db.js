@@ -1,4 +1,6 @@
 import pkg from "pg";
+import bcrypt from "bcrypt";
+import { v4 as uuidv4 } from "uuid";
 const { Pool } = pkg;
 
 let dbInstance = null;
@@ -12,6 +14,36 @@ export const getDb = () => {
 };
 
 export let db;
+
+// Seed demo user after database initialization
+async function seedDemoUser() {
+    const username = "demo";
+    const password = "Demo@123";
+
+    try {
+        const existing = await dbInstance.query(
+            "SELECT id FROM users WHERE username = $1",
+            [username],
+        );
+
+        if (existing.rows.length > 0) {
+            console.log("Demo user already exists");
+            return;
+        }
+
+        const hashed = await bcrypt.hash(password, 10);
+        const userId = uuidv4();
+
+        await dbInstance.query(
+            "INSERT INTO users (id, username, password) VALUES ($1, $2, $3)",
+            [userId, username, hashed],
+        );
+
+        console.log("Demo user created: demo / Demo@123");
+    } catch (error) {
+        console.error("Seed error:", error.message);
+    }
+}
 
 export async function initDb() {
     if (initPromise) {
@@ -188,6 +220,10 @@ export async function initDb() {
       `);
 
             console.log("Database initialized successfully with all tables");
+
+            // Seed demo user
+            await seedDemoUser();
+
             return dbInstance;
         } catch (error) {
             console.error("Failed to initialize database:", error);

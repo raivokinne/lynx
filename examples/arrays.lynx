@@ -1,0 +1,33 @@
+// Arrays and Pipeline Operators in Lynx
+let numbers = [1, 2, 3, 4, 5]
+
+// Filter - keep elements matching condition
+let filtered = numbers |> filter(fn(x) { x > 2 })
+println("Filter > 2: ", filtered)
+
+// Map - transform each element
+let doubled = numbers |> map(fn(x) { x * 2 })
+println("Doubled: ", doubled)
+
+// Reduce - combine all elements
+let sum = numbers |> reduce(fn(a, b) { a + b }, 0)
+println("Sum: ", sum)
+
+// Chaining pipelines
+let result = numbers
+    |> filter(fn(x) { x %% 2 == 0 })
+    |> map(fn(x) { x ^ 2 })
+    |> reduce(fn(a, b) { a + b }, 0)
+println("Sum of squares of evens: ", result)
+
+// Other array operations
+let words = ["hello", "world", "lynx"]
+
+// Length
+println("Length: ", len(words))
+
+// Contains
+println("Contains 'hello': ", words |> contains("hello"))
+
+// Find index
+println("Index of 'lynx': ", words |> find("lynx"))

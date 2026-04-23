@@ -1,0 +1,23 @@
+// Variables and Control Flow in Lynx
+let name = "Lynx"
+let count = 10
+
+if count > 5 {
+    println("Count is greater than 5")
+} else {
+    println("Count is 5 or less")
+}
+
+// While loop
+let n = 0
+while n < 5 {
+    println("Count: ", n)
+    let n = n + 1
+}
+
+// For loop with range
+for i in range(3) {
+    println("i = ", i)
+}
+
+println("Hello, ", name)
