@@ -5,6 +5,7 @@
 import { Code } from "../models/code.js";
 import { db } from "../db/connection.js";
 import { v4 as uuidv4 } from "uuid";
+import logger from "../../logger.js";
 
 /**
  * Create a new version of code (internal helper)
@@ -30,7 +31,7 @@ const createVersion = async (codeId, code, title) => {
     );
     return { versionId, versionNumber: nextVersion };
   } catch (error) {
-    console.error("Create version error:", error?.message ?? error);
+    logger.error("Create version error:", error?.message ?? error);
     throw error;
   }
 };
@@ -63,7 +64,7 @@ export const getVersions = async (req, res) => {
 
     res.json({ success: true, versions: result.rows });
   } catch (error) {
-    console.error("Get versions error:", error?.message ?? error);
+    logger.error("Get versions error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to fetch versions" });
   }
 };
@@ -101,7 +102,7 @@ export const getVersion = async (req, res) => {
 
     res.json({ success: true, version: result.rows[0] });
   } catch (error) {
-    console.error("Get version error:", error?.message ?? error);
+    logger.error("Get version error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to fetch version" });
   }
 };
@@ -146,7 +147,7 @@ export const restoreVersion = async (req, res) => {
       message: `Restored to version ${versionNumber}`,
     });
   } catch (error) {
-    console.error("Restore version error:", error?.message ?? error);
+    logger.error("Restore version error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to restore version" });
   }
 };
@@ -194,7 +195,7 @@ export const compareVersions = async (req, res) => {
 
     res.json({ success: true, versions: result.rows });
   } catch (error) {
-    console.error("Compare versions error:", error?.message ?? error);
+    logger.error("Compare versions error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to compare versions" });
   }
 };
@@ -234,7 +235,7 @@ export const cleanupOldVersions = async (req, res) => {
       deletedCount: result.rowCount,
     });
   } catch (error) {
-    console.error("Cleanup versions error:", error?.message ?? error);
+    logger.error("Cleanup versions error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to cleanup versions" });
   }
 };

@@ -17,8 +17,8 @@ export const useCodeExecution = () => {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: `Bearer ${localStorage.getItem("token")}`,
 				},
+				credentials: "include",
 				body: JSON.stringify({ code }),
 			});
 			const result = await response.json();

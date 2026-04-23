@@ -1,0 +1,119 @@
+2026-04-23 12:05:01 [info]: Initializing database connection...
+2026-04-23 12:05:01 [info]: Database connected:
+2026-04-23 12:05:01 [info]: Database initialized with all tables
+2026-04-23 12:05:01 [info]: Demo user already exists
+2026-04-23 12:05:01 [info]: Server running on port 3001
+2026-04-23 12:05:01 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-23 12:05:01 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-23 12:05:40 [info]: Shutting down... (SIGTERM)
+2026-04-23 12:06:49 [info]: Initializing database connection...
+2026-04-23 12:06:49 [info]: Database connected:
+2026-04-23 12:06:49 [info]: Database initialized with all tables
+2026-04-23 12:06:49 [info]: Demo user already exists
+2026-04-23 12:06:49 [info]: Server running on port 3001
+2026-04-23 12:06:49 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-23 12:06:49 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-23 12:06:50 [info]: Shutting down... (SIGINT)
+2026-04-23 12:11:04 [info]: Initializing database connection...
+2026-04-23 12:11:04 [info]: Database connected:
+2026-04-23 12:11:04 [info]: Database initialized with all tables
+2026-04-23 12:11:04 [info]: Demo user already exists
+2026-04-23 12:11:04 [info]: Server running on port 3001
+2026-04-23 12:11:04 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-23 12:11:04 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-23 12:11:10 [info]: GET /api/auth/profile 401 - 2ms
+2026-04-23 12:11:10 [info]: GET /api/auth/profile 401 - 1ms
+2026-04-23 12:11:20 [info]: POST /api/auth/login 200 - 107ms
+2026-04-23 12:11:20 [info]: GET /api/settings 401 - 1ms
+2026-04-23 12:11:20 [info]: GET /api/settings 401 - 0ms
+2026-04-23 12:11:20 [error]: List code error:
+2026-04-23 12:11:20 [info]: GET /api/codes?limit=50&offset=0 500 - 20ms
+2026-04-23 12:11:20 [error]: List code error:
+2026-04-23 12:11:20 [info]: GET /api/codes?limit=50&offset=0 500 - 8ms
+2026-04-23 12:11:27 [info]: GET /api/auth/profile 401 - 2ms
+2026-04-23 12:11:27 [info]: GET /api/auth/profile 401 - 1ms
+2026-04-23 12:12:05 [info]: POST /api/auth/register 200 - 134ms
+2026-04-23 12:12:06 [info]: GET /api/settings 401 - 2ms
+2026-04-23 12:12:06 [info]: GET /api/settings 401 - 1ms
+2026-04-23 12:12:06 [error]: List code error:
+2026-04-23 12:12:06 [info]: GET /api/codes?limit=50&offset=0 500 - 18ms
+2026-04-23 12:12:06 [error]: List code error:
+2026-04-23 12:12:06 [info]: GET /api/codes?limit=50&offset=0 500 - 32ms
+2026-04-23 12:14:48 [info]: Initializing database connection...
+2026-04-23 12:14:48 [info]: Database connected:
+2026-04-23 12:14:48 [info]: Database initialized with all tables
+2026-04-23 12:14:48 [info]: Demo user already exists
+2026-04-23 12:14:48 [info]: Server running on port 3001
+2026-04-23 12:14:48 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-23 12:14:48 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-23 12:14:57 [info]: Shutting down... (SIGTERM)
+2026-04-23 12:19:23 [info]: Shutting down... (SIGINT)
+2026-04-23 12:19:25 [info]: Initializing database connection...
+2026-04-23 12:19:25 [info]: Database connected:
+2026-04-23 12:19:25 [info]: Database initialized with all tables
+2026-04-23 12:19:25 [info]: Demo user already exists
+2026-04-23 12:19:25 [info]: Server running on port 3001
+2026-04-23 12:19:25 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-23 12:19:25 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-23 12:19:30 [info]: GET /api/auth/profile 200 - 14ms
+2026-04-23 12:19:30 [info]: GET /api/auth/profile 304 - 3ms
+2026-04-23 12:19:30 [info]: GET /api/settings 401 - 3ms
+2026-04-23 12:19:30 [error]: List code error:
+2026-04-23 12:19:30 [info]: GET /api/codes?limit=50&offset=0 500 - 20ms
+2026-04-23 12:19:38 [error]: ReferenceError: COOKIE_OPTIONS is not defined
+    at clearAuthCookie (file:///Users/raivokinne/personal/lynx/app/server/src/controllers/auth.js:20:37)
+    at logout (file:///Users/raivokinne/personal/lynx/app/server/src/controllers/auth.js:155:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+2026-04-23 12:19:38 [info]: POST /api/auth/logout 500 - 16ms
+2026-04-23 12:19:38 [info]: GET /api/auth/profile 401 - 5ms
+2026-04-23 12:19:38 [info]: GET /api/auth/profile 401 - 2ms
+2026-04-23 12:19:48 [error]: Login error:
+2026-04-23 12:19:48 [info]: POST /api/auth/login 500 - 98ms
+2026-04-23 12:20:13 [error]: Login error:
+2026-04-23 12:20:13 [info]: POST /api/auth/login 500 - 102ms
+2026-04-23 12:21:24 [error]: Login error:
+2026-04-23 12:21:24 [info]: POST /api/auth/login 500 - 124ms
+2026-04-23 12:21:27 [info]: Shutting down... (SIGINT)
+2026-04-23 12:21:29 [info]: Initializing database connection...
+2026-04-23 12:21:29 [info]: Database connected:
+2026-04-23 12:21:29 [info]: Database initialized with all tables
+2026-04-23 12:21:29 [info]: Demo user already exists
+2026-04-23 12:21:29 [info]: Server running on port 3001
+2026-04-23 12:21:29 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-23 12:21:29 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-23 12:21:30 [info]: POST /api/auth/login 200 - 97ms
+2026-04-23 12:21:30 [info]: GET /api/settings 401 - 2ms
+2026-04-23 12:21:30 [info]: GET /api/settings 401 - 0ms
+2026-04-23 12:21:30 [error]: List code error:
+2026-04-23 12:21:30 [info]: GET /api/codes?limit=50&offset=0 500 - 7ms
+2026-04-23 12:21:30 [error]: List code error:
+2026-04-23 12:21:30 [info]: GET /api/codes?limit=50&offset=0 500 - 10ms
+2026-04-23 12:21:39 [info]: POST /api/settings 401 - 2ms
+2026-04-23 12:21:41 [info]: POST /api/settings 401 - 1ms
+2026-04-23 12:21:44 [info]: POST /api/settings 401 - 2ms
+2026-04-23 12:21:46 [info]: POST /api/settings 401 - 3ms
+2026-04-23 12:24:31 [error]: List code error:
+2026-04-23 12:24:31 [info]: GET /api/codes?limit=50&offset=0 500 - 19ms
+2026-04-23 12:24:38 [error]: List code error:
+2026-04-23 12:24:38 [info]: GET /api/codes?limit=50&offset=0 500 - 22ms
+2026-04-23 12:24:38 [info]: GET /api/settings 200 - 22ms
+2026-04-23 12:24:48 [error]: List code error:
+2026-04-23 12:24:48 [info]: GET /api/codes?limit=50&offset=0 500 - 3ms
+2026-04-23 12:24:48 [info]: GET /api/settings 304 - 10ms
+2026-04-23 12:24:54 [error]: List code error:
+2026-04-23 12:24:54 [info]: GET /api/codes?limit=50&offset=0 500 - 6ms
+2026-04-23 12:24:54 [info]: GET /api/settings 304 - 10ms
+2026-04-23 12:25:49 [info]: Shutting down... (SIGINT)
+2026-04-23 12:25:51 [info]: Initializing database connection...
+2026-04-23 12:25:51 [info]: Database connected:
+2026-04-23 12:25:51 [info]: Database initialized with all tables
+2026-04-23 12:25:51 [info]: Demo user already exists
+2026-04-23 12:25:51 [info]: Server running on port 3001
+2026-04-23 12:25:51 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-23 12:25:51 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-23 12:25:55 [info]: GET /api/auth/profile 200 - 15ms
+2026-04-23 12:25:55 [info]: GET /api/auth/profile 304 - 3ms
+2026-04-23 12:25:55 [error]: List code error:
+2026-04-23 12:25:55 [info]: GET /api/codes?limit=50&offset=0 500 - 19ms
+2026-04-23 12:25:55 [info]: GET /api/settings 304 - 14ms
+2026-04-23 12:26:03 [info]: POST /api/settings 200 - 8ms

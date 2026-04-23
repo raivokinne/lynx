@@ -3,6 +3,7 @@
  * Handles user session management
  */
 import { Session } from "../models/session.js";
+import logger from "../../logger.js";
 
 /**
  * Get all sessions for current user
@@ -16,7 +17,7 @@ export const getUserSessions = async (req, res) => {
     res.json({ success: true, sessions });
   } catch (error) {
     if (process.env.NODE_ENV !== "production") {
-      console.error("Get sessions error:", error);
+      logger.error("Get sessions error:", error);
     }
     res.status(500).json({ success: false, error: "Failed to fetch sessions" });
   }
@@ -41,7 +42,7 @@ export const revokeSession = async (req, res) => {
     res.json({ success: true, message: "Session revoked successfully" });
   } catch (error) {
     if (process.env.NODE_ENV !== "production") {
-      console.error("Revoke session error:", error);
+      logger.error("Revoke session error:", error);
     }
     res.status(500).json({ success: false, error: "Failed to revoke session" });
   }
@@ -59,7 +60,7 @@ export const revokeAllSessions = async (req, res) => {
     res.json({ success: true, message: "All other sessions revoked successfully" });
   } catch (error) {
     if (process.env.NODE_ENV !== "production") {
-      console.error("Revoke all sessions error:", error);
+      logger.error("Revoke all sessions error:", error);
     }
     res.status(500).json({ success: false, error: "Failed to revoke sessions" });
   }

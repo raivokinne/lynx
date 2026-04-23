@@ -1,0 +1,19 @@
+2026-04-23 12:11:20 [error]: List code error:
+2026-04-23 12:11:20 [error]: List code error:
+2026-04-23 12:12:06 [error]: List code error:
+2026-04-23 12:12:06 [error]: List code error:
+2026-04-23 12:19:30 [error]: List code error:
+2026-04-23 12:19:38 [error]: ReferenceError: COOKIE_OPTIONS is not defined
+    at clearAuthCookie (file:///Users/raivokinne/personal/lynx/app/server/src/controllers/auth.js:20:37)
+    at logout (file:///Users/raivokinne/personal/lynx/app/server/src/controllers/auth.js:155:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+2026-04-23 12:19:48 [error]: Login error:
+2026-04-23 12:20:13 [error]: Login error:
+2026-04-23 12:21:24 [error]: Login error:
+2026-04-23 12:21:30 [error]: List code error:
+2026-04-23 12:21:30 [error]: List code error:
+2026-04-23 12:24:31 [error]: List code error:
+2026-04-23 12:24:38 [error]: List code error:
+2026-04-23 12:24:48 [error]: List code error:
+2026-04-23 12:24:54 [error]: List code error:
+2026-04-23 12:25:55 [error]: List code error:

@@ -4,6 +4,7 @@
  */
 import { db } from "../db/connection.js";
 import { v4 as uuidv4 } from "uuid";
+import logger from "../../logger.js";
 
 const defaultSettings = {
   themeDark: "hc-black",
@@ -39,7 +40,7 @@ export const getSettings = async (req, res) => {
       settings: JSON.parse(result.rows[0].settings),
     });
   } catch (error) {
-    console.error("Get settings error:", error?.message ?? error);
+    logger.error("Get settings error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to fetch settings" });
   }
 };
@@ -73,7 +74,7 @@ export const saveSettings = async (req, res) => {
 
     res.json({ success: true, message: "Settings saved successfully" });
   } catch (error) {
-    console.error("Save settings error:", error?.message ?? error);
+    logger.error("Save settings error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to save settings" });
   }
 };
@@ -89,7 +90,7 @@ export const deleteSettings = async (req, res) => {
     await db.query("DELETE FROM user_settings WHERE user_id = $1", [req.user.id]);
     res.json({ success: true, message: "Settings reset to default successfully" });
   } catch (error) {
-    console.error("Reset settings error:", error?.message ?? error);
+    logger.error("Reset settings error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to reset settings" });
   }
 };

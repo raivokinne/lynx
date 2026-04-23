@@ -6,6 +6,7 @@ import { Code } from "../models/code.js";
 import { db } from "../db/connection.js";
 import { v4 as uuidv4 } from "uuid";
 import crypto from "crypto";
+import logger from "../../logger.js";
 
 const generateShareToken = () => crypto.randomBytes(16).toString("hex");
 
@@ -59,7 +60,7 @@ export const shareCode = async (req, res) => {
 
     res.json({ success: true, shareToken, message: "Code shared successfully" });
   } catch (error) {
-    console.error("Share code error:", error?.message ?? error);
+    logger.error("Share code error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to share code" });
   }
 };
@@ -99,7 +100,7 @@ export const getSharedCode = async (req, res) => {
 
     res.json({ success: true, code: result.rows[0] });
   } catch (error) {
-    console.error("Get shared code error:", error?.message ?? error);
+    logger.error("Get shared code error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to fetch shared code" });
   }
 };
@@ -130,7 +131,7 @@ export const getCodeShares = async (req, res) => {
 
     res.json({ success: true, shares: result.rows });
   } catch (error) {
-    console.error("Get code shares error:", error?.message ?? error);
+    logger.error("Get code shares error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to fetch shares" });
   }
 };
@@ -172,7 +173,7 @@ export const updateShare = async (req, res) => {
 
     res.json({ success: true, message: "Share updated successfully" });
   } catch (error) {
-    console.error("Update share error:", error?.message ?? error);
+    logger.error("Update share error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to update share" });
   }
 };
@@ -203,7 +204,7 @@ export const revokeShare = async (req, res) => {
 
     res.json({ success: true, message: "Share revoked successfully" });
   } catch (error) {
-    console.error("Revoke share error:", error?.message ?? error);
+    logger.error("Revoke share error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to revoke share" });
   }
 };
@@ -232,7 +233,7 @@ export const getPublicShares = async (req, res) => {
 
     res.json({ success: true, codes: result.rows });
   } catch (error) {
-    console.error("Get public shares error:", error?.message ?? error);
+    logger.error("Get public shares error:", error?.message ?? error);
     res.status(500).json({ success: false, error: "Failed to fetch public shares" });
   }
 };

@@ -1,6 +1,7 @@
 import { Session } from "../models/session.js";
 import jwt from "jsonwebtoken";
 import config from "../config/index.js";
+import logger from "../../logger.js";
 
 // Session validation query
 const SESSION_QUERY = `
@@ -18,6 +19,10 @@ const extractBearerToken = (req) => {
   return token || null;
 };
 
+const extractToken = (req) => {
+  return req.cookies?.auth_token || extractBearerToken(req);
+};
+
 // Verify JWT token and extract payload
 const verifyToken = (token) => {
   try {
@@ -33,7 +38,7 @@ const verifyToken = (token) => {
 // Authentication middleware - validates JWT and session
 export const authenticateToken = async (req, res, next) => {
   try {
-    const token = extractBearerToken(req);
+    const token = extractToken(req);
 
     if (!token) {
       return res.status(401).json({
@@ -64,12 +69,13 @@ export const authenticateToken = async (req, res, next) => {
       id: session.user_id,
       username: session.username,
       sessionId: decoded.sessionId,
+      token,
     };
 
     next();
   } catch (error) {
     if (process.env.NODE_ENV !== "production") {
-      console.error("Auth middleware error:", error?.message ?? error);
+      logger.error("Auth middleware error:", error?.message ?? error);
     }
     return res.status(500).json({ success: false, error: "Authentication failed" });
   }
