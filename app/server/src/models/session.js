@@ -27,10 +27,14 @@ export const Session = {
       const result = await db.query(
         `SELECT s.*, u.username, u.is_active FROM sessions s
          JOIN users u ON s.user_id = u.id
-         WHERE s.id = $1 AND s.token = $2 AND s.expires_at > NOW()`,
-        [decoded.sessionId, token],
+         WHERE s.id = $1 AND s.expires_at > NOW() AND u.is_active = true`,
+        [decoded.sessionId],
       );
-      return result.rows[0] || null;
+      const session = result.rows[0];
+      if (session && session.token === token) {
+        return session;
+      }
+      return null;
     } catch {
       return null;
     }
