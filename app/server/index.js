@@ -24,7 +24,7 @@ function validateCorsOrigins(origins) {
       new URL(origin);
       return true;
     } catch {
-      console.warn(`Invalid CORS origin: ${origin}`);
+      logger.warn(`Invalid CORS origin: ${origin}`);
       return false;
     }
   });
@@ -106,7 +106,7 @@ function sanitizeError(error) {
 
 app.use((err, req, res, next) => {
   if (config.env !== "production") {
-    console.error("Unhandled error:", err?.message ?? err);
+    logger.error("Unhandled error:", err?.message ?? err);
   }
 
   const sanitizedError = sanitizeError(err);
@@ -129,7 +129,7 @@ async function seedDemoUser() {
   try {
     const existing = await database.query("SELECT id FROM users WHERE username = $1", [username]);
     if (existing.rows.length > 0) {
-      console.log("Demo user already exists");
+      logger.info("Demo user already exists");
       return;
     }
 
@@ -141,9 +141,9 @@ async function seedDemoUser() {
       [userId, username, hashed],
     );
 
-    console.log("Demo user created: demo / Demo@123");
+    logger.info("Demo user created: demo / Demo@123");
   } catch (error) {
-    console.error("Seed error:", error.message);
+    logger.error("Seed error:", error.message);
   }
 }
 
@@ -151,21 +151,21 @@ initDb(config)
   .then(() => seedDemoUser())
   .then(() => {
     app.listen(config.port, () => {
-      console.log(`Server running on port ${config.port}`);
-      console.log(`Temp directory: ${config.compiler.tempDir}`);
-      console.log(`Compiler path: ${config.compiler.path}`);
+      logger.info(`Server running on port ${config.port}`);
+      logger.info(`Temp directory: ${config.compiler.tempDir}`);
+      logger.info(`Compiler path: ${config.compiler.path}`);
       cleanupTempFiles();
       setInterval(cleanupTempFiles, 30 * 60 * 1000);
     });
   })
   .catch((err) => {
-    console.error("Failed to initialize:", err);
+    logger.error("Failed to initialize:", err);
     process.exit(1);
   });
 
 async function shutdown(signal) {
   try {
-    console.log(`Shutting down... (${signal})`);
+    logger.info(`Shutting down... (${signal})`);
     cleanupTempFiles();
     await closeDb();
   } finally {
@@ -176,5 +176,5 @@ async function shutdown(signal) {
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("unhandledRejection", (reason) => {
-  console.error("Unhandled Rejection:", reason);
+  logger.error("Unhandled Rejection:", reason);
 });

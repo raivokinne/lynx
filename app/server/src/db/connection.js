@@ -1,5 +1,6 @@
 import pkg from "pg";
 const { Pool } = pkg;
+import logger from "../logger.js";
 
 // PostgreSQL connection pool singleton
 let poolInstance = null;
@@ -26,7 +27,7 @@ export async function initDb(config) {
 
   initPromise = (async () => {
     try {
-      console.log("Initializing database connection...");
+      logger.info("Initializing database connection...");
 
       // Create connection pool with config settings
       poolInstance = new Pool({
@@ -41,15 +42,15 @@ export async function initDb(config) {
 
       // Verify connection works
       const result = await poolInstance.query("SELECT NOW()");
-      console.log("Database connected:", result.rows[0].now);
+      logger.info("Database connected:", result.rows[0].now);
 
       // Create all required tables
       await createTables(poolInstance);
-      console.log("Database initialized with all tables");
+      logger.info("Database initialized with all tables");
 
       return poolInstance;
     } catch (error) {
-      console.error("Failed to initialize database:", error);
+      logger.error("Failed to initialize database:", error);
       poolInstance = null;
       initPromise = null;
       throw error;
@@ -160,9 +161,9 @@ export async function closeDb() {
       await poolInstance.end();
       poolInstance = null;
       initPromise = null;
-      console.log("Database connection closed");
+      logger.info("Database connection closed");
     } catch (error) {
-      console.warn("Error closing database:", error);
+      logger.warn("Error closing database:", error);
     }
   }
 }
