@@ -35,33 +35,9 @@ export const Session = {
   },
 
   async updateLastActivity(id) {
-    await db.query("UPDATE sessions SET last_activity = NOW() WHERE id = $1", [id]);
-  },
-
-  async findByUserId(userId) {
-    const result = await db.query(
-      `SELECT id, ip_address, user_agent, created_at, last_activity, expires_at
-       FROM sessions WHERE user_id = $1 AND expires_at > NOW()
-       ORDER BY last_activity DESC`,
-      [userId],
-    );
-    return result.rows;
-  },
-
-  async delete(id, userId) {
-    const result = await db.query(
-      "DELETE FROM sessions WHERE id = $1 AND user_id = $2",
-      [id, userId],
-    );
-    return result.rowCount > 0;
-  },
-
-  async deleteAllExcept(userId, exceptId) {
-    const result = await db.query(
-      "DELETE FROM sessions WHERE user_id = $1 AND id != $2",
-      [userId, exceptId],
-    );
-    return result.rowCount;
+    await db.query("UPDATE sessions SET last_activity = NOW() WHERE id = $1", [
+      id,
+    ]);
   },
 
   async cleanup() {

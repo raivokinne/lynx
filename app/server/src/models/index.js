@@ -1,3 +1,3 @@
-export { User, default } from "./user.js";
-export { Code, default } from "./code.js";
-export { Session, default } from "./session.js";
+export { User } from "./user.js";
+export { Code } from "./code.js";
+export { Session } from "./session.js";

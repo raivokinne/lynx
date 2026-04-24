@@ -171,60 +171,15 @@ export const deleteCode = async (req, res) => {
 
     res.json({
       success: true,
-      message: permanent ? "Code permanently deleted" : "Code deleted successfully"
+      message: permanent
+        ? "Code permanently deleted"
+        : "Code deleted successfully",
     });
   } catch (error) {
     logger.error("Delete code error:", error?.message ?? error);
     res.status(500).json({
       success: false,
       error: "Failed to delete code",
-    });
-  }
-};
-
-/**
- * Restore a previously deleted code entry
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @returns {JSON} Success message or error
- */
-export const restoreCode = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const restored = await Code.restore(id, req.user.id);
-
-    if (!restored) {
-      return res.status(404).json({
-        success: false,
-        error: "Code not found or already restored",
-      });
-    }
-
-    res.json({ success: true, message: "Code restored successfully" });
-  } catch (error) {
-    logger.error("Restore code error:", error?.message ?? error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to restore code",
-    });
-  }
-};
-
-/**
- * Get all soft-deleted code entries for current user
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @returns {JSON} Success response with array of deleted codes, or error
- */
-export const getDeletedCodes = async (req, res) => {
-  try {
-    const codes = await Code.findDeletedByUserId(req.user.id);
-    res.json({ success: true, codes });
-  } catch (error) {
-    logger.error("Get deleted codes error:", error?.message ?? error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch deleted codes",
     });
   }
 };
