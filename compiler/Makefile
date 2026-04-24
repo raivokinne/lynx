@@ -1,7 +1,7 @@
 BINARY_NAME = lynx
 MAIN_PACKAGE = ./lynx.go
 BUILD_DIR = ../app/server/build
-EXAMPLE ?= main.lynx
+EXAMPLE ?= complete.lynx
 
 .PHONY: build clean run install test
 
@@ -10,7 +10,7 @@ build:
 	go build -o $(BUILD_DIR)/$(BINARY_NAME) $(MAIN_PACKAGE)
 
 run:
-	go run $(MAIN_PACKAGE) ./examples/$(EXAMPLE)
+	go run $(MAIN_PACKAGE) ../examples/$(EXAMPLE)
 
 install:
 	go install $(MAIN_PACKAGE)

@@ -14,8 +14,8 @@ const PI = 3.14159
 const MAX_SIZE = 100
 
 // Reassigning variables
-let x = 20
-let x = x + 5
+x = 20
+x = x + 5
 
 // ------------------------ Types ------------------------
 // Numbers
@@ -240,7 +240,7 @@ class Animal {
     let init = fn(name) {
         self.name = name
     }
-    
+
     let speak = fn() {
         "some sound"
     }
@@ -252,7 +252,7 @@ class Dog(Animal) {
         self.name = name
         self.breed = breed
     }
-    
+
     let speak = fn() {
         self.name ++ " barks"
     }

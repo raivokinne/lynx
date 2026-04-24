@@ -14,7 +14,7 @@ export const config = {
     maxAge: 24 * 60 * 60 * 1000,
     path: "/",
   },
-  
+
   // Database connection settings
   db: {
     host: process.env.DB_HOST,
@@ -23,12 +23,16 @@ export const config = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     // SSL configuration for production environment
-    ssl: process.env.NODE_ENV === "production" ? {
-      rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== "false",
-      ca: process.env.DB_CA_CERT,
-      key: process.env.DB_CLIENT_KEY,
-      cert: process.env.DB_CLIENT_CERT,
-    } : false,
+    ssl:
+      process.env.NODE_ENV === "production"
+        ? {
+            rejectUnauthorized:
+              process.env.DB_SSL_REJECT_UNAUTHORIZED !== "false",
+            ca: process.env.DB_CA_CERT,
+            key: process.env.DB_CLIENT_KEY,
+            cert: process.env.DB_CLIENT_CERT,
+          }
+        : false,
     // Connection pool settings
     pool: {
       max: 20,
@@ -49,7 +53,6 @@ export const config = {
   rateLimit: {
     auth: { windowMs: 15 * 60 * 1000, max: 50 },
     general: { windowMs: 15 * 60 * 1000, max: 100 },
-    compiler: { windowMs: 60 * 1000, max: 10 },
   },
 
   // Lynx compiler settings
@@ -57,14 +60,17 @@ export const config = {
     path: process.env.COMPILER_PATH || null,
     fileExtension: process.env.COMPILER_FILE_EXT || ".lynx",
     tempDir: process.env.COMPILER_TEMP_DIR || null,
-    timeout: 10000,          // Execution timeout in ms
-    maxFileSize: 1024 * 1024,  // 1MB max file size
-    maxOutputSize: 100000,    // Max output buffer size
+    timeout: 10000, // Execution timeout in ms
+    maxFileSize: 1024 * 1024, // 1MB max file size
+    maxOutputSize: 100000, // Max output buffer size
   },
 
   // CORS configuration
   cors: {
-    origins: process.env.CORS_ORIGINS?.split(",").map(o => o.trim()) || ["http://localhost:3000", "http://localhost:5173"],
+    origins: process.env.CORS_ORIGINS?.split(",").map((o) => o.trim()) || [
+      "http://localhost:3000",
+      "http://localhost:5173",
+    ],
   },
 };
 

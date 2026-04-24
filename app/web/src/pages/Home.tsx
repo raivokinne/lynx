@@ -24,7 +24,8 @@ export const Home = () => {
     deleteCode,
     updateCode,
   } = useCodeManagement(user?.id);
-  const { output, error, isRunning, cooldownEnd, executeCode, clearOutput } = useCodeExecution();
+  const { output, error, isRunning, cooldownEnd, executeCode, clearOutput } =
+    useCodeExecution();
   const { isDarkMode, toggleTheme } = useTheme();
 
   const [showSettings, setShowSettings] = useState(false);
@@ -51,7 +52,10 @@ export const Home = () => {
         isDarkMode ? "bg-black text-gray-400" : "bg-gray-100 text-gray-700"
       } transition-colors duration-200`}
     >
-      <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
 
       <Header
         isDarkMode={isDarkMode}
