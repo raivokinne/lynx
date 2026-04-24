@@ -18,6 +18,7 @@ export const getDefaultEditorOptions = (
 	glyphMargin: true,
 	folding: true,
 	tabIndex: 0,
+	contextmenu: true,
 
 	// Auto-completion and IntelliSense
 	autoClosingBrackets: "always",

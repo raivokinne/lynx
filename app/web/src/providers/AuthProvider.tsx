@@ -33,7 +33,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 			setIsLoading(false);
 		};
 
-		initAuth();
+		if ("requestIdleCallback" in window) {
+			requestIdleCallback(() => initAuth(), { timeout: 2000 });
+		} else {
+			setTimeout(initAuth, 100);
+		}
 	}, []);
 
 	const login = async (username: string, password: string) => {

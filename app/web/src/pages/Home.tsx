@@ -60,7 +60,7 @@ export const Home = () => {
         onLogout={logout}
       />
 
-      <div className="flex h-[calc(100vh-3.5rem)]">
+      <main className="flex h-[calc(100vh-3.5rem)]">
         <Sidebar
           isDarkMode={isDarkMode}
           isRunning={isRunning}
@@ -86,7 +86,7 @@ export const Home = () => {
           />
           <OutputPanel isDarkMode={isDarkMode} output={output} error={error} />
         </div>
-      </div>
+      </main>
     </div>
   );
 };

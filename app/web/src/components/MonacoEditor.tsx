@@ -44,6 +44,15 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
         initialOptions,
       );
 
+      const textarea = containerRef.current.querySelector("textarea");
+      if (textarea) {
+        textarea.removeAttribute("onpaste");
+        textarea.onpaste = null;
+        textarea.addEventListener("paste", (e: Event) => {
+          e.stopPropagation();
+        }, true);
+      }
+
       editorRef.current.onDidChangeModelContent(() => {
         if (onChange && editorRef.current) {
           onChange(editorRef.current.getValue());

@@ -20,7 +20,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
 			className={`border-b px-2 py-1 ${isDarkMode ? "border-neutral-800 bg-neutral-900" : "border-neutral-300 bg-neutral-200"}`}
 		>
 			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-1 text-xs font-mono text-neutral-500">
+				<div className="flex items-center gap-1 text-xs font-mono text-neutral-400">
 					<Terminal className="w-3 h-3" />
 					<span>output</span>
 				</div>
@@ -33,7 +33,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
 									: "bg-neutral-600"
 							}`}
 					></div>
-					<span className="text-xs font-mono text-neutral-500">
+					<span className="text-xs font-mono text-neutral-400">
 						{output && !error ? "done" : error ? "error" : "idle"}
 					</span>
 				</div>
