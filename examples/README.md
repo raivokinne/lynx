@@ -1,47 +1,87 @@
 # Lynx Code Examples
 
-This directory contains example Lynx programs to help you get started.
+This directory contains example Lynx programs demonstrating the language features.
 
 ## Running Examples
 
 ```bash
-cd lynx/compiler
-./lynx ../examples/hello_world.lynx
+./lynx examples/complete.lynx
 ```
 
 ## Examples
 
-| File                                         | Description                                 |
-| -------------------------------------------- | ------------------------------------------- |
-| [hello_world.lynx](./hello_world.lynx)       | Basic hello world program                   |
-| [variables.lynx](./variables.lynx)           | Variables, loops, and control flow          |
-| [functions.lynx](./functions.lynx)           | Functions, higher-order functions, closures |
-| [arrays.lynx](./arrays.lynx)                 | Arrays and pipeline operators               |
-| [error_handling.lynx](./error_handling.lynx) | Error handling with try-catch               |
+| File               | Description                                 |
+| ----------------- | ------------------------------------------- |
+| [complete.lynx](./complete.lynx) | Complete syntax reference demonstrating all language features |
 
-## Quick Examples
-
-### Hello World
-
-```lynx
-println("Hello, World!")
-```
+## Syntax Overview
 
 ### Variables
 
 ```lynx
-let x = 10
+let x = 10                    // mutable
 let name = "Lynx"
+const PI = 3.14159           // immutable
 ```
 
 ### Functions
 
 ```lynx
-fn add(a, b) { a + b }
+let add = fn(a, b) {
+    return a + b
+}
+let double = fn(x) { x * 2 }   // arrow (implicit return)
+
+let makeAdder = fn(n) {        // closure
+    fn(x) { n + x }
+}
 ```
 
-### Pipelines
+### Control Flow
 
 ```lynx
-[1, 2, 3] |> filter(fn(x) { x > 1 }) |> map(fn(x) { x * 2 })
+if condition {
+    // code
+} else {
+    // code
+}
+
+while condition {
+    // code
+}
+
+for item in [1, 2, 3] {
+    // code
+}
+
+switch value {
+    case "A": { 1.0 }
+    default: { 0.0 }
+}
+```
+
+### Error Handling
+
+```lynx
+catch {
+    // code that might error
+} on err {
+    // handle error
+}
+```
+
+### Classes
+
+```lynx
+class Animal {
+    let init = fn(name) {
+        self.name = name
+    }
+}
+
+class Dog(Animal) {
+    let speak = fn() {
+        self.name ++ " barks"
+    }
+}
 ```

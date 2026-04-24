@@ -1,0 +1,299 @@
+// ============================================================
+// Lynx Language - Complete Syntax Reference
+// ============================================================
+
+// ------------------------ Variables ------------------------
+// Variable declaration (mutable)
+let x = 10
+let name = "lynx"
+let numbers = [1, 2, 3, 4, 5]
+let person = {"name": "alice", "age": 30}
+
+// Constant (immutable)
+const PI = 3.14159
+const MAX_SIZE = 100
+
+// Reassigning variables
+let x = 20
+let x = x + 5
+
+// ------------------------ Types ------------------------
+// Numbers
+let intNum = 42
+let floatNum = 3.14
+let negNum = -10
+
+// Strings
+let str = "hello"
+let concat = "hello " ++ "world"
+
+// Booleans
+let isActive = true
+let isDone = false
+
+// Arrays
+let arr = [1, 2, 3]
+let emptyArr = []
+
+// Objects (hashes)
+let user = {"name": "bob", "age": 25}
+
+// null
+let nothing = null
+
+// ------------------------ Operators ------------------------
+// Arithmetic
+let sum = 5 + 3
+let diff = 5 - 3
+let prod = 5 * 3
+let quot = 15 / 3
+let mod = 15 % 4
+let power = 2 ^ 3
+let square = 5 $ 2  // square root
+
+// Comparison
+let eq = 5 == 5
+let neq = 5 != 3
+let lt = 3 < 5
+let lte = 3 <= 5
+let gt = 5 > 3
+let gte = 5 >= 3
+
+// Logical
+let andResult = true and false
+let orResult = true or false
+let notResult = !true
+
+// ------------------------ Control Flow ------------------------
+// if-else
+let score = 85
+if score > 90 {
+    println("A")
+} else {
+    if score > 80 {
+        println("B")
+    } else {
+        if score > 70 {
+            println("C")
+        } else {
+            println("F")
+        }
+    }
+}
+
+// while loop
+let counter = 0
+while counter < 3 {
+    println("count: ", counter)
+    let counter = counter + 1
+}
+
+// for loop with range
+for i in range(0, 5) {
+    println("i: ", i)
+}
+
+// for loop with array
+for item in [1, 2, 3] {
+    println("item: ", item)
+}
+
+// break and continue
+for i in range(0, 10) {
+    if i == 5 {
+        break
+    }
+    if i % 2 == 0 {
+        continue
+    }
+    println("odd: ", i)
+}
+
+// ------------------------ Switch ------------------------
+let grade = "B"
+let processGrade = fn(g) {
+    switch g {
+        case "A": { 4.0 }
+        case "B": { 3.0 }
+        case "C": { 2.0 }
+        default: { 0.0 }
+    }
+}
+println("grade: ", processGrade(grade))
+
+// switch with guards (no continue)
+let describe = fn(val) {
+    switch val {
+        case 0: "zero"
+        case x if x > 0: "positive"
+        case x if x < 0: "negative"
+        default: "unknown"
+    }
+}
+println(describe(5))
+
+// ------------------------ Functions ------------------------
+// Function stored in variable
+let add = fn(a, b) {
+    return a + b
+}
+println(add(3, 5))
+
+// Function without return (implicit)
+let greet = fn(name) {
+    "hello, " ++ name
+}
+println(greet("world"))
+
+// Arrow function (single expression)
+let double = fn(x) { x * 2 }
+println(double(7))
+
+// Higher-order functions
+let apply = fn(f, val) {
+    f(val)
+}
+println(apply(fn(x) { x + 1 }, 10))
+
+let applyTwice = fn(f, x) {
+    f(f(x))
+}
+println(applyTwice(fn(x) { x + 1 }, 5))
+
+// Closures
+let makeAdder = fn(n) {
+    fn(x) { n + x }
+}
+let add5 = makeAdder(5)
+println(add5(10))
+
+let makeMultiplier = fn(n) {
+    fn(x) { n * x }
+}
+let times3 = makeMultiplier(3)
+println(times3(4))
+
+// Recursion
+let factorial = fn(n) {
+    if n <= 1 { 1 }
+    else { n * factorial(n - 1) }
+}
+println(factorial(5))
+
+// Anonymous functions
+println(fn(x) { x + 1 }(5))
+
+// ------------------------ Built-in Functions ------------------------
+// Print
+println("hello")
+println("a:", 1, " b:", 2)
+
+// Length
+let arr = [1, 2, 3]
+let s = "hello"
+let h = {"a": 1}
+println("len arr: ", len(arr))
+println("len str: ", len(s))
+println("len hash: ", len(h))
+
+// Range
+let nums = range(0, 5)
+println("range: ", nums)
+
+// Type conversion (not as standalone functions)
+// Note: type() is for type checking, not conversion
+
+// Random
+let r = random()
+
+// Sleep
+// sleep(100)  // uncomment to test
+
+// ------------------------ Error Handling ------------------------
+// Throw error
+let divide = fn(a, b) {
+    if b == 0 {
+        error "division by zero"
+    }
+    return a / b
+}
+
+// Catch error
+catch {
+    let result = divide(10, 0)
+    println("result: ", result)
+} on err {
+    println("caught: ", err)
+}
+
+// Catch success
+catch {
+    let result = divide(10, 2)
+    println("10/2 = ", result)
+} on err {
+    println("error: ", err)
+}
+
+// ------------------------ Classes ------------------------
+// Class definition
+class Animal {
+    let init = fn(name) {
+        self.name = name
+    }
+    
+    let speak = fn() {
+        "some sound"
+    }
+}
+
+// Class with inheritance
+class Dog(Animal) {
+    let init = fn(name, breed) {
+        self.name = name
+        self.breed = breed
+    }
+    
+    let speak = fn() {
+        self.name ++ " barks"
+    }
+}
+
+// Using classes
+let dog = Dog("Rex", "Labrador")
+println(dog.name)
+println(dog.breed)
+println(dog.speak())
+
+// ------------------------ Pipeline Operator ------------------------
+// Note: piping seems to have issues, commenting out for now
+// let result = [1, 2, 3, 4, 5]
+//     |> fn(arr) { arr }
+// println("pipeline result: ", result)
+
+// ------------------------ Spread Operator ------------------------
+// (used in function definitions for variadic)
+// fn sum(...) { ... }  // variadic function
+
+// ------------------------ Built-in Library Functions ------------------------
+// File operations (prefixed with _)
+let cwd = _cwd()
+let home = _home()
+let temp = _temp()
+
+// HTTP operations
+// let resp = _http_get("http://example.com")
+
+// Hash functions
+// let hash = _md5("hello")
+// let hash = _sha256("hello")
+
+// JSON
+// let obj = _jsonParse('{"a": 1}')
+// let json = _jsonStringify({"a": 1})
+
+// System
+// _exit(0)
+// _mkdir("/path/to/dir")
+
+// ------------------------ Complete ------------------------
+println("=== All syntax examples complete ===")
