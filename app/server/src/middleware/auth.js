@@ -3,16 +3,8 @@ import jwt from "jsonwebtoken";
 import config from "../config/index.js";
 import logger from "../../logger.js";
 
-// Extract Bearer token from Authorization header
-const extractBearerToken = (req) => {
-  const auth = req.headers.authorization;
-  if (!auth?.startsWith("Bearer ")) return null;
-  const token = auth.slice(7).trim();
-  return token || null;
-};
-
 const extractToken = (req) => {
-  return req.cookies?.auth_token || extractBearerToken(req);
+  return req.cookies?.auth_token;
 };
 
 // Verify JWT token and extract payload
@@ -20,7 +12,10 @@ const verifyToken = (token) => {
   try {
     return jwt.verify(token, config.jwt.secret);
   } catch (error) {
-    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
+    if (
+      error.name === "JsonWebTokenError" ||
+      error.name === "TokenExpiredError"
+    ) {
       return null;
     }
     throw error;
@@ -69,7 +64,9 @@ export const authenticateToken = async (req, res, next) => {
     if (process.env.NODE_ENV !== "production") {
       logger.error("Auth middleware error:", error?.message ?? error);
     }
-    return res.status(500).json({ success: false, error: "Authentication failed" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Authentication failed" });
   }
 };
 
