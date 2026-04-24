@@ -72,6 +72,10 @@ export const useCodeExecution = () => {
 		setOutput("Compiling code...\n");
 		setError("");
 
+		if (isAuthenticated) {
+			showToast.success("Code running");
+		}
+
 		try {
 			const response = await fetch(`${API_BASE}/compile`, {
 				method: "POST",

@@ -16,14 +16,24 @@ const logger = winston.createLogger({
   format: combine(
     timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     errors({ stack: true }),
-    logFormat
+    logFormat,
   ),
   transports: [
     new winston.transports.Console({
-      format: combine(colorize(), timestamp({ format: "YYYY-MM-DD HH:mm:ss" }), errors({ stack: true }), logFormat)
+      format: combine(
+        colorize(),
+        timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+        errors({ stack: true }),
+        logFormat,
+      ),
     }),
-    new winston.transports.File({ filename: resolve(__dirname, "../logs/error.log"), level: "error" }),
-    new winston.transports.File({ filename: resolve(__dirname, "../logs/combined.log") }),
+    new winston.transports.File({
+      filename: resolve(__dirname, "../logs/error.log"),
+      level: "error",
+    }),
+    new winston.transports.File({
+      filename: resolve(__dirname, "../logs/combined.log"),
+    }),
   ],
 });
 

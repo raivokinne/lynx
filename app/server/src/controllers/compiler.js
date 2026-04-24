@@ -5,7 +5,7 @@
 import { existsSync, unlinkSync, writeFileSync, mkdirSync } from "fs";
 import { join, resolve } from "path";
 import { randomBytes } from "crypto";
-import { validateCode, sanitizeSessionId, executeCompiler } from "../utils/compiler.js";
+import { sanitizeSessionId, executeCompiler } from "../utils/compiler.js";
 import config from "../config/index.js";
 import logger from "../../logger.js";
 
@@ -49,11 +49,6 @@ export const compilerController = async (req, res) => {
     executionCounts.set(userKey, count + 1);
 
     const { code } = req.body;
-    const validation = validateCode(code, { checkSecurity: true });
-
-    if (!validation.valid) {
-      return res.status(400).json({ success: false, error: validation.error });
-    }
 
     const sessionId = sanitizeSessionId(req.user?.sessionId || "anonymous");
     const timestamp = Date.now();
@@ -104,7 +99,10 @@ export const compilerController = async (req, res) => {
     } else {
       res.status(500).json({
         success: false,
-        error: process.env.NODE_ENV === "production" ? "Compilation failed" : message,
+        error:
+          process.env.NODE_ENV === "production"
+            ? "Compilation failed"
+            : message,
       });
     }
   } finally {

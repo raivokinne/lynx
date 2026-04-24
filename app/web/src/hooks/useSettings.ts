@@ -189,6 +189,7 @@ export const useSettings = (userId?: string) => {
       }
     } catch {
       showToast.error("Failed to load settings");
+      setError("Failed to load settings");
       setEditorSettings(defaultSettings);
     } finally {
       setLoading(false);
@@ -260,6 +261,7 @@ export const useSettings = (userId?: string) => {
       }
     } catch {
       showToast.error("Failed to save settings");
+      setError("Failed to save settings");
       return false;
     } finally {
       setLoading(false);
@@ -323,6 +325,7 @@ export const useSettings = (userId?: string) => {
       }
     } catch {
       showToast.error("Failed to reset settings");
+      setError("Failed to reset settings");
       return false;
     } finally {
       setLoading(false);
