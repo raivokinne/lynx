@@ -17,6 +17,10 @@ const COOLDOWN_DURATION = 60000;
 const USER_ID_COOKIE = "lynx_execution_id";
 
 const getUserId = (req, res) => {
+  if (req.user?.id) {
+    return req.user.id;
+  }
+
   let userId = req.cookies?.[USER_ID_COOKIE];
 
   if (!userId) {
@@ -50,11 +54,14 @@ export const compilerController = async (req, res) => {
 
   try {
     const userId = getUserId(req, res);
+    const isAuthenticated = !!req.user?.id;
     const now = Date.now();
     const userKey = `${userId}::${Math.floor(now / 60000)}`;
     const count = executionCounts.get(userKey) || 0;
 
-    executionCounts.set(userKey, count + 1);
+    if (!isAuthenticated) {
+      executionCounts.set(userKey, count + 1);
+    }
 
     const { code } = req.body;
 
@@ -65,10 +72,10 @@ export const compilerController = async (req, res) => {
     let isOnCooldown = false;
     let cooldownEnd = null;
 
-    if (cooldown && cooldown > nowTime) {
+    if (!isAuthenticated && cooldown && cooldown > nowTime) {
       isOnCooldown = true;
       cooldownEnd = cooldown;
-    } else if (cooldown) {
+    } else if (cooldown && cooldown <= nowTime) {
       cooldowns.delete(userKeyId);
     }
 
@@ -101,7 +108,7 @@ export const compilerController = async (req, res) => {
 
     writeFileSync(tempFilePath, code, { encoding: "utf8", mode: 0o600 });
 
-    if (isOnCooldown) {
+    if (!isAuthenticated && isOnCooldown) {
       const remainingCooldown = Math.ceil((cooldownEnd - nowTime) / 1000);
       return res.status(429).json({
         success: false,
@@ -114,12 +121,13 @@ export const compilerController = async (req, res) => {
     output = await executeCompiler(tempFilePath);
 
     success = true;
-    const remaining = MAX_UNAUTHENTICATED_EXECUTIONS - (count + 1);
 
     res.json({
       success: true,
       output: output?.trim() || "Program executed successfully (no output)",
-      executionsRemaining: remaining > 0 ? remaining : 0,
+      executionsRemaining: isAuthenticated
+        ? null
+        : MAX_UNAUTHENTICATED_EXECUTIONS - (count + 1),
       cooldownEnd: null,
     });
   } catch (err) {
@@ -131,17 +139,17 @@ export const compilerController = async (req, res) => {
       message === "Output too large";
 
     if (isUserError) {
-      const keyId = `${userId}::${userId}`;
-      if (count + 1 >= MAX_UNAUTHENTICATED_EXECUTIONS) {
+      if (!isAuthenticated && count + 1 >= MAX_UNAUTHENTICATED_EXECUTIONS) {
+        const keyId = `${userId}::${userId}`;
         cooldowns.set(keyId, Date.now() + COOLDOWN_DURATION);
       }
 
       res.status(400).json({
         success: false,
         error: message,
-        executionsRemaining: 0,
+        executionsRemaining: isAuthenticated ? null : 0,
         cooldownEnd:
-          count + 1 >= MAX_UNAUTHENTICATED_EXECUTIONS
+          !isAuthenticated && count + 1 >= MAX_UNAUTHENTICATED_EXECUTIONS
             ? Date.now() + COOLDOWN_DURATION
             : null,
       });
@@ -169,12 +177,13 @@ export const compilerController = async (req, res) => {
 
 export const executionStatusController = async (req, res) => {
   try {
-    let userId = req.cookies?.[USER_ID_COOKIE];
+    const userId = getUserId(req, res);
+    const isAuthenticated = !!req.user?.id;
     const nowTime = Date.now();
 
-    if (!userId) {
+    if (isAuthenticated) {
       return res.json({
-        executionsRemaining: MAX_UNAUTHENTICATED_EXECUTIONS,
+        executionsRemaining: null,
         cooldownEnd: null,
         isOnCooldown: false,
       });

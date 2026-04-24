@@ -278,3 +278,110 @@
 2026-04-23 21:50:57 [info]: POST /api/compile 500 - 64ms
 2026-04-23 21:51:01 [info]: POST /api/compile 500 - 51ms
 2026-04-23 21:51:06 [info]: POST /api/compile 500 - 67ms
+2026-04-24 19:49:28 [info]: Initializing database connection...
+2026-04-24 19:49:28 [info]: Database connected:
+2026-04-24 19:49:28 [info]: Database initialized with all tables
+2026-04-24 19:49:28 [info]: Demo user already exists
+2026-04-24 19:49:28 [info]: Server running on port 3001
+2026-04-24 19:49:28 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-24 19:49:28 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-24 19:50:12 [info]: Shutting down... (SIGINT)
+2026-04-24 19:50:14 [info]: Initializing database connection...
+2026-04-24 19:50:14 [info]: Database connected:
+2026-04-24 19:50:14 [info]: Database initialized with all tables
+2026-04-24 19:50:14 [info]: Demo user already exists
+2026-04-24 19:50:14 [info]: Server running on port 3001
+2026-04-24 19:50:14 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-24 19:50:14 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-24 19:59:39 [info]: Shutting down... (SIGINT)
+2026-04-24 19:59:40 [info]: Initializing database connection...
+2026-04-24 19:59:40 [info]: Database connected:
+2026-04-24 19:59:40 [info]: Database initialized with all tables
+2026-04-24 19:59:40 [info]: Demo user already exists
+2026-04-24 19:59:40 [info]: Server running on port 3001
+2026-04-24 19:59:40 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-24 19:59:40 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-24 19:59:54 [info]: Shutting down... (SIGINT)
+2026-04-24 19:59:56 [info]: Initializing database connection...
+2026-04-24 19:59:56 [info]: Database connected:
+2026-04-24 19:59:56 [info]: Database initialized with all tables
+2026-04-24 19:59:56 [info]: Demo user already exists
+2026-04-24 19:59:56 [info]: Server running on port 3001
+2026-04-24 19:59:56 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-24 19:59:56 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-24 20:00:43 [info]: Shutting down... (SIGINT)
+2026-04-24 20:00:47 [info]: Initializing database connection...
+2026-04-24 20:00:47 [info]: Database connected:
+2026-04-24 20:00:47 [info]: Database initialized with all tables
+2026-04-24 20:00:47 [info]: Demo user already exists
+2026-04-24 20:00:47 [info]: Server running on port 3001
+2026-04-24 20:00:47 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-24 20:00:47 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-24 20:00:51 [info]: Shutting down... (SIGINT)
+2026-04-24 20:00:59 [info]: Initializing database connection...
+2026-04-24 20:00:59 [info]: Database connected:
+2026-04-24 20:00:59 [info]: Database initialized with all tables
+2026-04-24 20:00:59 [info]: Demo user already exists
+2026-04-24 20:00:59 [info]: Server running on port 3001
+2026-04-24 20:00:59 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-24 20:00:59 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-24 20:01:02 [warn]: CORS rejected origin: http://localhost:5174
+2026-04-24 20:01:02 [info]: OPTIONS /api/compile 200 - 6ms
+2026-04-24 20:01:02 [warn]: CORS rejected origin: http://localhost:5174
+2026-04-24 20:01:02 [info]: GET /api/execution/status 200 - 10ms
+2026-04-24 20:01:09 [warn]: CORS rejected origin: http://localhost:5174
+2026-04-24 20:01:09 [info]: OPTIONS /api/compile 200 - 2ms
+2026-04-24 20:01:09 [warn]: CORS rejected origin: http://localhost:5174
+2026-04-24 20:01:09 [info]: GET /api/execution/status 200 - 2ms
+2026-04-24 20:01:37 [info]: GET /api/auth/profile 401 - 3ms
+2026-04-24 20:01:37 [info]: GET /api/auth/profile 401 - 0ms
+2026-04-24 20:01:39 [info]: GET /api/execution/status 200 - 1ms
+2026-04-24 20:01:39 [info]: GET /api/execution/status 304 - 1ms
+2026-04-24 20:01:41 [info]: POST /api/compile 500 - 68ms
+2026-04-24 20:01:41 [info]: GET /api/execution/status 200 - 1ms
+2026-04-24 20:01:44 [info]: POST /api/compile 500 - 57ms
+2026-04-24 20:01:44 [info]: GET /api/execution/status 200 - 1ms
+2026-04-24 20:01:52 [info]: POST /api/compile 500 - 74ms
+2026-04-24 20:01:53 [info]: GET /api/execution/status 200 - 1ms
+2026-04-24 20:02:00 [info]: POST /api/compile 500 - 63ms
+2026-04-24 20:02:00 [info]: GET /api/execution/status 200 - 1ms
+2026-04-24 20:02:11 [info]: POST /api/compile 500 - 72ms
+2026-04-24 20:02:11 [info]: GET /api/execution/status 200 - 1ms
+2026-04-24 20:02:16 [info]: POST /api/compile 500 - 55ms
+2026-04-24 20:02:16 [info]: GET /api/execution/status 200 - 1ms
+2026-04-24 20:02:19 [info]: POST /api/compile 500 - 60ms
+2026-04-24 20:02:19 [info]: GET /api/execution/status 200 - 1ms
+2026-04-24 20:02:23 [info]: POST /api/compile 500 - 56ms
+2026-04-24 20:02:23 [info]: GET /api/execution/status 200 - 1ms
+2026-04-24 20:02:42 [info]: GET /api/execution/status 304 - 1ms
+2026-04-24 20:02:42 [info]: GET /api/execution/status 304 - 3ms
+2026-04-24 20:02:42 [info]: GET /api/auth/profile 401 - 1ms
+2026-04-24 20:02:43 [info]: GET /api/auth/profile 401 - 1ms
+2026-04-24 20:06:10 [info]: Shutting down... (SIGINT)
+2026-04-24 20:06:12 [info]: Initializing database connection...
+2026-04-24 20:06:12 [info]: Database connected:
+2026-04-24 20:06:12 [info]: Database initialized with all tables
+2026-04-24 20:06:12 [info]: Demo user already exists
+2026-04-24 20:06:12 [info]: Server running on port 3001
+2026-04-24 20:06:12 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-24 20:06:12 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-24 20:06:17 [info]: GET /api/execution/status 200 - 7ms
+2026-04-24 20:06:17 [info]: GET /api/execution/status 304 - 1ms
+2026-04-24 20:06:17 [info]: GET /api/auth/profile 401 - 2ms
+2026-04-24 20:06:17 [info]: GET /api/auth/profile 401 - 2ms
+2026-04-24 20:06:19 [info]: POST /api/compile 500 - 73ms
+2026-04-24 20:06:19 [info]: GET /api/execution/status 200 - 0ms
+2026-04-24 20:06:22 [info]: POST /api/compile 500 - 70ms
+2026-04-24 20:06:22 [info]: GET /api/execution/status 200 - 1ms
+2026-04-24 20:06:26 [info]: POST /api/compile 500 - 72ms
+2026-04-24 20:06:26 [info]: GET /api/execution/status 200 - 1ms
+2026-04-24 20:06:31 [info]: POST /api/compile 500 - 77ms
+2026-04-24 20:06:31 [info]: GET /api/execution/status 200 - 2ms
+2026-04-24 20:06:35 [info]: POST /api/compile 500 - 71ms
+2026-04-24 20:06:35 [info]: GET /api/execution/status 200 - 1ms
+2026-04-24 20:13:35 [info]: GET /api/execution/status 200 - 1ms
+2026-04-24 20:13:35 [info]: GET /api/execution/status 304 - 0ms
+2026-04-24 20:13:35 [info]: GET /api/auth/profile 401 - 1ms
+2026-04-24 20:13:35 [info]: GET /api/auth/profile 401 - 0ms
+2026-04-24 20:13:37 [info]: POST /api/compile 500 - 72ms
+2026-04-24 20:13:37 [info]: GET /api/execution/status 200 - 4ms
