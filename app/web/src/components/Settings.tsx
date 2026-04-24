@@ -14,10 +14,10 @@ import {
   Palette,
   Search,
   Info,
-  CheckCircle,
 } from "lucide-react";
 import { ThemeManagement } from "./ThemeManagement";
 import type { EditorSettings } from "../types/types";
+import { showToast } from "../utils/toast";
 
 interface SettingsProps {
   isOpen: boolean;
@@ -49,7 +49,6 @@ export const Settings: React.FC<SettingsProps> = ({
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const [savedNotification, setSavedNotification] = useState(false);
 
   if (!isOpen) return null;
 
@@ -59,8 +58,7 @@ export const Settings: React.FC<SettingsProps> = ({
       [key]: value,
     });
 
-    setSavedNotification(true);
-    setTimeout(() => setSavedNotification(false), 2000);
+    showToast.success("Saved settings");
   };
 
   const resetToDefaults = () => {
@@ -79,8 +77,7 @@ export const Settings: React.FC<SettingsProps> = ({
     };
     onSettingsChange(defaultSettings);
     setShowResetConfirm(false);
-    setSavedNotification(true);
-    setTimeout(() => setSavedNotification(false), 2000);
+    showToast.success("Saved settings");
   };
 
   const exportSettings = () => {
@@ -116,8 +113,7 @@ export const Settings: React.FC<SettingsProps> = ({
           ) {
             onToggleDarkMode();
           }
-          setSavedNotification(true);
-          setTimeout(() => setSavedNotification(false), 2000);
+          showToast.success("Saved settings");
         }
       } catch {
         alert("Invalid settings file");
@@ -167,13 +163,6 @@ export const Settings: React.FC<SettingsProps> = ({
           </div>
 
           <div className="flex items-center gap-1">
-            {savedNotification && (
-              <div className="flex items-center gap-1 px-2 py-0.5 bg-green-900 text-green-400 text-xs font-mono">
-                <CheckCircle className="w-3 h-3" />
-                saved
-              </div>
-            )}
-
             <button
               onClick={exportSettings}
               className={`p-1 transition-colors ${isDarkMode ? "hover:bg-neutral-800 text-neutral-500 hover:text-neutral-400" : "hover:bg-neutral-200 text-neutral-400 hover:text-neutral-600"}`}

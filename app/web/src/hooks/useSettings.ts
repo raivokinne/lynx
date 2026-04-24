@@ -227,6 +227,7 @@ export const useSettings = (userId?: string) => {
           saveToLocalStorage(newSettings);
         }
 
+        showToast.success("Settings saved");
         return newSettings;
       });
 
