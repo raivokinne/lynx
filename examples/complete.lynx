@@ -265,14 +265,33 @@ println(dog.breed)
 println(dog.speak())
 
 // ------------------------ Pipeline Operator ------------------------
-// Note: piping seems to have issues, commenting out for now
-// let result = [1, 2, 3, 4, 5]
-//     |> fn(arr) { arr }
-// println("pipeline result: ", result)
+// Pipe passes the left value as first argument to the right function
+let result = [1, 2, 3, 4, 5] |> fn(arr) { arr }
+println("pipeline result: ", result)
 
-// ------------------------ Spread Operator ------------------------
-// (used in function definitions for variadic)
-// fn sum(...) { ... }  // variadic function
+// Filter with pipe (using helper function)
+let filterEvens = fn(arr) {
+    let filtered = []
+    for x in arr {
+        if x % 2 == 0 {
+            filtered = filtered ++ [x]
+        }
+    }
+    filtered
+}
+let evens = [1, 2, 3, 4, 5] |> filterEvens
+println("evens: ", evens)
+
+// Chain pipes
+let double = fn(arr) {
+    let result = []
+    for x in arr {
+        result = result ++ [x * 2]
+    }
+    result
+}
+let chained = [1, 2, 3, 4, 5] |> filterEvens |> double
+println("chained filter + double: ", chained)
 
 // ------------------------ Built-in Library Functions ------------------------
 // File operations (prefixed with _)

@@ -1936,6 +1936,9 @@ func evalPipeRight(right ast.Node, left object.Object, env *object.Env) object.O
 	case *ast.Identifier:
 		fn := Eval(rightExpr, env)
 		return applyFunction(fn, []object.Object{left})
+	case *ast.FunctionLiteral:
+		fn := Eval(rightExpr, env)
+		return applyFunction(fn, []object.Object{left})
 	case *ast.PipeExpression:
 		intermediate := evalPipeRight(rightExpr.Left, left, env)
 		return evalPipeRight(rightExpr.Right, intermediate, env)
