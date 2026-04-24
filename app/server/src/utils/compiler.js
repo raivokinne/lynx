@@ -52,58 +52,6 @@ export const cleanupTempFiles = () => {
   }
 };
 
-// Validate code with size and security checks
-export const validateCode = (code, options = {}) => {
-  const { maxSize = config.compiler.maxFileSize, minSize = 1, checkSecurity = true } = options;
-
-  if (!code || typeof code !== "string") {
-    return { valid: false, error: "Code is required and must be a string" };
-  }
-
-  const processedCode = code.trim();
-  if (processedCode.length === 0) {
-    return { valid: false, error: "Code cannot be empty" };
-  }
-
-  if (code.length > maxSize) {
-    return { valid: false, error: `Code exceeds maximum size of ${maxSize} characters` };
-  }
-
-  if (processedCode.length < minSize) {
-    return { valid: false, error: `Code must be at least ${minSize} character(s)` };
-  }
-
-  if (checkSecurity) {
-    const securityCheck = validateCodeSecurity(code);
-    if (!securityCheck.valid) return securityCheck;
-  }
-
-  return { valid: true };
-};
-
-function validateCodeSecurity(code) {
-  const dangerousPatterns = [
-    { pattern: /eval\s*\(/gi, name: "eval()" },
-    { pattern: /Function\s*\(/gi, name: "Function constructor" },
-    { pattern: /process\./gi, name: "process object" },
-    { pattern: /global\./gi, name: "global object" },
-    { pattern: /require\s*\(/gi, name: "require()" },
-    { pattern: /child_process/gi, name: "child_process module" },
-  ];
-
-  for (const { pattern, name } of dangerousPatterns) {
-    if (pattern.test(code)) {
-      return { valid: false, error: `Code contains unsafe pattern: ${name}` };
-    }
-  }
-
-  if (code.includes("\0")) {
-    return { valid: false, error: "Code contains null bytes" };
-  }
-
-  return { valid: true };
-}
-
 // Execute the Lynx compiler
 export const executeCompiler = (filePath) => {
   const safePath = resolve(filePath);
@@ -140,18 +88,30 @@ export const executeCompiler = (filePath) => {
       }
     };
 
-    const child = spawn("firejail", [
-      "--net=none", "--nosound", "--nogroups", "--noroot",
-      "--private-dev", "--seccomp", "--caps.drop=all",
-      "--rlimit-nproc=50", "--rlimit-fsize=10485760",
-      `--whitelist=${config.compiler.path}`,
-      `--whitelist=${config.compiler.tempDir}`,
-      "--quiet", config.compiler.path, safePath,
-    ], {
-      stdio: ["ignore", "pipe", "pipe"],
-      cwd: config.compiler.tempDir,
-      env: { PATH: process.env.PATH },
-    });
+    const child = spawn(
+      "firejail",
+      [
+        "--net=none",
+        "--nosound",
+        "--nogroups",
+        "--noroot",
+        "--private-dev",
+        "--seccomp",
+        "--caps.drop=all",
+        "--rlimit-nproc=50",
+        "--rlimit-fsize=10485760",
+        `--whitelist=${config.compiler.path}`,
+        `--whitelist=${config.compiler.tempDir}`,
+        "--quiet",
+        config.compiler.path,
+        safePath,
+      ],
+      {
+        stdio: ["ignore", "pipe", "pipe"],
+        cwd: config.compiler.tempDir,
+        env: { PATH: process.env.PATH },
+      },
+    );
 
     const timer = setTimeout(() => {
       finish(() => {
@@ -159,7 +119,7 @@ export const executeCompiler = (filePath) => {
         reject(new Error("Execution timed out"));
       });
     }, config.compiler.timeout);
-    
+
     child.stdout?.on("data", (data) => {
       stdout += data.toString();
       if (totalOutput() > MAX_OUTPUT_SIZE) {
@@ -175,7 +135,9 @@ export const executeCompiler = (filePath) => {
     });
 
     child.on("error", (err) => {
-      finish(() => reject(new Error(`Failed to start compiler: ${err.message}`)));
+      finish(() =>
+        reject(new Error(`Failed to start compiler: ${err.message}`)),
+      );
     });
 
     child.on("close", (code, signal) => {
