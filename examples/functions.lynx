@@ -1,32 +1,36 @@
 // Functions in Lynx
 
-// Named function
-fn add(a, b) {
+// basic function - stored in variable
+let greet = fn(name) {
+    return "hello, " ++ name ++ "!"
+}
+println(greet("world"))
+
+let add = fn(a, b) {
     return a + b
 }
+println(add(5, 3))
 
-// Arrow function (implicit return)
-fn multiply(a, b) => a * b
+// arrow function
+let double = fn(x) { x * 2 }
+println(double(7))
 
-// Higher-order function
-fn apply(a, b, fn) {
-    return fn(a, b)
+// higher-order function  
+let applyTwice = fn(f, x) {
+    f(f(x))
 }
+println(applyTwice(fn(x) { x + 1 }, 5))
 
-let result = apply(5, 3, add)
-println("5 + 3 = ", result)
-
-let result2 = apply(4, 7, multiply)
-println("4 * 7 = ", result2)
-
-// Closures
-fn makeAdder(x) {
+// closures
+let makeAdder = fn(x) {
     fn(y) { x + y }
 }
-
 let add5 = makeAdder(5)
-println("5 + 10 = ", add5(10))
+println(add5(10))
 
-// Function as value
-let fnRef = fn(x) { x * 2 }
-println("Ref: ", fnRef(6))
+// recursion
+let factorial = fn(n) {
+    if n <= 1 { 1 }
+    else { n * factorial(n - 1) }
+}
+println(factorial(5))
