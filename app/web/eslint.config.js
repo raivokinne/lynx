@@ -23,6 +23,7 @@ export default tseslint.config([
       '@typescript-eslint/no-explicit-any': 'off',
       'no-useless-escape': 'off',
       'react-hooks/exhaustive-deps': 'warn',
+      'react-refresh/only-export-components': 'warn',
     },
   },
 ])

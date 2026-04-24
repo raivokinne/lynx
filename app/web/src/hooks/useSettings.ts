@@ -270,7 +270,7 @@ export const useSettings = (userId?: string) => {
   }, [userId, editorSettings]);
 
   const updateAllSettings = useCallback(
-    (newSettings: EditorSettings) => {
+    async (newSettings: EditorSettings) => {
       setEditorSettings(newSettings);
 
       if ((window as any).monaco && newSettings.customThemes) {
@@ -289,7 +289,7 @@ export const useSettings = (userId?: string) => {
         saveToLocalStorage(newSettings);
       } else {
         setHasUnsavedChanges(true);
-        saveSettings();
+        await saveSettings();
       }
     },
     [userId, saveSettings, registerCustomTheme],

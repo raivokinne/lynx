@@ -40,6 +40,13 @@ export const Session = {
     ]);
   },
 
+  async delete(id, userId) {
+    await db.query("DELETE FROM sessions WHERE id = $1 AND user_id = $2", [
+      id,
+      userId,
+    ]);
+  },
+
   async cleanup() {
     await db.query("DELETE FROM sessions WHERE expires_at < NOW()");
   },
