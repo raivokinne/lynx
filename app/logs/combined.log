@@ -385,3 +385,24 @@
 2026-04-24 20:13:35 [info]: GET /api/auth/profile 401 - 0ms
 2026-04-24 20:13:37 [info]: POST /api/compile 500 - 72ms
 2026-04-24 20:13:37 [info]: GET /api/execution/status 200 - 4ms
+2026-04-27 11:26:21 [info]: Initializing database connection...
+2026-04-27 11:26:21 [info]: Database connected:
+2026-04-27 11:26:21 [info]: Database initialized with all tables
+2026-04-27 11:26:21 [info]: Demo user already exists
+2026-04-27 11:26:21 [info]: Server running on port 3001
+2026-04-27 11:26:21 [info]: Temp directory: /Users/raivokinne/personal/lynx/app/server/temp
+2026-04-27 11:26:21 [info]: Compiler path: /Users/raivokinne/personal/lynx/app/server/build/lynx
+2026-04-27 11:26:27 [info]: GET /api/auth/profile 401 - 5ms
+2026-04-27 11:26:27 [info]: GET /api/auth/profile 401 - 0ms
+2026-04-27 11:26:28 [info]: GET /api/execution/status 200 - 1ms
+2026-04-27 11:26:28 [info]: GET /api/execution/status 304 - 1ms
+2026-04-27 11:26:31 [info]: Compile request received
+2026-04-27 11:26:31 [error]: Compilation error:
+2026-04-27 11:26:31 [error]: Compilation error:
+2026-04-27 11:26:31 [info]: POST /api/compile 500 - 64ms
+2026-04-27 11:26:31 [info]: GET /api/execution/status 200 - 0ms
+2026-04-27 11:29:59 [info]: GET /api/auth/profile 401 - 2ms
+2026-04-27 11:29:59 [info]: GET /api/auth/profile 401 - 0ms
+2026-04-27 11:29:59 [info]: GET /api/execution/status 200 - 1ms
+2026-04-27 11:29:59 [info]: GET /api/execution/status 304 - 0ms
+2026-04-27 11:56:02 [info]: Shutting down... (SIGINT)
