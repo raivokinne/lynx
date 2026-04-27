@@ -115,6 +115,10 @@ function sanitizeError(error) {
 }
 
 app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    return next(err);
+  }
+
   if (config.env !== "production") {
     logger.error("Unhandled error:", err?.message ?? err);
   }

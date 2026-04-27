@@ -150,12 +150,11 @@ export const compilerController = async (req, res) => {
       message.includes("Execution timed out") ||
       message.includes("Output too large");
 
-    console.error("isUserError:", isUserError);
-    console.error("isAuthenticated:", isAuthenticated);
-    console.error("count:", count);
-
+    console.log("isUserError:", isUserError);
+    console.log("CHECKPOINT 1 - isAuthenticated:", isAuthenticated);
     if (isUserError) {
-      console.error("ENTERING user error block");
+      console.log("CHECKPOINT 2 - entered if block");
+      console.log("CHECKPOINT 3 - count:", count);
       if (!isAuthenticated && count + 1 >= MAX_UNAUTHENTICATED_EXECUTIONS) {
         const keyId = `${userId}::${userId}`;
         cooldowns.set(keyId, Date.now() + COOLDOWN_DURATION);
