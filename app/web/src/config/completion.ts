@@ -12,6 +12,7 @@ const LYNX_KEYWORDS = [
 	"fn",
 	"let",
 	"const",
+	"class",
 ];
 
 export const createCompletionProvider = () => ({

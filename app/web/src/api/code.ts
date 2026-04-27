@@ -1,5 +1,5 @@
 import { API_BASE } from "../types/constants";
-import type { SavedCode, ResponseCode } from "../types/types";
+import type { SavedCode } from "../types/types";
 import { showToast } from "../utils/toast";
 
 // API client for code CRUD operations
@@ -120,46 +120,6 @@ export const codeApi = {
       return data;
     } catch {
       showToast.error("Failed to delete code");
-      return { success: false, error: "Network error" };
-    }
-  },
-
-  restoreCode: async (id: string) => {
-    try {
-      const response = await fetch(`${API_BASE}/codes/${id}/restore`, {
-        method: "POST",
-        credentials: "include",
-      });
-
-      const data = await response.json();
-      return data;
-    } catch {
-      showToast.error("Failed to restore code");
-      return { success: false, error: "Network error" };
-    }
-  },
-
-  getDeletedCodes: async () => {
-    try {
-      const response = await fetch(`${API_BASE}/codes/deleted/list`, {
-        credentials: "include",
-      });
-
-      const data: ResponseCode = await response.json();
-
-      if (data.success && data.codes) {
-        data.codes = data.codes.map((code) => ({
-          id: code.id,
-          title: code.title,
-          code: code.code,
-          createdAt: code.createdAt,
-          updatedAt: code.updatedAt,
-        }));
-      }
-
-      return data;
-    } catch {
-      showToast.error("Failed to get deleted codes");
       return { success: false, error: "Network error" };
     }
   },

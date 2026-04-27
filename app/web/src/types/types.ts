@@ -6,11 +6,6 @@ export interface SavedCode {
   updatedAt: string;
 }
 
-export interface ResponseCode {
-  success: boolean;
-  codes: null | SavedCode[];
-}
-
 export interface EditorSettings {
   theme?: string;
   themeDark?: string;
