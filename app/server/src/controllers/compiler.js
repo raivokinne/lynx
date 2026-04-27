@@ -50,17 +50,24 @@ setInterval(() => {
  * @returns {JSON} Success response with output, or error
  */
 export const compilerController = async (req, res) => {
+  // Hoisted so catch/finally blocks can access them
   let tempFilePath = null;
   let output;
   let success;
+  let userId;
+  let isAuthenticated;
+  let count = 0;
+  let userKey;
 
   try {
     logger.info("Compile request received");
-    const userId = getUserId(req, res);
-    const isAuthenticated = !!req.user?.id;
+
+    userId = getUserId(req, res);
+    isAuthenticated = !!req.user?.id;
+
     const now = Date.now();
-    const userKey = `${userId}::${Math.floor(now / 60000)}`;
-    const count = executionCounts.get(userKey) || 0;
+    userKey = `${userId}::${Math.floor(now / 60000)}`;
+    count = executionCounts.get(userKey) || 0;
 
     if (!isAuthenticated) {
       executionCounts.set(userKey, count + 1);
@@ -134,61 +141,39 @@ export const compilerController = async (req, res) => {
       cooldownEnd: null,
     });
   } catch (err) {
-    console.error("CATCH BLOCK START");
-    console.error("RAW ERR:", err);
-    console.error("ERR MSG:", err?.message);
-    console.error("ERR STACK:", err?.stack);
     const errMsg = err?.message || err?.toString() || String(err);
-    console.error("errMsg:", errMsg);
     logger.error("Compilation error:", errMsg);
-    const message = errMsg;
-    console.error("message:", message);
-    console.error("ABOUT TO CHECK isUserError");
 
     const isUserError =
-      message.includes("Compiler exited") ||
-      message.includes("Execution timed out") ||
-      message.includes("Output too large");
+      errMsg.includes("Compiler exited") ||
+      errMsg.includes("Execution timed out") ||
+      errMsg.includes("Output too large");
 
-    console.log("isUserError:", isUserError);
-    console.log("CHECKPOINT 1 - isAuthenticated:", isAuthenticated);
     if (isUserError) {
-      console.log("CHECKPOINT 2 - entered if block");
-      console.log("CHECKPOINT 3 - count:", count);
-      if (!isAuthenticated && count + 1 >= MAX_UNAUTHENTICATED_EXECUTIONS) {
+      const hitLimit =
+        !isAuthenticated && count + 1 >= MAX_UNAUTHENTICATED_EXECUTIONS;
+
+      if (hitLimit) {
         const keyId = `${userId}::${userId}`;
         cooldowns.set(keyId, Date.now() + COOLDOWN_DURATION);
       }
 
-      const responseBody = JSON.stringify({
+      return res.status(400).json({
         success: false,
-        error: message,
+        error: errMsg,
         executionsRemaining: isAuthenticated ? null : 0,
-        cooldownEnd:
-          !isAuthenticated && count + 1 >= MAX_UNAUTHENTICATED_EXECUTIONS
-            ? Date.now() + COOLDOWN_DURATION
-            : null,
+        cooldownEnd: hitLimit ? Date.now() + COOLDOWN_DURATION : null,
       });
-
-      res.setHeader("Content-Type", "application/json");
-      res.writeHead(400);
-      res.end(responseBody);
-    } else {
-      logger.error("Compilation error:", message);
-      const responseBody = JSON.stringify({
-        success: false,
-        error:
-          process.env.NODE_ENV === "production"
-            ? "Compilation failed"
-            : message,
-        executionsRemaining: null,
-        cooldownEnd: null,
-      });
-
-      res.setHeader("Content-Type", "application/json");
-      res.writeHead(500);
-      res.end(responseBody);
     }
+
+    logger.error("Internal compilation error:", errMsg);
+    return res.status(500).json({
+      success: false,
+      error:
+        process.env.NODE_ENV === "production" ? "Compilation failed" : errMsg,
+      executionsRemaining: null,
+      cooldownEnd: null,
+    });
   } finally {
     if (tempFilePath && existsSync(tempFilePath)) {
       try {

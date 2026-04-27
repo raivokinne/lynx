@@ -1,6 +1,17 @@
 import { defaultSettings } from "../types/constants";
 import type { EditorSettings } from "../types/types";
 
+export const safeJson = async (response: Response): Promise<any | null> => {
+  const text = await response.text();
+  if (!text || !text.trim()) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    console.error("Failed to parse response as JSON:", text);
+    return null;
+  }
+};
+
 export const normalizeEditorSettings = (raw: any): EditorSettings => {
   if (!raw || typeof raw !== "object") {
     return { ...defaultSettings };
@@ -50,4 +61,3 @@ export const normalizeEditorSettings = (raw: any): EditorSettings => {
     readOnly: Boolean(raw.readOnly ?? defaultSettings.readOnly),
   };
 };
-

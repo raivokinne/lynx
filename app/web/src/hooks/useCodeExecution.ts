@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { API_BASE } from "../types/constants";
 import { showToast } from "../utils/toast";
+import { safeJson } from "../utils/utils";
 
 const EXECUTION_COOLDOWN = 3000;
 const MAX_UNAUTHENTICATED_EXECUTIONS = 5;
@@ -20,16 +21,17 @@ export const useCodeExecution = () => {
     try {
       const response = await fetch(`${API_BASE}/execution/status`, {
         credentials: "include",
+        // Prevent 304s — we always need a fresh body to read execution state
+        cache: "no-store",
       });
-      const data = await response.json();
+
+      const data = await safeJson(response);
+      if (!data) return;
+
       if (data.executionsRemaining !== null) {
         setExecutionsRemaining(data.executionsRemaining);
       }
-      if (data.cooldownEnd) {
-        setCooldownEnd(data.cooldownEnd);
-      } else {
-        setCooldownEnd(null);
-      }
+      setCooldownEnd(data.cooldownEnd ?? null);
     } catch (e) {
       console.error("Failed to fetch execution status:", e);
     }
@@ -89,13 +91,11 @@ export const useCodeExecution = () => {
         return;
       }
 
-      if (!isAuthenticated) {
-        if (executionsRemaining <= 0) {
-          setError(
-            "Too many executions. Please sign in for unlimited access or wait 1 minute.",
-          );
-          return;
-        }
+      if (!isAuthenticated && executionsRemaining <= 0) {
+        setError(
+          "Too many executions. Please sign in for unlimited access or wait 1 minute.",
+        );
+        return;
       }
 
       lastExecutionTimeRef.current = now;
@@ -112,7 +112,14 @@ export const useCodeExecution = () => {
           credentials: "include",
           body: JSON.stringify({ code }),
         });
-        const result = await response.json();
+
+        const result = await safeJson(response);
+
+        if (!result) {
+          setOutput("");
+          setError("Received an empty response from the server.");
+          return;
+        }
 
         if (result.executionsRemaining !== null) {
           setExecutionsRemaining(result.executionsRemaining);

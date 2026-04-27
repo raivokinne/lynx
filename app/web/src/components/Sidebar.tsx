@@ -46,14 +46,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
         onClick={onRunCode}
         disabled={!canRun || isRunning || isOnCooldown}
         className={`p-1.5 transition-colors font-mono text-xs relative ${
-          isDarkMode ? "hover:bg-neutral-800 text-neutral-400" : "hover:bg-neutral-300 text-neutral-600"
+          isDarkMode
+            ? "hover:bg-neutral-800 text-neutral-400"
+            : "hover:bg-neutral-300 text-neutral-600"
         } disabled:opacity-50`}
         title={
           isOnCooldown
-            ? `Cooldown: ${countdown}s remaining (${ executionsRemaining } runs left)`
+            ? `Cooldown: ${countdown}s remaining (${executionsRemaining} runs left)`
             : canRun
-            ? "Run code"
-            : "Enter code to run"
+              ? "Run code"
+              : "Enter code to run"
         }
       >
         {isRunning ? (
@@ -78,7 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {!isOnCooldown && executionsRemaining < 5 && (
         <div
-          className={`text-[9px] font-mono ${
+          className={`text-[20px] font-mono ${
             isDarkMode ? "text-neutral-500" : "text-neutral-400"
           }`}
           title={`${executionsRemaining} runs remaining`}
@@ -92,7 +94,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <button
         onClick={onSettings}
         className={`p-1.5 transition-colors ${
-          isDarkMode ? "hover:bg-neutral-800 text-neutral-500" : "hover:bg-neutral-300 text-neutral-500"
+          isDarkMode
+            ? "hover:bg-neutral-800 text-neutral-500"
+            : "hover:bg-neutral-300 text-neutral-500"
         }`}
         title="Settings"
       >
