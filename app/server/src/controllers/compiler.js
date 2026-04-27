@@ -134,8 +134,12 @@ export const compilerController = async (req, res) => {
       cooldownEnd: null,
     });
   } catch (err) {
-    logger.error("Compilation error:", err?.message ?? err?.toString() ?? String(err));
-    const message = err?.message || err?.toString() || String(err);
+    console.error("RAW ERR:", err);
+    console.error("ERR MSG:", err?.message);
+    console.error("ERR STACK:", err?.stack);
+    const errMsg = err?.message || err?.toString() || String(err);
+    logger.error("Compilation error:", errMsg);
+    const message = errMsg;
 
     const isUserError =
       message.includes("Compiler exited") ||
