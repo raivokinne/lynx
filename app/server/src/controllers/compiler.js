@@ -51,8 +51,11 @@ setInterval(() => {
  */
 export const compilerController = async (req, res) => {
   let tempFilePath = null;
+  let output;
+  let success;
 
   try {
+    logger.info("Compile request received");
     const userId = getUserId(req, res);
     const isAuthenticated = !!req.user?.id;
     const now = Date.now();
@@ -131,6 +134,7 @@ export const compilerController = async (req, res) => {
       cooldownEnd: null,
     });
   } catch (err) {
+    logger.error("Compiler error:", err?.message ?? err, err?.stack);
     const message = err?.message ?? String(err);
 
     const isUserError =
@@ -154,6 +158,7 @@ export const compilerController = async (req, res) => {
             : null,
       });
     } else {
+      logger.error("Compilation error:", message);
       res.status(500).json({
         success: false,
         error:
