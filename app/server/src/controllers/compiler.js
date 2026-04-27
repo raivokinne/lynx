@@ -160,8 +160,7 @@ export const compilerController = async (req, res) => {
         cooldowns.set(keyId, Date.now() + COOLDOWN_DURATION);
       }
 
-      console.error("SENDING 400 response");
-      res.status(400).json({
+      const responseBody = JSON.stringify({
         success: false,
         error: message,
         executionsRemaining: isAuthenticated ? null : 0,
@@ -170,9 +169,13 @@ export const compilerController = async (req, res) => {
             ? Date.now() + COOLDOWN_DURATION
             : null,
       });
+
+      res.setHeader("Content-Type", "application/json");
+      res.writeHead(400);
+      res.end(responseBody);
     } else {
       logger.error("Compilation error:", message);
-      res.status(500).json({
+      const responseBody = JSON.stringify({
         success: false,
         error:
           process.env.NODE_ENV === "production"
@@ -181,6 +184,10 @@ export const compilerController = async (req, res) => {
         executionsRemaining: null,
         cooldownEnd: null,
       });
+
+      res.setHeader("Content-Type", "application/json");
+      res.writeHead(500);
+      res.end(responseBody);
     }
   } finally {
     if (tempFilePath && existsSync(tempFilePath)) {
@@ -191,7 +198,6 @@ export const compilerController = async (req, res) => {
       }
     }
   }
-};
 
 export const executionStatusController = async (req, res) => {
   try {
