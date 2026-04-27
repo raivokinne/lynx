@@ -146,6 +146,9 @@ export const compilerController = async (req, res) => {
       message.includes("Execution timed out") ||
       message.includes("Output too large");
 
+    console.error("isUserError:", isUserError);
+    console.error("isAuthenticated:", isAuthenticated);
+
     if (isUserError) {
       if (!isAuthenticated && count + 1 >= MAX_UNAUTHENTICATED_EXECUTIONS) {
         const keyId = `${userId}::${userId}`;
