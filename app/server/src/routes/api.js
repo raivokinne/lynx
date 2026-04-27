@@ -3,7 +3,7 @@ import { authenticateToken } from "../middleware/auth.js";
 import * as authController from "../controllers/auth.js";
 import * as codeController from "../controllers/code.js";
 import * as settingsController from "../controllers/settings.js";
-import { compilerController, executionStatusController } from "../controllers/compiler.js";
+import { compilerController, executionStatusController, clearCooldownController } from "../controllers/compiler.js";
 
 const router = express.Router();
 
@@ -20,6 +20,7 @@ router.delete("/codes/:id", authenticateToken, codeController.deleteCode);
 
 router.post("/compile", compilerController);
 router.get("/execution/status", executionStatusController);
+router.delete("/execution/cooldown", clearCooldownController);
 
 router.get("/settings", authenticateToken, settingsController.getSettings);
 router.post("/settings", authenticateToken, settingsController.saveSettings);

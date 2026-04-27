@@ -73,6 +73,11 @@ export const compilerController = async (req, res) => {
       executionCounts.set(userKey, count + 1);
     }
 
+    if (isAuthenticated && userId !== req.user.id) {
+      const oldUserKeyId = `${userId}::${userId}`;
+      cooldowns.delete(oldUserKeyId);
+    }
+
     const { code } = req.body;
 
     const userKeyId = `${userId}::${userId}`;
@@ -222,6 +227,29 @@ export const executionStatusController = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       error: "Failed to get execution status",
+    });
+  }
+};
+
+export const clearCooldownController = async (req, res) => {
+  try {
+    const userId = getUserId(req, res);
+    const isAuthenticated = !!req.user?.id;
+
+    if (!isAuthenticated) {
+      const oldUserKeyId = `${userId}::${userId}`;
+      cooldowns.delete(oldUserKeyId);
+      executionCounts.forEach((_, key) => {
+        if (key.startsWith(userId)) {
+          executionCounts.delete(key);
+        }
+      });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({
+      error: "Failed to clear cooldown",
     });
   }
 };
