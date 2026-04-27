@@ -134,7 +134,9 @@ export const compilerController = async (req, res) => {
       cooldownEnd: null,
     });
   } catch (err) {
-    logger.error("Compiler error:", err?.message ?? err, err?.stack);
+    logger.error("Compiler error raw:", err);
+    logger.error("Compiler error type:", typeof err);
+    logger.error("Compiler error string:", String(err));
     const message = err?.message ?? String(err);
 
     const isUserError =
