@@ -58,6 +58,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 					id: data.user.id,
 					username: data.user.username,
 				});
+				await fetch(`${API_BASE}/execution/cooldown`, {
+					method: "DELETE",
+					credentials: "include",
+				});
 				return { success: true };
 			} else {
 				return {
@@ -89,12 +93,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 				body: JSON.stringify({ username, password, confirmPassword }),
 			});
 
-			const data = await response.json();
+const data = await response.json();
 
 			if (data.success && data.user) {
 				setUser({
 					id: data.user.id,
 					username: data.user.username,
+				});
+				await fetch(`${API_BASE}/execution/cooldown`, {
+					method: "DELETE",
+					credentials: "include",
 				});
 				return { success: true };
 			} else {
@@ -103,8 +111,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 					error: data.error || "Registration failed",
 				};
 			}
-		} catch {
-			showToast.error("Network error. Please try again.");
+		} catch (error) {
+			console.error("Register error:", error);
 			return {
 				success: false,
 				error: "Network error. Please try again.",
