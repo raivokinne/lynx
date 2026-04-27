@@ -198,6 +198,7 @@ export const compilerController = async (req, res) => {
       }
     }
   }
+};
 
 export const executionStatusController = async (req, res) => {
   try {
