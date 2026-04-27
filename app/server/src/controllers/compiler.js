@@ -134,15 +134,13 @@ export const compilerController = async (req, res) => {
       cooldownEnd: null,
     });
   } catch (err) {
-    logger.error("Compiler error raw:", err);
-    logger.error("Compiler error type:", typeof err);
-    logger.error("Compiler error string:", String(err));
-    const message = err?.message ?? String(err);
+    logger.error("Compilation error:", err?.message ?? err?.toString() ?? String(err));
+    const message = err?.message || err?.toString() || String(err);
 
     const isUserError =
-      message.startsWith("Compiler exited") ||
-      message === "Execution timed out" ||
-      message === "Output too large";
+      message.includes("Compiler exited") ||
+      message.includes("Execution timed out") ||
+      message.includes("Output too large");
 
     if (isUserError) {
       if (!isAuthenticated && count + 1 >= MAX_UNAUTHENTICATED_EXECUTIONS) {
