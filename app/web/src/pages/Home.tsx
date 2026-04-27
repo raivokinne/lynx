@@ -72,6 +72,7 @@ export const Home = () => {
           isOnCooldown={isOnCooldown}
           cooldownEnd={cooldownEnd}
           executionsRemaining={executionsRemaining}
+          isAuthenticated={!!user}
           onRunCode={handleExecuteCode}
           onSave={() => {}}
           onSettings={() => setShowSettings(true)}
