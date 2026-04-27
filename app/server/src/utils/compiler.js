@@ -1,4 +1,14 @@
-import { spawn } from "child_process";
+import { spawn, execSync } from "child_process";
+import { existsSync } from "fs";
+
+const useFirejail = (() => {
+  try {
+    execSync("which firejail", { stdio: "ignore" });
+    return true;
+  } catch {
+    return config.env !== "production";
+  }
+})();
 import { readdirSync, rmdirSync, statSync, unlinkSync, existsSync } from "fs";
 import { join, resolve } from "path";
 import config from "../config/index.js";
@@ -88,30 +98,39 @@ export const executeCompiler = (filePath) => {
       }
     };
 
-    const child = spawn(
-      "firejail",
-      [
-        "--net=none",
-        "--nosound",
-        "--nogroups",
-        "--noroot",
-        "--private-dev",
-        "--seccomp",
-        "--caps.drop=all",
-        "--rlimit-nproc=50",
-        "--rlimit-fsize=10485760",
-        `--whitelist=${config.compiler.path}`,
-        `--whitelist=${config.compiler.tempDir}`,
-        "--quiet",
-        config.compiler.path,
-        safePath,
-      ],
-      {
+    let child;
+    if (useFirejail) {
+      child = spawn(
+        "firejail",
+        [
+          "--net=none",
+          "--nosound",
+          "--nogroups",
+          "--noroot",
+          "--private-dev",
+          "--seccomp",
+          "--caps.drop=all",
+          "--rlimit-nproc=50",
+          "--rlimit-fsize=10485760",
+          `--whitelist=${config.compiler.path}`,
+          `--whitelist=${config.compiler.tempDir}`,
+          "--quiet",
+          config.compiler.path,
+          safePath,
+        ],
+        {
+          stdio: ["ignore", "pipe", "pipe"],
+          cwd: config.compiler.tempDir,
+          env: { PATH: process.env.PATH },
+        },
+      );
+    } else {
+      child = spawn(config.compiler.path, [safePath], {
         stdio: ["ignore", "pipe", "pipe"],
         cwd: config.compiler.tempDir,
         env: { PATH: process.env.PATH },
-      },
-    );
+      });
+    }
 
     const timer = setTimeout(() => {
       finish(() => {

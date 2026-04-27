@@ -150,11 +150,13 @@ export const compilerController = async (req, res) => {
     console.error("isAuthenticated:", isAuthenticated);
 
     if (isUserError) {
+      console.error("ENTERING user error block");
       if (!isAuthenticated && count + 1 >= MAX_UNAUTHENTICATED_EXECUTIONS) {
         const keyId = `${userId}::${userId}`;
         cooldowns.set(keyId, Date.now() + COOLDOWN_DURATION);
       }
 
+      console.error("SENDING 400 response");
       res.status(400).json({
         success: false,
         error: message,
