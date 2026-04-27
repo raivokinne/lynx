@@ -134,12 +134,16 @@ export const compilerController = async (req, res) => {
       cooldownEnd: null,
     });
   } catch (err) {
+    console.error("CATCH BLOCK START");
     console.error("RAW ERR:", err);
     console.error("ERR MSG:", err?.message);
     console.error("ERR STACK:", err?.stack);
     const errMsg = err?.message || err?.toString() || String(err);
+    console.error("errMsg:", errMsg);
     logger.error("Compilation error:", errMsg);
     const message = errMsg;
+    console.error("message:", message);
+    console.error("ABOUT TO CHECK isUserError");
 
     const isUserError =
       message.includes("Compiler exited") ||
@@ -148,6 +152,7 @@ export const compilerController = async (req, res) => {
 
     console.error("isUserError:", isUserError);
     console.error("isAuthenticated:", isAuthenticated);
+    console.error("count:", count);
 
     if (isUserError) {
       console.error("ENTERING user error block");
