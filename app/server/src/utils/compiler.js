@@ -1,5 +1,9 @@
+import { readdirSync, rmdirSync, statSync, unlinkSync, existsSync } from "fs";
+import { join, resolve } from "path";
 import { spawn, execSync } from "child_process";
-import { existsSync } from "fs";
+
+import config from "../config/index.js";
+import logger from "../../logger.js";
 
 const useFirejail = (() => {
   try {
@@ -9,10 +13,6 @@ const useFirejail = (() => {
     return config.env !== "production";
   }
 })();
-import { readdirSync, rmdirSync, statSync, unlinkSync, existsSync } from "fs";
-import { join, resolve } from "path";
-import config from "../config/index.js";
-import logger from "../../logger.js";
 
 const MAX_OUTPUT_SIZE = 100_000;
 
