@@ -24,7 +24,7 @@ export const Home = () => {
     deleteCode,
     updateCode,
   } = useCodeManagement(user?.id);
-  const { output, error, isRunning, cooldownEnd, executeCode, clearOutput } =
+  const { output, error, isRunning, cooldownEnd, executionsRemaining, executeCode, clearOutput } =
     useCodeExecution();
   const { isDarkMode, toggleTheme } = useTheme();
 
@@ -70,6 +70,8 @@ export const Home = () => {
           isRunning={isRunning}
           canRun={code.trim().length > 0}
           isOnCooldown={isOnCooldown}
+          cooldownEnd={cooldownEnd}
+          executionsRemaining={executionsRemaining}
           onRunCode={handleExecuteCode}
           onSave={() => {}}
           onSettings={() => setShowSettings(true)}
