@@ -7,7 +7,7 @@ A clean, minimal programming language focused on simplicity and functional progr
 ```bash
 # Clone the repository
 git clone https://github.com/raivokinne/lynx.git
-cd lynx/compiler
+cd lynx
 
 # Build
 go build -o lynx .
@@ -27,34 +27,6 @@ Try your first Lynx program:
 ```
 
 See the [examples](./examples) directory for more demo programs.
-
-## Web IDE
-
-Run the web-based code editor:
-
-```bash
-cd lynx/app/web 
-npm install 
-npm run dev
-cd lynx/app/server
-npm install
-npm start
-```
-
-Then open http://localhost:5173 in your browser.
-
-### Demo Account
-
-You can try the web IDE without registering:
-
-- **Username:** demo
-- **Password:** Demo@123
-
-Or create your own account via the registration page.
-
-## Documentation
-
-See [lynxlang.site/docs](https://lynxlang.site/docs) for full documentation.
 
 ## License
 
